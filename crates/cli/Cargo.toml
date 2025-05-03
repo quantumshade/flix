@@ -1,0 +1,52 @@
+[package]
+name = "flix-cli"
+version = "0.0.1"
+
+categories = ["command-line-utilities"]
+description = "CLI for interacting with flix media"
+repository = "https://github.com/QuantumShade/flix"
+
+authors.workspace = true
+edition.workspace = true
+license-file.workspace = true
+rust-version.workspace = true
+
+[[bin]]
+doc = false
+name = "flix"
+path = "src/main.rs"
+
+[lints.rust]
+arithmetic_overflow = "forbid"
+unsafe_code = "forbid"
+
+[lints.clippy]
+arithmetic_side_effects = "deny"
+as_conversions = "deny"
+checked_conversions = "deny"
+default_union_representation = "deny"
+expect_used = "deny"
+indexing_slicing = "deny"
+integer_division = "deny"
+integer_division_remainder_used = "deny"
+transmute_undefined_repr = "deny"
+unchecked_duration_subtraction = "deny"
+unwrap_used = "deny"
+
+[dependencies]
+flix = { workspace = true, features = ["tmdb"] }
+flix-tmdb = { workspace = true }
+
+anyhow = { workspace = true }
+clap = { workspace = true, features = [
+	"derive",
+	"color",
+	"error-context",
+	"help",
+	"suggestions",
+	"usage",
+] }
+home = { workspace = true }
+serde = { workspace = true, features = ["derive"] }
+tokio = { workspace = true, features = ["rt", "fs", "macros"] }
+toml = { workspace = true, features = ["display", "parse"] }

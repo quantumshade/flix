@@ -1,0 +1,23 @@
+[package]
+name = "flix-tmdb"
+version = "0.0.1"
+
+categories = []
+description = "Clients and models for fetching data from TMDB"
+repository = "https://github.com/QuantumShade/flix"
+
+authors.workspace = true
+edition.workspace = true
+license-file.workspace = true
+rust-version.workspace = true
+
+[lints]
+workspace = true
+
+[dependencies]
+chrono = { workspace = true, features = ["serde"] }
+reqwest = { workspace = true, features = ["json", "rustls-tls"] }
+serde = { workspace = true, features = ["derive"] }
+thiserror = { workspace = true }
+url = { workspace = true }
+url-macro = { workspace = true }

@@ -1,0 +1,50 @@
+[workspace]
+members = ["crates/*"]
+resolver = "2"
+
+[workspace.package]
+authors = []
+edition = "2024"
+license-file = "LICENSE.md"
+rust-version = "1.85.0"
+
+[workspace.lints.rust]
+arithmetic_overflow = "forbid"
+missing_docs = "forbid"
+unsafe_code = "forbid"
+
+[workspace.lints.clippy]
+arithmetic_side_effects = "forbid"
+as_conversions = "forbid"
+checked_conversions = "forbid"
+default_union_representation = "forbid"
+expect_used = "forbid"
+indexing_slicing = "forbid"
+integer_division = "forbid"
+integer_division_remainder_used = "forbid"
+transmute_undefined_repr = "forbid"
+unchecked_duration_subtraction = "forbid"
+unwrap_used = "forbid"
+
+[profile.release]
+codegen-units = 1
+lto = "fat"
+opt-level = 3
+overflow-checks = true
+strip = "debuginfo"
+
+[workspace.dependencies]
+flix = { path = "crates/flix", version = "=0.0.1", default-features = false }
+flix-tmdb = { path = "crates/tmdb", version = "=0.0.1", default-features = false }
+
+anyhow = { version = "^1", default-features = false }
+chrono = { version = "^0.4", default-features = false }
+clap = { version = "^4", default-features = false, features = ["std"] }
+home = { version = "^0.5", default-features = false }
+reqwest = { version = "^0.12", default-features = false }
+serde = { version = "^1", default-features = false }
+thiserror = { version = "^2", default-features = false }
+tokio = { version = "^1", default-features = false }
+toml = { version = "^0.8", default-features = false }
+url = { version = "^2", default-features = false }
+url-macro = { version = "^0.2", default-features = false }

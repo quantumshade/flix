@@ -1,0 +1,26 @@
+[package]
+name = "flix"
+version = "0.0.1"
+
+categories = []
+description = "Types for storing persistent data about media"
+repository = "https://github.com/QuantumShade/flix"
+
+authors.workspace = true
+edition.workspace = true
+license-file.workspace = true
+rust-version.workspace = true
+
+[lints]
+workspace = true
+
+[features]
+default = []
+tmdb = ["dep:flix-tmdb"]
+
+[dependencies]
+flix-tmdb = { workspace = true, optional = true }
+
+chrono = { workspace = true, features = ["serde"] }
+serde = { workspace = true, features = ["std", "derive"] }
+thiserror = { workspace = true }

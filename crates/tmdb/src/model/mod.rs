@@ -15,3 +15,4 @@ pub use serde::*;
 pub use show::*;
 
 pub use id::{CollectionId, MovieGenreId, MovieId, ShowGenreId, ShowId};
+pub use id::{Inner as TmdbIdInner, TmdbId};

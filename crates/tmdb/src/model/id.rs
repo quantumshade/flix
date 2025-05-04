@@ -18,8 +18,11 @@ pub enum Collection {}
 pub enum Movie {}
 pub enum Show {}
 
-type Inner = i32;
+/// The inner type of TmdbId
+pub type Inner = i32;
 
+/// Wraps an ID from TMDB, the generic parameter is to enforce that
+/// IDs for different types of media are not interchangeable
 #[derive(serde::Serialize, serde::Deserialize)]
 #[serde(transparent)]
 #[repr(transparent)]
@@ -30,7 +33,8 @@ pub struct TmdbId<T> {
 }
 
 impl<T> TmdbId<T> {
-	pub fn inner(&self) -> Inner {
+	/// Extract the inner value
+	pub fn inner(self) -> Inner {
 		self.inner
 	}
 }

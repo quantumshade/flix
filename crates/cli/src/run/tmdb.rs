@@ -50,7 +50,6 @@ impl TmdbObject {
 				},
 				tmdb: Some(TmdbMovie {
 					id: tmdb.id,
-					collection: tmdb.collection.map(|c| c.id),
 					genres: tmdb.genres.iter().map(|g| g.id).collect(),
 				}),
 			})?,
@@ -67,7 +66,6 @@ impl TmdbObject {
 			})?,
 			TmdbObject::Season(tmdb) => toml::to_string(&Season {
 				season: GenericSeason {
-					number: tmdb.season_number,
 					name: tmdb.name,
 					overview: tmdb.overview,
 					air_date: tmdb.air_date,
@@ -75,7 +73,6 @@ impl TmdbObject {
 			})?,
 			TmdbObject::Episode(tmdb) => toml::to_string(&Episode {
 				episode: GenericEpisode {
-					number: tmdb.episode_number,
 					name: tmdb.name,
 					overview: tmdb.overview,
 					air_date: tmdb.air_date,

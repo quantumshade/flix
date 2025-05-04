@@ -1,4 +1,4 @@
-# flix
+# flix-tmdb
 
 [![Crates Version](https://img.shields.io/crates/v/flix-tmdb.svg)](https://crates.io/crates/flix-tmdb)
 

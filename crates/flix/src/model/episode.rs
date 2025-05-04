@@ -10,8 +10,6 @@ pub struct Episode {
 /// The generic episode data
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
 pub struct GenericEpisode {
-	/// The episode's number
-	pub number: i32,
 	/// The episode's name
 	pub name: String,
 	/// The episode's overview

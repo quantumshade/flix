@@ -1,5 +1,5 @@
 #[cfg(feature = "tmdb")]
-use flix_tmdb::model::{CollectionId, MovieGenreId, MovieId};
+use flix_tmdb::model::{MovieGenreId, MovieId};
 
 use chrono::NaiveDate;
 
@@ -31,8 +31,6 @@ pub struct GenericMovie {
 pub struct TmdbMovie {
 	/// The movie's TMDB ID
 	pub id: MovieId,
-	/// The movie's collection's TMDB ID
-	pub collection: Option<CollectionId>,
 	/// The list of genre TMDB IDs that the movie is associated with
 	pub genres: Vec<MovieGenreId>,
 }

@@ -1,7 +1,7 @@
 use super::id::{MovieGenreId, ShowGenreId};
 
 /// A deserialized movie Genre from the TMDB API
-#[derive(Debug, serde::Deserialize)]
+#[derive(Debug, Clone, serde::Deserialize)]
 pub struct MovieGenre {
 	/// The genre's TMDB ID
 	pub id: MovieGenreId,
@@ -10,7 +10,7 @@ pub struct MovieGenre {
 }
 
 /// A deserialized show Genre from the TMDB API
-#[derive(Debug, serde::Deserialize)]
+#[derive(Debug, Clone, serde::Deserialize)]
 pub struct ShowGenre {
 	/// The genre's TMDB ID
 	pub id: ShowGenreId,

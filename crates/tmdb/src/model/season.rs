@@ -3,7 +3,7 @@ use chrono::NaiveDate;
 use super::Episode;
 
 /// A deserialized Season from the TMDB API
-#[derive(Debug, serde::Deserialize)]
+#[derive(Debug, Clone, serde::Deserialize)]
 pub struct Season {
 	/// The season's number
 	pub season_number: i32,

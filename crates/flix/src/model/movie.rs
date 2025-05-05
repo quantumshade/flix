@@ -21,6 +21,8 @@ pub struct GenericMovie {
 	pub title: String,
 	/// The movie's overview
 	pub overview: String,
+	/// The movie's genres
+	pub genres: Vec<String>,
 	/// The movie's release date
 	pub release_date: NaiveDate,
 }

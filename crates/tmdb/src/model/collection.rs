@@ -1,7 +1,7 @@
 use super::{CollectionId, MovieId};
 
 /// A deserialized Collection from the TMDB API
-#[derive(Debug, serde::Deserialize)]
+#[derive(Debug, Clone, serde::Deserialize)]
 pub struct Collection {
 	/// The collection's TMDB ID
 	pub id: CollectionId,
@@ -15,7 +15,7 @@ pub struct Collection {
 }
 
 /// A deserialized collection item from the TMDB API
-#[derive(Debug, serde::Deserialize)]
+#[derive(Debug, Clone, serde::Deserialize)]
 pub struct Item {
 	/// The movie's TMDB ID
 	pub id: MovieId,

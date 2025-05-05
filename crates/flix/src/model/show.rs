@@ -21,6 +21,8 @@ pub struct GenericShow {
 	pub name: String,
 	/// The show's overview
 	pub overview: String,
+	/// The show's genres
+	pub genres: Vec<String>,
 	/// The show's air date
 	pub air_date: NaiveDate,
 }

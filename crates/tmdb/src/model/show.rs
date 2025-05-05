@@ -3,7 +3,7 @@ use chrono::NaiveDate;
 use super::{ShowGenre, ShowId};
 
 /// A deserialized Show from the TMDB API
-#[derive(Debug, serde::Deserialize)]
+#[derive(Debug, Clone, serde::Deserialize)]
 pub struct Show {
 	/// The show's TMDB ID
 	pub id: ShowId,
@@ -24,7 +24,7 @@ pub struct Show {
 }
 
 /// A deserialized show Status from the TMDB API
-#[derive(Debug, serde::Deserialize)]
+#[derive(Debug, Clone, Copy, serde::Deserialize)]
 pub enum ShowStatus {
 	/// The show is returning
 	#[serde(rename = "Returning Series")]

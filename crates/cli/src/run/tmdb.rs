@@ -46,6 +46,7 @@ impl TmdbObject {
 				movie: GenericMovie {
 					title: tmdb.title,
 					overview: tmdb.overview,
+					genres: tmdb.genres.iter().cloned().map(|g| g.name).collect(),
 					release_date: tmdb.release_date,
 				},
 				tmdb: Some(TmdbMovie {
@@ -57,6 +58,7 @@ impl TmdbObject {
 				show: GenericShow {
 					name: tmdb.name,
 					overview: tmdb.overview,
+					genres: tmdb.genres.iter().cloned().map(|g| g.name).collect(),
 					air_date: tmdb.first_air_date,
 				},
 				tmdb: Some(TmdbShow {

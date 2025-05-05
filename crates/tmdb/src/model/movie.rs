@@ -3,7 +3,7 @@ use chrono::NaiveDate;
 use super::{CollectionId, MovieGenre, MovieId};
 
 /// A deserialized Movie from the TMDB API
-#[derive(Debug, serde::Deserialize)]
+#[derive(Debug, Clone, serde::Deserialize)]
 pub struct Movie {
 	/// The movie's TMDB ID
 	pub id: MovieId,
@@ -23,14 +23,14 @@ pub struct Movie {
 }
 
 /// A deserialized movie's collection from the TMDB API
-#[derive(Debug, serde::Deserialize)]
+#[derive(Debug, Clone, serde::Deserialize)]
 pub struct InCollection {
 	/// The collection's TMDB ID
 	pub id: CollectionId,
 }
 
 /// A deserialized movie status from the TMDB API
-#[derive(Debug, serde::Deserialize)]
+#[derive(Debug, Clone, Copy, serde::Deserialize)]
 pub enum MovieStatus {
 	/// The movie was cancelled
 	#[serde(rename = "Canceled")]

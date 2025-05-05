@@ -1,7 +1,7 @@
 use chrono::NaiveDate;
 
 /// A deserialized Episode from the TMDB API
-#[derive(Debug, serde::Deserialize)]
+#[derive(Debug, Clone, serde::Deserialize)]
 pub struct Episode {
 	/// The episode's number
 	pub episode_number: i32,

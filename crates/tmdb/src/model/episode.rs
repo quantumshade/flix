@@ -4,7 +4,7 @@ use chrono::NaiveDate;
 #[derive(Debug, Clone, serde::Deserialize)]
 pub struct Episode {
 	/// The episode's number
-	pub episode_number: i32,
+	pub episode_number: u32,
 	/// The episode's name
 	pub name: String,
 	/// The episode's overview

@@ -22,8 +22,8 @@ impl Client {
 	pub async fn get_details(
 		&self,
 		id: impl Into<ShowId>,
-		season: impl Into<i32>,
-		episode: impl Into<i32>,
+		season: impl Into<u32>,
+		episode: impl Into<u32>,
 		language: Option<&str>,
 	) -> Result<Episode, Error> {
 		Ok(self

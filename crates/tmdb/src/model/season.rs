@@ -6,7 +6,7 @@ use super::Episode;
 #[derive(Debug, Clone, serde::Deserialize)]
 pub struct Season {
 	/// The season's number
-	pub season_number: i32,
+	pub season_number: u32,
 	/// The season's name
 	pub name: String,
 	/// The season's overview

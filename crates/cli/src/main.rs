@@ -1,3 +1,5 @@
+use std::path::Path;
+
 use flix_tmdb::Client;
 
 use anyhow::{Context, Result};
@@ -41,7 +43,7 @@ async fn main() -> Result<()> {
 				let output = output
 					.as_ref()
 					.map(|p| p.as_path())
-					.unwrap_or(object.default_filename());
+					.unwrap_or(Path::new("flix.toml"));
 
 				let mut file = if *force {
 					fs::File::create(output).await

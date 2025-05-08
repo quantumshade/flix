@@ -18,7 +18,7 @@ pub struct Show {
 	/// The show's last air date
 	pub last_air_date: NaiveDate,
 	/// The number of seasons in this show
-	pub number_of_seasons: i32,
+	pub number_of_seasons: u32,
 	/// The show's status
 	pub status: ShowStatus,
 }

@@ -1,5 +1,3 @@
-use std::path::Path;
-
 use flix::model::{
 	Collection, Episode, GenericCollection, GenericEpisode, GenericMovie, GenericSeason,
 	GenericShow, Movie, Season, Show, TmdbCollection, TmdbMovie, TmdbShow,
@@ -23,16 +21,6 @@ pub enum TmdbObject {
 }
 
 impl TmdbObject {
-	pub fn default_filename(&self) -> &'static Path {
-		Path::new(match self {
-			TmdbObject::Collection(_) => "collection.toml",
-			TmdbObject::Movie(_) => "movie.toml",
-			TmdbObject::Show(_) => "show.toml",
-			TmdbObject::Season(_) => "season.toml",
-			TmdbObject::Episode(_) => "episode.toml",
-		})
-	}
-
 	pub fn serialize(self) -> Result<String> {
 		Ok(match self {
 			TmdbObject::Collection(tmdb) => toml::to_string(&Collection {
@@ -68,6 +56,7 @@ impl TmdbObject {
 			})?,
 			TmdbObject::Season(tmdb) => toml::to_string(&Season {
 				season: GenericSeason {
+					number: tmdb.season_number,
 					name: tmdb.name,
 					overview: tmdb.overview,
 					air_date: tmdb.air_date,
@@ -75,6 +64,7 @@ impl TmdbObject {
 			})?,
 			TmdbObject::Episode(tmdb) => toml::to_string(&Episode {
 				episode: GenericEpisode {
+					number: tmdb.episode_number,
 					name: tmdb.name,
 					overview: tmdb.overview,
 					air_date: tmdb.air_date,

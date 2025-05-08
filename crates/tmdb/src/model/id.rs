@@ -19,7 +19,7 @@ pub enum Movie {}
 pub enum Show {}
 
 /// The inner type of TmdbId
-pub type Inner = i32;
+pub type Inner = u32;
 
 /// Wraps an ID from TMDB, the generic parameter is to enforce that
 /// IDs for different types of media are not interchangeable

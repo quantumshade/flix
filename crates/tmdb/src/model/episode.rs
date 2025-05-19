@@ -5,8 +5,9 @@ use chrono::NaiveDate;
 pub struct Episode {
 	/// The episode's number
 	pub episode_number: u32,
-	/// The episode's name
-	pub name: String,
+	/// The episode's title
+	#[serde(rename = "name")]
+	pub title: String,
 	/// The episode's overview
 	pub overview: String,
 	/// The episode's air date

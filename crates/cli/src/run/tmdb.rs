@@ -1,11 +1,11 @@
 use flix::model::{
 	Collection, Episode, GenericCollection, GenericEpisode, GenericMovie, GenericSeason,
-	GenericShow, Movie, Season, Show, TmdbCollection, TmdbMovie, TmdbShow,
+	GenericShow, Movie, Season, Show, TmdbCollection, TmdbEpisode, TmdbMovie, TmdbSeason, TmdbShow,
 };
 use flix_tmdb::Client;
 use flix_tmdb::model::{
 	Collection as TCollection, Episode as TEpisode, Movie as TMovie, Season as TSeason,
-	Show as TShow,
+	Show as TShow, ShowId,
 };
 
 use anyhow::{Context, Result};
@@ -16,8 +16,8 @@ pub enum TmdbObject {
 	Collection(TCollection),
 	Movie(TMovie),
 	Show(TShow),
-	Season(TSeason),
-	Episode(TEpisode),
+	Season(TSeason, ShowId),
+	Episode(TEpisode, u32, ShowId),
 }
 
 impl TmdbObject {
@@ -25,7 +25,7 @@ impl TmdbObject {
 		Ok(match self {
 			TmdbObject::Collection(tmdb) => toml::to_string(&Collection {
 				collection: GenericCollection {
-					name: tmdb.name,
+					title: tmdb.title,
 					overview: tmdb.overview,
 				},
 				tmdb: Some(TmdbCollection { id: tmdb.id }),
@@ -44,7 +44,7 @@ impl TmdbObject {
 			})?,
 			TmdbObject::Show(tmdb) => toml::to_string(&Show {
 				show: GenericShow {
-					name: tmdb.name,
+					title: tmdb.title,
 					overview: tmdb.overview,
 					genres: tmdb.genres.iter().cloned().map(|g| g.name).collect(),
 					air_date: tmdb.first_air_date,
@@ -54,21 +54,24 @@ impl TmdbObject {
 					genres: tmdb.genres.iter().map(|g| g.id).collect(),
 				}),
 			})?,
-			TmdbObject::Season(tmdb) => toml::to_string(&Season {
+			TmdbObject::Season(tmdb, show_id) => toml::to_string(&Season {
 				season: GenericSeason {
 					number: tmdb.season_number,
-					name: tmdb.name,
+					title: tmdb.title,
 					overview: tmdb.overview,
 					air_date: tmdb.air_date,
 				},
+				tmdb: Some(TmdbSeason { show_id }),
 			})?,
-			TmdbObject::Episode(tmdb) => toml::to_string(&Episode {
+			TmdbObject::Episode(tmdb, season_number, show_id) => toml::to_string(&Episode {
 				episode: GenericEpisode {
 					number: tmdb.episode_number,
-					name: tmdb.name,
+					season: season_number,
+					title: tmdb.title,
 					overview: tmdb.overview,
 					air_date: tmdb.air_date,
 				},
+				tmdb: Some(TmdbEpisode { show_id }),
 			})?,
 		})
 	}
@@ -104,6 +107,7 @@ impl TmdbObject {
 					.get_details(id, season, None)
 					.await
 					.with_context(|| format!("could not get show details for '{id}' S{season}"))?,
+				id.into(),
 			),
 			Command::Episode {
 				id,
@@ -117,6 +121,8 @@ impl TmdbObject {
 					.with_context(|| {
 						format!("could not get show details for '{id}' S{season}E{episode}")
 					})?,
+				season,
+				id.into(),
 			),
 		})
 	}

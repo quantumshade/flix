@@ -15,8 +15,8 @@ pub struct Verse {
 /// The generic verse data
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
 pub struct GenericVerse {
-	/// The verse's name
-	pub name: String,
+	/// The verse's title
+	pub title: String,
 	/// The verse's overview
 	pub overview: String,
 }

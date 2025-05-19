@@ -15,8 +15,8 @@ pub struct Collection {
 /// The generic collection data
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
 pub struct GenericCollection {
-	/// The collection's name
-	pub name: String,
+	/// The collection's title
+	pub title: String,
 	/// The collection's overview
 	pub overview: String,
 }

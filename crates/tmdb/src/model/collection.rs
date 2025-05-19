@@ -5,8 +5,9 @@ use super::{CollectionId, MovieId};
 pub struct Collection {
 	/// The collection's TMDB ID
 	pub id: CollectionId,
-	/// The collection's name
-	pub name: String,
+	/// The collection's title
+	#[serde(rename = "name")]
+	pub title: String,
 	/// The collection's overview
 	pub overview: String,
 	/// The list of movies that are part of this collection

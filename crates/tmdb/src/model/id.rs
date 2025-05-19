@@ -1,4 +1,5 @@
 use core::fmt;
+use core::hash::{Hash, Hasher};
 use core::marker::PhantomData;
 
 /// The TMDB ID type of a movie genre
@@ -81,3 +82,9 @@ impl<T> PartialEq for TmdbId<T> {
 }
 
 impl<T> Eq for TmdbId<T> {}
+
+impl<T> Hash for TmdbId<T> {
+	fn hash<H: Hasher>(&self, state: &mut H) {
+		self.inner.hash(state);
+	}
+}

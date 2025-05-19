@@ -7,9 +7,9 @@ pub mod tmdb;
 #[derive(Parser)]
 #[command(version, about, long_about = None)]
 pub struct Cli {
-	/// Use a custom config file [default: ~/.flix]
-	#[arg(short, long, value_name = "FILE")]
-	config: Option<PathBuf>,
+	/// Use a custom config file
+	#[arg(short, long, value_name = "FILE", default_value = "~/.flix")]
+	config: PathBuf,
 
 	#[command(subcommand)]
 	command: Command,
@@ -17,12 +17,9 @@ pub struct Cli {
 
 impl Cli {
 	pub fn config_path(&self) -> PathBuf {
-		match self.config.as_ref() {
-			Some(path) => match path.strip_prefix("~/") {
-				Ok(path) => expect_home_dir().join(path),
-				Err(_) => path.to_owned(),
-			},
-			None => expect_home_dir().join(".flix"),
+		match self.config.strip_prefix("~/") {
+			Ok(path) => expect_home_dir().join(path),
+			Err(_) => self.config.to_owned(),
 		}
 	}
 
@@ -45,11 +42,17 @@ pub enum Command {
 		force: bool,
 
 		/// Change the destination
-		#[arg(short, long, value_name = "FILE")]
-		output: Option<PathBuf>,
+		#[arg(short, long, value_name = "FILE", default_value = "flix.toml")]
+		output: PathBuf,
 
 		#[command(subcommand)]
 		command: BackendCommand,
+	},
+	/// Update a flix manifest
+	Update {
+		/// Change the destination
+		#[arg(short, long, value_name = "FILE", default_value = "flix.toml")]
+		output: PathBuf,
 	},
 }
 
@@ -60,6 +63,12 @@ pub enum BackendCommand {
 		#[command(subcommand)]
 		command: tmdb::Command,
 	},
+}
+
+impl From<tmdb::Command> for BackendCommand {
+	fn from(value: tmdb::Command) -> Self {
+		Self::Tmdb { command: value }
+	}
 }
 
 fn expect_home_dir() -> PathBuf {

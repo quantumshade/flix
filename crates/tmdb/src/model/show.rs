@@ -7,8 +7,9 @@ use super::{ShowGenre, ShowId};
 pub struct Show {
 	/// The show's TMDB ID
 	pub id: ShowId,
-	/// The show's name
-	pub name: String,
+	/// The show's title
+	#[serde(rename = "name")]
+	pub title: String,
 	/// The show's overview
 	pub overview: String,
 	/// The list of genres this show belongs to

@@ -17,8 +17,8 @@ pub struct Show {
 /// The generic show data
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
 pub struct GenericShow {
-	/// The show's name
-	pub name: String,
+	/// The show's title
+	pub title: String,
 	/// The show's overview
 	pub overview: String,
 	/// The show's genres

@@ -7,8 +7,9 @@ use super::Episode;
 pub struct Season {
 	/// The season's number
 	pub season_number: u32,
-	/// The season's name
-	pub name: String,
+	/// The season's title
+	#[serde(rename = "name")]
+	pub title: String,
 	/// The season's overview
 	pub overview: String,
 	/// The season's air date

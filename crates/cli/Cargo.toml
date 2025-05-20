@@ -1,6 +1,6 @@
 [package]
 name = "flix-cli"
-version = "0.0.5"
+version = "0.0.6"
 
 categories = ["command-line-utilities"]
 description = "CLI for interacting with flix media"
@@ -48,5 +48,6 @@ clap = { workspace = true, features = [
 ] }
 home = { workspace = true }
 serde = { workspace = true, features = ["derive"] }
+futures = { workspace = true }
 tokio = { workspace = true, features = ["rt", "fs", "macros"] }
 toml = { workspace = true, features = ["display", "parse"] }

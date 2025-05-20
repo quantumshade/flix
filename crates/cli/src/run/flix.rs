@@ -1,6 +1,6 @@
 use flix::model::{Collection, Episode, Movie, Season, Show, Verse};
 
-use anyhow::{Result, bail};
+use anyhow::{Result, anyhow, bail};
 
 use crate::cli::BackendCommand;
 use crate::cli::tmdb;
@@ -56,7 +56,14 @@ impl FlixObject {
 				tmdb::Command::Episode {
 					id: tmdb.show_id.into(),
 					season: episode.episode.season,
-					episode: episode.episode.number,
+					episode: episode
+						.episode
+						.number
+						.primary_episode_number()
+						.ok_or_else(|| {
+							anyhow!("the episode does not have a primary episode number")
+						})?,
+					episodes: episode.episode.number.additional_episode_numbers(),
 				}
 				.into()
 			}

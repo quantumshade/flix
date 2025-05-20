@@ -34,12 +34,13 @@ overflow-checks = true
 strip = "debuginfo"
 
 [workspace.dependencies]
-flix = { path = "crates/flix", version = "=0.0.5", default-features = false }
-flix-tmdb = { path = "crates/tmdb", version = "=0.0.5", default-features = false }
+flix = { path = "crates/flix", version = "=0.0.6", default-features = false }
+flix-tmdb = { path = "crates/tmdb", version = "=0.0.6", default-features = false }
 
 anyhow = { version = "^1", default-features = false }
 chrono = { version = "^0.4", default-features = false }
 clap = { version = "^4", default-features = false, features = ["std"] }
+futures = { version = "^0.3", default-features = false }
 home = { version = "^0.5", default-features = false }
 reqwest = { version = "^0.12", default-features = false }
 serde = { version = "^1", default-features = false }

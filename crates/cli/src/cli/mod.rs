@@ -23,8 +23,8 @@ impl Cli {
 		}
 	}
 
-	pub fn command(&self) -> &Command {
-		&self.command
+	pub fn command(self) -> Command {
+		self.command
 	}
 }
 

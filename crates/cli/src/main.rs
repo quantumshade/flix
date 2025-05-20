@@ -33,14 +33,14 @@ async fn main() -> Result<()> {
 			force,
 			output,
 			command,
-		} => exec_write(client, *force, output, command).await?,
-		Command::Update { output } => exec_update(client, output).await?,
+		} => exec_write(client, force, &output, command).await?,
+		Command::Update { output } => exec_update(client, &output).await?,
 	}
 
 	Ok(())
 }
 
-async fn exec_print(client: Client, command: &BackendCommand) -> Result<()> {
+async fn exec_print(client: Client, command: BackendCommand) -> Result<()> {
 	match command {
 		BackendCommand::Tmdb { command } => {
 			let object = run::tmdb::TmdbObject::fetch(&client, command).await?;
@@ -54,7 +54,7 @@ async fn exec_write(
 	client: Client,
 	force: bool,
 	output: &Path,
-	command: &BackendCommand,
+	command: BackendCommand,
 ) -> Result<()> {
 	match command {
 		BackendCommand::Tmdb { command } => {
@@ -83,8 +83,9 @@ async fn exec_update(client: Client, output: &Path) -> Result<()> {
 	let content = fs::read_to_string(output)
 		.await
 		.with_context(|| format!("failed to read file at path: {}", output.display()))?;
-	let object: FlixObject = toml::from_str(&content).context("failed to deserialize flix file")?;
+	let object: FlixObject = toml::from_str(&content)
+		.with_context(|| format!("failed to deserialize flix file: {}", output.display()))?;
 
 	let command = object.backend_command()?;
-	exec_write(client, true, output, &command).await
+	exec_write(client, true, output, command).await
 }

@@ -25,6 +25,7 @@ pub enum Command {
 		season: u32,
 	},
 	/// Process a TMDB episode
+	#[command(trailing_var_arg = true)]
 	Episode {
 		#[arg(value_name = "TMDB_ID")]
 		id: u32,
@@ -32,5 +33,7 @@ pub enum Command {
 		season: u32,
 		#[arg(value_name = "EPISODE_NUM")]
 		episode: u32,
+		#[arg(value_name = "...")]
+		episodes: Vec<u32>,
 	},
 }

@@ -1,6 +1,7 @@
 use flix::model::{
-	Collection, Episode, GenericCollection, GenericEpisode, GenericMovie, GenericSeason,
-	GenericShow, Movie, Season, Show, TmdbCollection, TmdbEpisode, TmdbMovie, TmdbSeason, TmdbShow,
+	Collection, Episode, EpisodeNumber, GenericCollection, GenericEpisode, GenericMovie,
+	GenericSeason, GenericShow, Movie, Season, Show, TmdbCollection, TmdbEpisode, TmdbMovie,
+	TmdbSeason, TmdbShow,
 };
 use flix_tmdb::Client;
 use flix_tmdb::model::{
@@ -9,6 +10,7 @@ use flix_tmdb::model::{
 };
 
 use anyhow::{Context, Result};
+use futures::{StreamExt, TryStreamExt, stream};
 
 use crate::cli::tmdb::Command;
 
@@ -17,7 +19,7 @@ pub enum TmdbObject {
 	Movie(TMovie),
 	Show(TShow),
 	Season(TSeason, ShowId),
-	Episode(TEpisode, u32, ShowId),
+	Episode(TEpisode, Vec<u32>, u32, ShowId),
 }
 
 impl TmdbObject {
@@ -63,23 +65,34 @@ impl TmdbObject {
 				},
 				tmdb: Some(TmdbSeason { show_id }),
 			})?,
-			TmdbObject::Episode(tmdb, season_number, show_id) => toml::to_string(&Episode {
-				episode: GenericEpisode {
-					number: tmdb.episode_number,
-					season: season_number,
-					title: tmdb.title,
-					overview: tmdb.overview,
-					air_date: tmdb.air_date,
-				},
-				tmdb: Some(TmdbEpisode { show_id }),
-			})?,
+			TmdbObject::Episode(tmdb, mut episode_numbers, season_number, show_id) => {
+				toml::to_string(&Episode {
+					episode: GenericEpisode {
+						number: if episode_numbers.is_empty() {
+							EpisodeNumber::Single {
+								number: tmdb.episode_number,
+							}
+						} else {
+							episode_numbers.insert(0, tmdb.episode_number);
+							EpisodeNumber::Multiple {
+								numbers: episode_numbers,
+							}
+						},
+						season: season_number,
+						title: tmdb.title,
+						overview: tmdb.overview,
+						air_date: tmdb.air_date,
+					},
+					tmdb: Some(TmdbEpisode { show_id }),
+				})?
+			}
 		})
 	}
 }
 
 impl TmdbObject {
-	pub async fn fetch(client: &Client, command: &Command) -> Result<Self> {
-		Ok(match *command {
+	pub async fn fetch(client: &Client, command: Command) -> Result<Self> {
+		Ok(match command {
 			Command::Collection { id } => Self::Collection(
 				client
 					.collections()
@@ -113,17 +126,32 @@ impl TmdbObject {
 				id,
 				season,
 				episode,
-			} => Self::Episode(
-				client
+				episodes,
+			} => {
+				let mut episode = client
 					.episodes()
 					.get_details(id, season, episode, None)
 					.await
 					.with_context(|| {
 						format!("could not get show details for '{id}' S{season}E{episode}")
-					})?,
-				season,
-				id.into(),
-			),
+					})?;
+				let title = stream::once(async { Ok(episode.title) })
+					.chain(stream::iter(episodes.clone()).then(|episode| async move {
+						client
+							.episodes()
+							.get_details(id, season, episode, None)
+							.await
+							.with_context(|| {
+								format!("could not get show details for '{id}' S{season}E{episode}")
+							})
+							.map(|episode| episode.title)
+					}))
+					.try_collect::<Vec<_>>()
+					.await?
+					.join(" + ");
+				episode.title = title;
+				Self::Episode(episode, episodes, season, id.into())
+			}
 		})
 	}
 }

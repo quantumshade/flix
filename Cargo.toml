@@ -34,8 +34,8 @@ overflow-checks = true
 strip = "debuginfo"
 
 [workspace.dependencies]
-flix = { path = "crates/flix", version = "=0.0.6", default-features = false }
-flix-tmdb = { path = "crates/tmdb", version = "=0.0.6", default-features = false }
+flix = { path = "crates/flix", version = "=0.0.7", default-features = false }
+flix-tmdb = { path = "crates/tmdb", version = "=0.0.7", default-features = false }
 
 anyhow = { version = "^1", default-features = false }
 chrono = { version = "^0.4", default-features = false }

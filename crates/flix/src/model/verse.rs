@@ -29,4 +29,6 @@ pub struct TmdbVerse {
 	pub movies: Vec<MovieId>,
 	/// The list of show TMDB IDs in the verse
 	pub shows: Vec<ShowId>,
+	/// The list of sub-verse names
+	pub verses: Vec<String>,
 }

@@ -1,15 +1,19 @@
 [package]
 name = "flix-cli"
-version = "0.0.8"
+version = "0.0.9"
 
 categories = ["command-line-utilities"]
-description = "CLI for interacting with flix media"
+description = "CLI for interacting with a flix database"
 repository = "https://github.com/QuantumShade/flix"
 
 authors.workspace = true
 edition.workspace = true
 license-file.workspace = true
 rust-version.workspace = true
+
+[package.metadata.docs.rs]
+all-features = true
+rustdoc-args = ["--cfg", "docsrs"]
 
 [[bin]]
 doc = false
@@ -35,9 +39,9 @@ unwrap_used = "deny"
 
 [dependencies]
 flix = { workspace = true, features = ["tmdb"] }
-flix-tmdb = { workspace = true }
 
 anyhow = { workspace = true }
+chrono = { workspace = true, features = ["now"] }
 clap = { workspace = true, features = [
 	"derive",
 	"color",
@@ -46,8 +50,9 @@ clap = { workspace = true, features = [
 	"suggestions",
 	"usage",
 ] }
-home = { workspace = true }
-serde = { workspace = true, features = ["derive"] }
 futures = { workspace = true }
+home = { workspace = true }
+sea-orm = { workspace = true, features = ["runtime-tokio"] }
+serde = { workspace = true, features = ["derive"] }
 tokio = { workspace = true, features = ["rt", "fs", "macros"] }
-toml = { workspace = true, features = ["display", "parse"] }
+toml = { workspace = true, features = ["parse", "serde"] }

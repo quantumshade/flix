@@ -4,7 +4,6 @@ use crate::{Config, api};
 
 /// The primary client that references all other clients
 pub struct Client {
-	genres: api::genres::Client,
 	collections: api::collections::Client,
 	movies: api::movies::Client,
 	shows: api::shows::Client,
@@ -22,7 +21,6 @@ impl Client {
 	pub fn new_with_config(config: Config) -> Self {
 		let config = Rc::new(config);
 		Self {
-			genres: api::genres::Client::new(config.clone()),
 			collections: api::collections::Client::new(config.clone()),
 			movies: api::movies::Client::new(config.clone()),
 			shows: api::shows::Client::new(config.clone()),
@@ -33,11 +31,6 @@ impl Client {
 }
 
 impl Client {
-	/// Access the Genres API
-	pub fn genres(&self) -> &api::genres::Client {
-		&self.genres
-	}
-
 	/// Access the Collections API
 	pub fn collections(&self) -> &api::collections::Client {
 		&self.collections

@@ -1,19 +1,14 @@
+//! TMDB API clients
+
 use reqwest::Request;
 use reqwest::header;
 
 use crate::Config;
 
-/// Collections API
 pub mod collections;
-/// Episodes API
 pub mod episodes;
-/// Genres API
-pub mod genres;
-/// Movies API
 pub mod movies;
-/// Seasons API
 pub mod seasons;
-/// Shows API
 pub mod shows;
 
 /// A generic error wrapping Url and Reqwest errors

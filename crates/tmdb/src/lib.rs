@@ -1,8 +1,8 @@
 //! flix-tmdb provides clients and models for fetching data from TMDB
 
-/// TMDB API clients
+#![cfg_attr(docsrs, feature(doc_cfg))]
+
 pub mod api;
-/// Deserializable types from the TMDB API
 pub mod model;
 
 mod client;

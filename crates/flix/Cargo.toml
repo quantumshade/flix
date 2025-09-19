@@ -1,9 +1,9 @@
 [package]
 name = "flix"
-version = "0.0.8"
+version = "0.0.9"
 
 categories = []
-description = "Types for storing persistent data about media"
+description = "Mechanisms for interacting with flix media"
 repository = "https://github.com/QuantumShade/flix"
 
 authors.workspace = true
@@ -11,16 +11,22 @@ edition.workspace = true
 license-file.workspace = true
 rust-version.workspace = true
 
+[package.metadata.docs.rs]
+all-features = true
+rustdoc-args = ["--cfg", "docsrs"]
+
 [lints]
 workspace = true
 
 [features]
 default = []
-tmdb = ["dep:flix-tmdb"]
+fs = ["dep:flix-fs"]
+serde = ["flix-model/serde"]
+tmdb = ["dep:flix-tmdb", "flix-db/tmdb"]
 
 [dependencies]
-flix-tmdb = { workspace = true, optional = true }
+flix-db = { workspace = true }
+flix-model = { workspace = true }
 
-chrono = { workspace = true, features = ["serde"] }
-serde = { workspace = true, features = ["std", "derive"] }
-thiserror = { workspace = true }
+flix-fs = { workspace = true, optional = true }
+flix-tmdb = { workspace = true, optional = true }

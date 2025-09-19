@@ -1,7 +1,13 @@
+//! Collections API
+
+use core::time::Duration;
 use std::rc::Rc;
 
+use governor::Jitter;
+
 use crate::Config;
-use crate::model::{Collection, CollectionId};
+use crate::model::Collection;
+use crate::model::id::CollectionId;
 
 use super::{Error, make_request};
 
@@ -24,12 +30,20 @@ impl Client {
 		id: impl Into<CollectionId>,
 		language: Option<&str>,
 	) -> Result<Collection, Error> {
+		self.config
+			.limiter
+			.until_ready_with_jitter(Jitter::new(
+				Duration::from_millis(0),
+				Duration::from_millis(50),
+			))
+			.await;
+
 		Ok(self
 			.config
 			.client
 			.execute(make_request(
 				&self.config,
-				&format!("/3/collection/{}", id.into()),
+				&format!("/3/collection/{}", id.into().into_raw()),
 				language,
 			)?)
 			.await?

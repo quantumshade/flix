@@ -1,11 +1,10 @@
-use std::path::Path;
+use std::path::PathBuf;
 
-use flix_tmdb::Client;
+use flix::tmdb::Client;
 
 use anyhow::{Context, Result};
 use clap::Parser;
 use tokio::fs;
-use tokio::io::AsyncWriteExt;
 
 mod cli;
 use cli::{BackendCommand, Cli, Command};
@@ -13,8 +12,8 @@ use cli::{BackendCommand, Cli, Command};
 mod config;
 use config::Config;
 
+mod db;
 mod run;
-use run::flix::FlixObject;
 
 #[tokio::main(flavor = "current_thread")]
 async fn main() -> Result<()> {
@@ -25,67 +24,72 @@ async fn main() -> Result<()> {
 	let config: Config = toml::from_str(config.as_str())
 		.with_context(|| format!("could not parse config: {:?}", cli.config_path()))?;
 
+	let database_path = cli.database_path()?;
+
 	let client = Client::new(config.tmdb().bearer_token().to_owned());
 
 	match cli.command() {
-		Command::Print { command } => exec_print(client, command).await?,
-		Command::Write {
-			force,
-			output,
-			command,
-		} => exec_write(client, force, &output, command).await?,
-		Command::Update { output } => exec_update(client, &output).await?,
+		Command::Init => exec_init(database_path).await?,
+		Command::Add { command } => exec_add(client, database_path, command).await?,
+		Command::Update { command } => exec_update(client, database_path, command).await?,
+		Command::Delete { command } => exec_delete(client, database_path, command).await?,
+		Command::Backup { output } => exec_backup(database_path, output).await?,
+		Command::Restore { input } => exec_restore(database_path, input).await?,
 	}
 
 	Ok(())
 }
 
-async fn exec_print(client: Client, command: BackendCommand) -> Result<()> {
+async fn exec_init(database_path: String) -> Result<()> {
+	db::open_new(database_path).await?;
+
+	Ok(())
+}
+
+async fn exec_add(client: Client, database_path: String, command: BackendCommand) -> Result<()> {
+	let database = db::open(database_path).await?;
+
 	match command {
 		BackendCommand::Tmdb { command } => {
-			let object = run::tmdb::TmdbObject::fetch(&client, command).await?;
-			println!("{}", object.serialize().context("failed to serialize")?)
+			run::tmdb::add(client, database.as_ref(), command).await?;
 		}
 	}
+
 	Ok(())
 }
 
-async fn exec_write(
-	client: Client,
-	force: bool,
-	output: &Path,
-	command: BackendCommand,
-) -> Result<()> {
+async fn exec_update(client: Client, database_path: String, command: BackendCommand) -> Result<()> {
+	let database = db::open(database_path).await?;
+
 	match command {
 		BackendCommand::Tmdb { command } => {
-			let object = run::tmdb::TmdbObject::fetch(&client, command).await?;
-
-			let mut file = if force {
-				fs::File::create(output).await
-			} else {
-				fs::File::create_new(output).await
-			}
-			.with_context(|| format!("could not create file at path {}", output.display()))?;
-			file.write_all(
-				object
-					.serialize()
-					.context("failed to serialize tmdb object")?
-					.as_bytes(),
-			)
-			.await
-			.with_context(|| format!("could not write to file at path {}", output.display()))?;
+			run::tmdb::update(client, database.as_ref(), command).await?;
 		}
 	}
+
 	Ok(())
 }
 
-async fn exec_update(client: Client, output: &Path) -> Result<()> {
-	let content = fs::read_to_string(output)
-		.await
-		.with_context(|| format!("failed to read file at path: {}", output.display()))?;
-	let object: FlixObject = toml::from_str(&content)
-		.with_context(|| format!("failed to deserialize flix file: {}", output.display()))?;
+async fn exec_delete(client: Client, database_path: String, command: BackendCommand) -> Result<()> {
+	let database = db::open(database_path).await?;
 
-	let command = object.backend_command()?;
-	exec_write(client, true, output, command).await
+	match command {
+		BackendCommand::Tmdb { command } => {
+			run::tmdb::delete(client, database.as_ref(), command).await?;
+		}
+	}
+
+	Ok(())
+}
+
+async fn exec_backup(database_path: String, output: PathBuf) -> Result<()> {
+	_ = database_path;
+	_ = output;
+	unimplemented!()
+}
+
+async fn exec_restore(database_path: String, input: PathBuf) -> Result<()> {
+	_ = database_path;
+	_ = input;
+	unimplemented!()
 }

@@ -1,7 +1,13 @@
+//! Movies API
+
+use core::time::Duration;
 use std::rc::Rc;
 
+use governor::Jitter;
+
 use crate::Config;
-use crate::model::{Movie, MovieId};
+use crate::model::Movie;
+use crate::model::id::MovieId;
 
 use super::{Error, make_request};
 
@@ -24,12 +30,20 @@ impl Client {
 		id: impl Into<MovieId>,
 		language: Option<&str>,
 	) -> Result<Movie, Error> {
+		self.config
+			.limiter
+			.until_ready_with_jitter(Jitter::new(
+				Duration::from_millis(0),
+				Duration::from_millis(50),
+			))
+			.await;
+
 		Ok(self
 			.config
 			.client
 			.execute(make_request(
 				&self.config,
-				&format!("/3/movie/{}", id.into()),
+				&format!("/3/movie/{}", id.into().into_raw()),
 				language,
 			)?)
 			.await?

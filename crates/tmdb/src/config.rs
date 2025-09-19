@@ -1,3 +1,7 @@
+use governor::clock::MonotonicClock;
+use governor::state::{InMemoryState, NotKeyed};
+use governor::{Quota, RateLimiter};
+use nonzero_ext::nonzero;
 use url::Url;
 use url_macro::url;
 
@@ -7,6 +11,8 @@ pub struct Config {
 	pub base_url: Url,
 	/// The reqwest client that is used for every request
 	pub client: reqwest::Client,
+	/// The rate limiter to use for the client
+	pub limiter: RateLimiter<NotKeyed, InMemoryState, MonotonicClock>,
 	/// The bearer token for readonly access to the API
 	pub bearer_token: String,
 	/// An optional user agent string to provide to the API
@@ -19,6 +25,7 @@ impl Config {
 		Self {
 			base_url: url!("https://api.themoviedb.org"),
 			client: reqwest::Client::new(),
+			limiter: RateLimiter::direct(Quota::per_second(nonzero!(30u32))),
 			bearer_token,
 			user_agent: None,
 		}

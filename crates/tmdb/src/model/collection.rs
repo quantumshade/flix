@@ -1,4 +1,4 @@
-use super::{CollectionId, MovieId};
+use super::id::{CollectionId, MovieId};
 
 /// A deserialized Collection from the TMDB API
 #[derive(Debug, Clone, serde::Deserialize)]
@@ -20,4 +20,6 @@ pub struct Collection {
 pub struct Item {
 	/// The movie's TMDB ID
 	pub id: MovieId,
+	/// The movie's title
+	pub title: String,
 }

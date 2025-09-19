@@ -1,157 +1,507 @@
-use flix::model::{
-	Collection, Episode, EpisodeNumber, GenericCollection, GenericEpisode, GenericMovie,
-	GenericSeason, GenericShow, Movie, Season, Show, TmdbCollection, TmdbEpisode, TmdbMovie,
-	TmdbSeason, TmdbShow,
-};
-use flix_tmdb::Client;
-use flix_tmdb::model::{
-	Collection as TCollection, Episode as TEpisode, Movie as TMovie, Season as TSeason,
-	Show as TShow, ShowId,
+use std::collections::HashMap;
+
+use flix::db::entity;
+use flix::model::id::{CollectionId, MovieId, ShowId};
+use flix::model::numbers::{EpisodeNumber, SeasonNumber};
+use flix::tmdb::Client;
+use flix::tmdb::model::id::{
+	CollectionId as TmdbCollectionId, MovieId as TmdbMovieId, ShowId as TmdbShowId,
 };
 
-use anyhow::{Context, Result};
-use futures::{StreamExt, TryStreamExt, stream};
+use anyhow::{Context, Result, bail};
+use chrono::Utc;
+use sea_orm::ActiveValue::{NotSet, Set};
+use sea_orm::{
+	ActiveModelTrait, DatabaseConnection, DbErr, EntityTrait, TransactionError, TransactionTrait,
+};
 
 use crate::cli::tmdb::Command;
 
-pub enum TmdbObject {
-	Collection(TCollection),
-	Movie(TMovie),
-	Show(TShow),
-	Season(TSeason, ShowId),
-	Episode(TEpisode, Vec<u32>, u32, ShowId),
-}
+pub async fn add(client: Client, db: &DatabaseConnection, command: Command) -> Result<()> {
+	match command {
+		Command::Collection { id } => {
+			let id = TmdbCollectionId::from_raw(id);
 
-impl TmdbObject {
-	pub fn serialize(self) -> Result<String> {
-		Ok(match self {
-			TmdbObject::Collection(tmdb) => toml::to_string(&Collection {
-				collection: GenericCollection {
-					title: tmdb.title,
-					overview: tmdb.overview,
-				},
-				tmdb: Some(TmdbCollection { id: tmdb.id }),
-			})?,
-			TmdbObject::Movie(tmdb) => toml::to_string(&Movie {
-				movie: GenericMovie {
-					title: tmdb.title,
-					overview: tmdb.overview,
-					genres: tmdb.genres.iter().cloned().map(|g| g.name).collect(),
-					release_date: tmdb.release_date,
-				},
-				tmdb: Some(TmdbMovie {
-					id: tmdb.id,
-					genres: tmdb.genres.iter().map(|g| g.id).collect(),
-				}),
-			})?,
-			TmdbObject::Show(tmdb) => toml::to_string(&Show {
-				show: GenericShow {
-					title: tmdb.title,
-					overview: tmdb.overview,
-					genres: tmdb.genres.iter().cloned().map(|g| g.name).collect(),
-					air_date: tmdb.first_air_date,
-				},
-				tmdb: Some(TmdbShow {
-					id: tmdb.id,
-					genres: tmdb.genres.iter().map(|g| g.id).collect(),
-				}),
-			})?,
-			TmdbObject::Season(tmdb, show_id) => toml::to_string(&Season {
-				season: GenericSeason {
-					number: tmdb.season_number,
-					title: tmdb.title,
-					overview: tmdb.overview,
-					air_date: tmdb.air_date,
-				},
-				tmdb: Some(TmdbSeason { show_id }),
-			})?,
-			TmdbObject::Episode(tmdb, mut episode_numbers, season_number, show_id) => {
-				toml::to_string(&Episode {
-					episode: GenericEpisode {
-						number: if episode_numbers.is_empty() {
-							EpisodeNumber::Single {
-								number: tmdb.episode_number,
-							}
-						} else {
-							episode_numbers.insert(0, tmdb.episode_number);
-							EpisodeNumber::Multiple {
-								numbers: episode_numbers,
-							}
-						},
-						season: season_number,
-						title: tmdb.title,
-						overview: tmdb.overview,
-						air_date: tmdb.air_date,
-					},
-					tmdb: Some(TmdbEpisode { show_id }),
-				})?
+			let collection = entity::tmdb::collections::Entity::find_by_id(id)
+				.one(db)
+				.await?;
+			if collection.is_some() {
+				bail!("collection already exists");
 			}
-		})
-	}
-}
 
-impl TmdbObject {
-	pub async fn fetch(client: &Client, command: Command) -> Result<Self> {
-		Ok(match command {
-			Command::Collection { id } => Self::Collection(
-				client
-					.collections()
-					.get_details(id, None)
-					.await
-					.with_context(|| format!("could not get collection details for '{id}'"))?,
-			),
-			Command::Movie { id } => Self::Movie(
-				client
-					.movies()
-					.get_details(id, None)
-					.await
-					.with_context(|| format!("could not get movie details for '{id}'"))?,
-			),
-			Command::Show { id } => Self::Show(
-				client
-					.shows()
-					.get_details(id, None)
-					.await
-					.with_context(|| format!("could not get show details for '{id}'"))?,
-			),
-			Command::Season { id, season } => Self::Season(
-				client
+			let collection = client
+				.collections()
+				.get_details(id, None)
+				.await
+				.with_context(|| format!("collections().get_details({})", id.into_raw()))?;
+
+			let result: Result<CollectionId, TransactionError<DbErr>> = db
+				.transaction(|txn| {
+					Box::pin(async move {
+						let flix = entity::info::collections::ActiveModel {
+							id: NotSet,
+							title: Set(collection.title),
+							overview: Set(collection.overview),
+						}
+						.insert(txn)
+						.await?;
+
+						entity::tmdb::collections::ActiveModel {
+							tmdb_id: Set(id),
+							flix_id: Set(flix.id),
+							last_update: Set(Utc::now().date_naive()),
+							movie_count: Set(collection.movies.len().try_into().unwrap_or(0)),
+						}
+						.insert(txn)
+						.await?;
+
+						Ok(flix.id)
+					})
+				})
+				.await;
+
+			let flix_id = match result {
+				Ok(id) => id,
+				Err(TransactionError::Connection(err)) => Err(err)?,
+				Err(TransactionError::Transaction(err)) => Err(err)?,
+			};
+			println!("Created Collection: {}", flix_id.into_raw());
+
+			Ok(())
+		}
+		Command::Movie { id } => {
+			let id = TmdbMovieId::from_raw(id);
+
+			let movie = entity::tmdb::movies::Entity::find_by_id(id).one(db).await?;
+			if movie.is_some() {
+				bail!("movie already exists");
+			}
+
+			let movie = client
+				.movies()
+				.get_details(id, None)
+				.await
+				.with_context(|| format!("movies().get_details({})", id.into_raw()))?;
+
+			let result: Result<MovieId, TransactionError<DbErr>> = db
+				.transaction(|txn| {
+					Box::pin(async move {
+						let flix = entity::info::movies::ActiveModel {
+							id: NotSet,
+							title: Set(movie.title),
+							tagline: Set(movie.tagline),
+							overview: Set(movie.overview),
+							date: Set(movie.release_date),
+						}
+						.insert(txn)
+						.await?;
+
+						entity::tmdb::movies::ActiveModel {
+							tmdb_id: Set(id),
+							flix_id: Set(flix.id),
+							last_update: Set(Utc::now().date_naive()),
+							runtime: Set(movie.runtime.into()),
+							collection: Set(movie.collection.map(|c| c.id)),
+						}
+						.insert(txn)
+						.await?;
+
+						Ok(flix.id)
+					})
+				})
+				.await;
+
+			let flix_id = match result {
+				Ok(id) => id,
+				Err(TransactionError::Connection(err)) => Err(err)?,
+				Err(TransactionError::Transaction(err)) => Err(err)?,
+			};
+			println!("Created Movie: {}", flix_id.into_raw());
+
+			Ok(())
+		}
+		Command::Show { id } => {
+			let id = TmdbShowId::from_raw(id);
+
+			let show = entity::tmdb::shows::Entity::find_by_id(id).one(db).await?;
+			if show.is_some() {
+				bail!("show already exists");
+			}
+
+			let show = client
+				.shows()
+				.get_details(id, None)
+				.await
+				.with_context(|| format!("shows().get_details({})", id.into_raw()))?;
+			let mut seasons = Vec::new();
+			let mut episodes = HashMap::new();
+
+			for season in 1..=show.number_of_seasons {
+				let season = client
 					.seasons()
 					.get_details(id, season, None)
 					.await
-					.with_context(|| format!("could not get show details for '{id}' S{season}"))?,
-				id.into(),
-			),
-			Command::Episode {
-				id,
-				season,
-				episode,
-				episodes,
-			} => {
-				let mut episode = client
+					.with_context(|| {
+						format!("seasons().get_details({}, {})", id.into_raw(), season)
+					})?;
+				if season.air_date > Utc::now().date_naive() {
+					eprintln!(
+						"skipping season ({}, {})",
+						id.into_raw(),
+						season.season_number
+					);
+					break;
+				}
+
+				let Ok(number_of_episodes) = EpisodeNumber::try_from(season.episodes.len()) else {
+					bail!(
+						"could not convert {} to an EpisodeNumber",
+						season.episodes.len()
+					)
+				};
+
+				let mut season_episodes = Vec::new();
+				for episode in 1..=number_of_episodes {
+					let Ok(episode) = client
+						.episodes()
+						.get_details(id, season.season_number, episode, None)
+						.await
+					else {
+						eprintln!(
+							"skipping episode ({}, {}, {})",
+							id.into_raw(),
+							season.season_number,
+							episode
+						);
+						break;
+					};
+					season_episodes.push(episode);
+				}
+
+				episodes.insert(season.season_number, season_episodes);
+				seasons.push(season);
+			}
+
+			let result: Result<ShowId, TransactionError<DbErr>> = db
+				.transaction(|txn| {
+					Box::pin(async move {
+						let flix = entity::info::shows::ActiveModel {
+							id: NotSet,
+							title: Set(show.title),
+							tagline: Set(show.tagline),
+							overview: Set(show.overview),
+							date: Set(show.first_air_date),
+						}
+						.insert(txn)
+						.await?;
+
+						entity::tmdb::shows::ActiveModel {
+							tmdb_id: Set(id),
+							flix_id: Set(flix.id),
+							last_update: Set(Utc::now().date_naive()),
+							number_of_seasons: Set(show.number_of_seasons),
+						}
+						.insert(txn)
+						.await?;
+
+						for season in seasons {
+							entity::info::seasons::ActiveModel {
+								show: Set(flix.id),
+								season: Set(season.season_number),
+								title: Set(season.title),
+								overview: Set(season.overview),
+								date: Set(season.air_date),
+							}
+							.insert(txn)
+							.await?;
+
+							entity::tmdb::seasons::ActiveModel {
+								tmdb_show: Set(id),
+								tmdb_season: Set(season.season_number),
+								flix_show: Set(flix.id),
+								flix_season: Set(season.season_number),
+								last_update: Set(Utc::now().date_naive()),
+							}
+							.insert(txn)
+							.await?;
+						}
+
+						for (season, episodes) in episodes {
+							for episode in episodes {
+								entity::info::episodes::ActiveModel {
+									show: Set(flix.id),
+									season: Set(season),
+									episode: Set(episode.episode_number),
+									title: Set(episode.title),
+									overview: Set(episode.overview),
+									date: Set(episode.air_date),
+								}
+								.insert(txn)
+								.await?;
+
+								entity::tmdb::episodes::ActiveModel {
+									tmdb_show: Set(id),
+									tmdb_season: Set(season),
+									tmdb_episode: Set(episode.episode_number),
+									flix_show: Set(flix.id),
+									flix_season: Set(season),
+									flix_episode: Set(episode.episode_number),
+									last_update: Set(Utc::now().date_naive()),
+									runtime: Set(episode.runtime.into()),
+								}
+								.insert(txn)
+								.await?;
+							}
+						}
+
+						Ok(flix.id)
+					})
+				})
+				.await;
+
+			let flix_id = match result {
+				Ok(id) => id,
+				Err(TransactionError::Connection(err)) => Err(err)?,
+				Err(TransactionError::Transaction(err)) => Err(err)?,
+			};
+			println!("Created Show: {}", flix_id.into_raw());
+
+			Ok(())
+		}
+		Command::Season { id, season } => {
+			let id = TmdbShowId::from_raw(id);
+			let season_number = season;
+
+			let Some(show) = entity::tmdb::shows::Entity::find_by_id(id).one(db).await? else {
+				bail!("show does not exists");
+			};
+
+			let season = entity::tmdb::seasons::Entity::find_by_id((id, season))
+				.one(db)
+				.await?;
+			if season.is_some() {
+				bail!("season already exists");
+			}
+
+			let season = client
+				.seasons()
+				.get_details(id, season_number, None)
+				.await
+				.with_context(|| {
+					format!(
+						"seasons().get_details({}, {})",
+						id.into_raw(),
+						season_number
+					)
+				})?;
+			let mut episodes = Vec::new();
+
+			let Ok(number_of_episodes) = EpisodeNumber::try_from(season.episodes.len()) else {
+				bail!(
+					"could not convert {} to an EpisodeNumber",
+					season.episodes.len()
+				)
+			};
+
+			for episode in 1..=number_of_episodes {
+				let Ok(episode) = client
 					.episodes()
-					.get_details(id, season, episode, None)
+					.get_details(id, season.season_number, episode, None)
+					.await
+				else {
+					eprintln!(
+						"skipping episode ({}, {}, {})",
+						id.into_raw(),
+						season.season_number,
+						episode
+					);
+					break;
+				};
+				episodes.push(episode);
+			}
+
+			let result: Result<(), TransactionError<DbErr>> = db
+				.transaction(|txn| {
+					Box::pin(async move {
+						entity::info::seasons::ActiveModel {
+							show: Set(show.flix_id),
+							season: Set(season_number),
+							title: Set(season.title),
+							overview: Set(season.overview),
+							date: Set(season.air_date),
+						}
+						.insert(txn)
+						.await?;
+
+						entity::tmdb::seasons::ActiveModel {
+							tmdb_show: Set(show.tmdb_id),
+							tmdb_season: Set(season_number),
+							flix_show: Set(show.flix_id),
+							flix_season: Set(season_number),
+							last_update: Set(Utc::now().date_naive()),
+						}
+						.insert(txn)
+						.await?;
+
+						for episode in episodes {
+							entity::info::episodes::ActiveModel {
+								show: Set(show.flix_id),
+								season: Set(season_number),
+								episode: Set(episode.episode_number),
+								title: Set(episode.title),
+								overview: Set(episode.overview),
+								date: Set(episode.air_date),
+							}
+							.insert(txn)
+							.await?;
+
+							entity::tmdb::episodes::ActiveModel {
+								tmdb_show: Set(show.tmdb_id),
+								tmdb_season: Set(season_number),
+								tmdb_episode: Set(episode.episode_number),
+								flix_show: Set(show.flix_id),
+								flix_season: Set(season_number),
+								flix_episode: Set(episode.episode_number),
+								last_update: Set(Utc::now().date_naive()),
+								runtime: Set(episode.runtime.into()),
+							}
+							.insert(txn)
+							.await?;
+						}
+
+						Ok(())
+					})
+				})
+				.await;
+
+			match result {
+				Ok(_) => (),
+				Err(TransactionError::Connection(err)) => Err(err)?,
+				Err(TransactionError::Transaction(err)) => Err(err)?,
+			};
+			println!(
+				"Created Season: {} S{}",
+				show.flix_id.into_raw(),
+				season_number
+			);
+
+			Ok(())
+		}
+		Command::Episode {
+			id,
+			season,
+			episode,
+			episodes,
+		} => {
+			let id = TmdbShowId::from_raw(id);
+			let season_number = season;
+
+			let Some(show) = entity::tmdb::shows::Entity::find_by_id(id).one(db).await? else {
+				bail!("show does not exists");
+			};
+			let Some(_) = entity::tmdb::seasons::Entity::find_by_id((id, season))
+				.one(db)
+				.await?
+			else {
+				bail!("season does not exists");
+			};
+
+			async fn fetch_episode(
+				client: &Client,
+				db: &DatabaseConnection,
+				flix_id: ShowId,
+				tmdb_id: TmdbShowId,
+				id: TmdbShowId,
+				season: SeasonNumber,
+				episode: EpisodeNumber,
+			) -> Result<()> {
+				let episode_number = episode;
+
+				let episode = entity::tmdb::episodes::Entity::find_by_id((id, season, episode))
+					.one(db)
+					.await?;
+				if episode.is_some() {
+					bail!("episode already exists");
+				}
+
+				let episode = client
+					.episodes()
+					.get_details(id, season, episode_number, None)
 					.await
 					.with_context(|| {
-						format!("could not get show details for '{id}' S{season}E{episode}")
+						format!("episodes().get_details({}, {})", id.into_raw(), season)
 					})?;
-				let title = stream::once(async { Ok(episode.title) })
-					.chain(stream::iter(episodes.clone()).then(|episode| async move {
-						client
-							.episodes()
-							.get_details(id, season, episode, None)
-							.await
-							.with_context(|| {
-								format!("could not get show details for '{id}' S{season}E{episode}")
-							})
-							.map(|episode| episode.title)
-					}))
-					.try_collect::<Vec<_>>()
-					.await?
-					.join(" + ");
-				episode.title = title;
-				Self::Episode(episode, episodes, season, id.into())
+
+				let result: Result<(), TransactionError<DbErr>> = db
+					.transaction(|txn| {
+						Box::pin(async move {
+							entity::info::episodes::ActiveModel {
+								show: Set(flix_id),
+								season: Set(season),
+								episode: Set(episode_number),
+								title: Set(episode.title),
+								overview: Set(episode.overview),
+								date: Set(episode.air_date),
+							}
+							.insert(txn)
+							.await?;
+
+							entity::tmdb::episodes::ActiveModel {
+								tmdb_show: Set(tmdb_id),
+								tmdb_season: Set(season),
+								tmdb_episode: Set(episode_number),
+								flix_show: Set(flix_id),
+								flix_season: Set(season),
+								flix_episode: Set(episode_number),
+								last_update: Set(Utc::now().date_naive()),
+								runtime: Set(episode.runtime.into()),
+							}
+							.insert(txn)
+							.await?;
+
+							Ok(())
+						})
+					})
+					.await;
+
+				match result {
+					Ok(_) => (),
+					Err(TransactionError::Connection(err)) => Err(err)?,
+					Err(TransactionError::Transaction(err)) => Err(err)?,
+				};
+				println!(
+					"Created Episode: {} S{}E{}",
+					flix_id.into_raw(),
+					season,
+					episode_number
+				);
+
+				Ok(())
 			}
-		})
+
+			let flix_id = show.flix_id;
+			let tmdb_id = show.tmdb_id;
+
+			fetch_episode(&client, db, flix_id, tmdb_id, id, season_number, episode).await?;
+			for episode in episodes {
+				fetch_episode(&client, db, flix_id, tmdb_id, id, season_number, episode).await?;
+			}
+
+			Ok(())
+		}
 	}
+}
+
+pub async fn update(client: Client, database: &DatabaseConnection, command: Command) -> Result<()> {
+	_ = client;
+	_ = database;
+	_ = command;
+	unimplemented!("updates")
+}
+
+pub async fn delete(client: Client, database: &DatabaseConnection, command: Command) -> Result<()> {
+	_ = client;
+	_ = database;
+	_ = command;
+	unimplemented!("deletions")
 }

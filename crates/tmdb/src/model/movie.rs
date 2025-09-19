@@ -1,6 +1,9 @@
+use core::time::Duration;
+
 use chrono::NaiveDate;
 
-use super::{CollectionId, MovieGenre, MovieId};
+use super::duration_from_minutes;
+use super::id::{CollectionId, MovieId};
 
 /// A deserialized Movie from the TMDB API
 #[derive(Debug, Clone, serde::Deserialize)]
@@ -12,14 +15,15 @@ pub struct Movie {
 	pub collection: Option<InCollection>,
 	/// The movie's title
 	pub title: String,
+	/// The movie's tagline
+	pub tagline: String,
 	/// The movie's overview
 	pub overview: String,
-	/// The list of genres the movie belongs to
-	pub genres: Vec<MovieGenre>,
 	/// The movie's release date
 	pub release_date: NaiveDate,
-	/// The movie's status
-	pub status: MovieStatus,
+	/// The movie's runtime
+	#[serde(deserialize_with = "duration_from_minutes")]
+	pub runtime: Duration,
 }
 
 /// A deserialized movie's collection from the TMDB API
@@ -27,27 +31,15 @@ pub struct Movie {
 pub struct InCollection {
 	/// The collection's TMDB ID
 	pub id: CollectionId,
+	/// The collection's title
+	#[serde(rename = "name")]
+	pub title: String,
 }
 
-/// A deserialized movie status from the TMDB API
-#[derive(Debug, Clone, Copy, serde::Deserialize)]
-pub enum MovieStatus {
-	/// The movie was cancelled
-	#[serde(rename = "Canceled")]
-	Canceled,
-	/// The movie is in production
-	#[serde(rename = "In Production")]
-	InProduction,
-	/// The movie is planned
-	#[serde(rename = "Planned")]
-	Planned,
-	/// The movie is in post production
-	#[serde(rename = "Post Production")]
-	PostProduction,
-	/// The movie is released
-	#[serde(rename = "Released")]
-	Released,
-	/// The movie is rumored
-	#[serde(rename = "Rumored")]
-	Rumored,
-}
+// TODO: Genres
+// pub genres: Vec<Genre>,
+// where: struct Genre { id, name }
+
+// TODO: Company
+// pub companies: Vec<Company>
+// where: struct Company { id, name }

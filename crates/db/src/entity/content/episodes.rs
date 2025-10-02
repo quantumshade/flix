@@ -53,9 +53,9 @@ pub enum Relation {
 	Library,
 	/// The media info for this episode
 	#[sea_orm(
-		belongs_to = "super::super::info::seasons::Entity",
-		from = "(Column::Show, Column::Season)",
-		to = "(super::super::info::seasons::Column::Show, super::super::info::seasons::Column::Season)",
+		belongs_to = "super::super::info::episodes::Entity",
+		from = "(Column::Show, Column::Season, Column::Episode)",
+		to = "(super::super::info::episodes::Column::Show, super::super::info::episodes::Column::Season, super::super::info::episodes::Column::Episode)",
 		on_update = "Cascade",
 		on_delete = "Cascade"
 	)]

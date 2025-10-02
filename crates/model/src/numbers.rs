@@ -58,21 +58,3 @@ impl EpisodeNumbers {
 		&self.0
 	}
 }
-
-// impl EpisodeNumbers {
-// 	/// Get the primary episode number of this episode
-// 	pub fn primary_episode_number(&self) -> Option<EpisodeNumber> {
-// 		match self {
-// 			EpisodeNumbers::Single { number } => Some(*number),
-// 			EpisodeNumbers::Multiple { numbers } => numbers.first().copied(),
-// 		}
-// 	}
-
-// 	/// Get additional episode numbers of this episode
-// 	pub fn additional_episode_numbers(&self) -> &[EpisodeNumber] {
-// 		match self {
-// 			EpisodeNumbers::Single { number: _ } => &[],
-// 			EpisodeNumbers::Multiple { numbers } => numbers.get(1..).unwrap_or(&[]),
-// 		}
-// 	}
-// }

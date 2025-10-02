@@ -47,17 +47,17 @@ pub enum Scanner {
 	Show {
 		/// The ID of the parent collection (if any)
 		parent: Option<CollectionId>,
-		/// The ID of the show this episode belongs to
+		/// The ID of the show
 		id: ShowId,
 		/// The file name of the poster file
 		poster_file_name: Option<String>,
 	},
 	/// A scanned episode
 	Season {
-		/// The ID of the show this episode belongs to
+		/// The ID of the show this season belongs to
 		show: ShowId,
-		/// The season this episode belongs to
-		number: SeasonNumber,
+		/// The number of this season
+		season: SeasonNumber,
 		/// The file name of the poster file
 		poster_file_name: Option<String>,
 	},
@@ -68,7 +68,7 @@ pub enum Scanner {
 		/// The season this episode belongs to
 		season: SeasonNumber,
 		/// The number(s) of this episode
-		number: EpisodeNumbers,
+		episode: EpisodeNumbers,
 		/// The file name of the media file
 		media_file_name: String,
 		/// The file name of the poster file
@@ -108,23 +108,23 @@ impl From<show::Scanner> for Scanner {
 			},
 			show::Scanner::Season {
 				show,
-				number,
+				season,
 				poster_file_name,
 			} => Self::Season {
 				show,
-				number,
+				season,
 				poster_file_name,
 			},
 			show::Scanner::Episode {
 				show,
 				season,
-				number,
+				episode,
 				media_file_name,
 				poster_file_name,
 			} => Self::Episode {
 				show,
 				season,
-				number,
+				episode,
 				media_file_name,
 				poster_file_name,
 			},
@@ -166,23 +166,23 @@ impl From<generic::Scanner> for Scanner {
 			},
 			generic::Scanner::Season {
 				show,
-				number,
+				season,
 				poster_file_name,
 			} => Self::Season {
 				show,
-				number,
+				season,
 				poster_file_name,
 			},
 			generic::Scanner::Episode {
 				show,
 				season,
-				number,
+				episode,
 				media_file_name,
 				poster_file_name,
 			} => Self::Episode {
 				show,
 				season,
-				number,
+				episode,
 				media_file_name,
 				poster_file_name,
 			},

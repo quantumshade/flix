@@ -22,10 +22,10 @@ pub type Item = crate::Item<Scanner>;
 pub enum Scanner {
 	/// A scanned episode
 	Season {
-		/// The ID of the show this episode belongs to
+		/// The ID of the show this season belongs to
 		show: ShowId,
 		/// The season this episode belongs to
-		number: SeasonNumber,
+		season: SeasonNumber,
 		/// The file name of the poster file
 		poster_file_name: Option<String>,
 	},
@@ -36,7 +36,7 @@ pub enum Scanner {
 		/// The season this episode belongs to
 		season: SeasonNumber,
 		/// The number(s) of this episode
-		number: EpisodeNumbers,
+		episode: EpisodeNumbers,
 		/// The file name of the media file
 		media_file_name: String,
 		/// The file name of the poster file
@@ -50,13 +50,13 @@ impl From<episode::Scanner> for Scanner {
 			episode::Scanner::Episode {
 				show,
 				season,
-				number,
+				episode,
 				media_file_name,
 				poster_file_name,
 			} => Self::Episode {
 				show,
 				season,
-				number,
+				episode,
 				media_file_name,
 				poster_file_name,
 			},
@@ -69,7 +69,7 @@ impl Scanner {
 	pub fn scan_season(
 		path: &Path,
 		show: ShowId,
-		number: SeasonNumber,
+		season: SeasonNumber,
 	) -> impl Stream<Item = Item> {
 		stream!({
 			let dirs = match fs::read_dir(path).await {
@@ -141,7 +141,7 @@ impl Scanner {
 				path: path.to_owned(),
 				event: Ok(Self::Season {
 					show,
-					number,
+					season,
 					poster_file_name,
 				}),
 			};
@@ -170,14 +170,14 @@ impl Scanner {
 					continue;
 				};
 
-				let Ok(season) = s_str.parse::<SeasonNumber>() else {
+				let Ok(season_number) = s_str.parse::<SeasonNumber>() else {
 					yield Item {
 						path: path.to_owned(),
 						event: Err(Error::UnexpectedFolder),
 					};
 					continue;
 				};
-				if season != number {
+				if season_number != season {
 					yield Item {
 						path: path.to_owned(),
 						event: Err(Error::Inconsistent),
@@ -204,9 +204,12 @@ impl Scanner {
 					continue;
 				};
 
-				for await event in
-					episode::Scanner::scan_episode(&episode_dir, show, number, episode_numbers)
-				{
+				for await event in episode::Scanner::scan_episode(
+					&episode_dir,
+					show,
+					season_number,
+					episode_numbers,
+				) {
 					yield event.map(|e| e.into());
 				}
 			}

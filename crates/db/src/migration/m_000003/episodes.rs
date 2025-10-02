@@ -2,7 +2,7 @@ use sea_orm::sea_query;
 use sea_orm::sea_query::{ForeignKeyCreateStatement, Index, Table};
 use sea_orm::{DbErr, Iden};
 use sea_orm_migration::SchemaManager;
-use sea_orm_migration::schema::{binary, binary_null, integer, string};
+use sea_orm_migration::schema::{binary, integer, string, string_null};
 
 use crate::migration::m_000001::FlixInfoEpisodes;
 use crate::migration::m_000003::FlixLibraries;
@@ -13,6 +13,7 @@ pub enum FlixEpisodes {
 	Show,
 	Season,
 	Episode,
+	Count,
 	Slug,
 	Library,
 	Directory,
@@ -28,11 +29,12 @@ pub async fn up(manager: &SchemaManager<'_>) -> Result<(), DbErr> {
 				.col(integer(FlixEpisodes::Show))
 				.col(integer(FlixEpisodes::Season))
 				.col(integer(FlixEpisodes::Episode))
+				.col(integer(FlixEpisodes::Count))
 				.col(string(FlixEpisodes::Slug))
 				.col(integer(FlixEpisodes::Library))
 				.col(binary(FlixEpisodes::Directory))
-				.col(binary(FlixEpisodes::RelativeMediaPath))
-				.col(binary_null(FlixEpisodes::RelativePosterPath))
+				.col(string(FlixEpisodes::RelativeMediaPath))
+				.col(string_null(FlixEpisodes::RelativePosterPath))
 				.primary_key(
 					Index::create()
 						.col(FlixEpisodes::Show)

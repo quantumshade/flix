@@ -108,7 +108,7 @@ mod tests {
 				slug: Set(::std::string::String::new()),
 				library: Set(::flix_model::id::LibraryId::from_raw($lid)),
 				directory: Set(::std::path::PathBuf::new().into()),
-				relative_poster_path: Set(None),
+				relative_poster_path: Set(::core::option::Option::None),
 			}
 			.insert($db)
 			.await
@@ -144,8 +144,8 @@ mod tests {
 				slug: Set(::std::string::String::new()),
 				library: Set(::flix_model::id::LibraryId::from_raw($lid)),
 				directory: Set(::std::path::PathBuf::new().into()),
-				relative_media_path: Set(::std::path::PathBuf::new().into()),
-				relative_poster_path: Set(None),
+				relative_media_path: Set(::std::string::String::new()),
+				relative_poster_path: Set(::core::option::Option::None),
 			}
 			.insert($db)
 			.await
@@ -181,7 +181,7 @@ mod tests {
 				slug: Set(::std::string::String::new()),
 				library: Set(::flix_model::id::LibraryId::from_raw($lid)),
 				directory: Set(::std::path::PathBuf::new().into()),
-				relative_poster_path: Set(None),
+				relative_poster_path: Set(::core::option::Option::None),
 			}
 			.insert($db)
 			.await
@@ -216,7 +216,7 @@ mod tests {
 				slug: Set(::std::string::String::new()),
 				library: Set(::flix_model::id::LibraryId::from_raw($lid)),
 				directory: Set(::std::path::PathBuf::new().into()),
-				relative_poster_path: Set(None),
+				relative_poster_path: Set(::core::option::Option::None),
 			}
 			.insert($db)
 			.await
@@ -245,16 +245,23 @@ mod tests {
 	pub(super) use make_flix_episode;
 	macro_rules! have_episode {
 		($db:expr, $lid:literal, $show:literal, $season:literal, $episode:literal) => {
+			have_episode!(@make, $db, $lid, $show, $season, $episode, 0);
+		};
+		($db:expr, $lid:literal, $show:literal, $season:literal, $episode:literal, >1) => {
+			have_episode!(@make, $db, $lid, $show, $season, $episode, 1);
+		};
+		(@make, $db:expr, $lid:literal, $show:literal, $season:literal, $episode:literal, $count:literal) => {
 			$crate::entity::tests::make_flix_episode!($db, $show, $season, $episode);
 			$crate::entity::content::episodes::ActiveModel {
 				show: Set(::flix_model::id::ShowId::from_raw($show)),
 				season: Set($season),
 				episode: Set($episode),
+				count: Set($count),
 				slug: Set(::std::string::String::new()),
 				library: Set(::flix_model::id::LibraryId::from_raw($lid)),
 				directory: Set(::std::path::PathBuf::new().into()),
-				relative_media_path: Set(::std::path::PathBuf::new().into()),
-				relative_poster_path: Set(None),
+				relative_media_path: Set(::std::string::String::new()),
+				relative_poster_path: Set(::core::option::Option::None),
 			}
 			.insert($db)
 			.await

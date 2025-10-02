@@ -25,7 +25,7 @@ pub struct Model {
 	/// The collection's directory
 	pub directory: PathBytes,
 	/// The collection's poster path
-	pub relative_poster_path: Option<PathBytes>,
+	pub relative_poster_path: Option<String>,
 }
 
 impl ActiveModelBehavior for ActiveModel {}
@@ -51,6 +51,24 @@ pub enum Relation {
 		on_delete = "Cascade"
 	)]
 	Library,
+	/// The media info for this collection
+	#[sea_orm(
+		belongs_to = "super::super::info::collections::Entity",
+		from = "Column::Id",
+		to = "super::super::info::collections::Column::Id",
+		on_update = "Cascade",
+		on_delete = "Cascade"
+	)]
+	MediaInfo,
+	/// The watched info for this collection
+	#[sea_orm(
+		belongs_to = "super::super::watched::collections::Entity",
+		from = "Column::Id",
+		to = "super::super::watched::collections::Column::Id",
+		on_update = "Cascade",
+		on_delete = "Cascade"
+	)]
+	WatchInfo,
 }
 
 impl Related<super::collections::Entity> for Entity {
@@ -62,5 +80,17 @@ impl Related<super::collections::Entity> for Entity {
 impl Related<super::libraries::Entity> for Entity {
 	fn to() -> RelationDef {
 		Relation::Library.def()
+	}
+}
+
+impl Related<super::super::info::collections::Entity> for Entity {
+	fn to() -> RelationDef {
+		Relation::MediaInfo.def()
+	}
+}
+
+impl Related<super::super::watched::collections::Entity> for Entity {
+	fn to() -> RelationDef {
+		Relation::WatchInfo.def()
 	}
 }

@@ -74,7 +74,7 @@ mod tests {
 				assert_eq!(model.slug, concat!("C/", $id).to_string());
 				assert_eq!(model.library, LibraryId::from_raw($lid));
 				assert_eq!(model.directory, Path::new(concat!("/C/", $id)).to_owned().into());
-				assert_eq!(model.relative_poster_path, noneable!(relative_poster_path, Path::new(concat!("C/Poster", $id)).to_owned().into() $(, $($skip),+)?));
+				assert_eq!(model.relative_poster_path, noneable!(relative_poster_path, concat!("C/Poster", $id).to_owned() $(, $($skip),+)?));
 			};
 			($db:expr, $id:literal, $pid:expr, $lid:literal, $error:ident $(; $($skip:ident),+)?) => {
 				let model = assert_collection!(@insert, $db, $id, $pid, $lid $(; $($skip),+)?)
@@ -89,7 +89,7 @@ mod tests {
 					slug: notsettable!(slug, concat!("C/", $id).to_string() $(, $($skip),+)?),
 					library: notsettable!(library, LibraryId::from_raw($lid) $(, $($skip),+)?),
 					directory: notsettable!(directory, Path::new(concat!("/C/", $id)).to_owned().into() $(, $($skip),+)?),
-					relative_poster_path: notsettable!(relative_poster_path, Some(Path::new(concat!("C/Poster", $id)).to_owned().into()) $(, $($skip),+)?),
+					relative_poster_path: notsettable!(relative_poster_path, Some(concat!("C/Poster", $id).to_owned()) $(, $($skip),+)?),
 				}.insert($db).await
 			};
 		}
@@ -129,8 +129,8 @@ mod tests {
 				assert_eq!(model.slug, concat!("M/", $id).to_string());
 				assert_eq!(model.library, LibraryId::from_raw($lid));
 				assert_eq!(model.directory, Path::new(concat!("/M/", $id)).to_owned().into());
-				assert_eq!(model.relative_media_path, Path::new(concat!("M/Media", $id)).to_owned().into());
-				assert_eq!(model.relative_poster_path, noneable!(relative_poster_path, Path::new(concat!("M/Poster", $id)).to_owned().into() $(, $($skip),+)?));
+				assert_eq!(model.relative_media_path, concat!("M/Media", $id));
+				assert_eq!(model.relative_poster_path, noneable!(relative_poster_path, concat!("M/Poster", $id).to_owned() $(, $($skip),+)?));
 			};
 			($db:expr, $id:literal, $pid:expr, $lid:literal, $error:ident $(; $($skip:ident),+)?) => {
 				let model = assert_movie!(@insert, $db, $id, $pid, $lid $(; $($skip),+)?)
@@ -145,8 +145,8 @@ mod tests {
 					slug: notsettable!(slug, concat!("M/", $id).to_string() $(, $($skip),+)?),
 					library: notsettable!(library, LibraryId::from_raw($lid) $(, $($skip),+)?),
 					directory: notsettable!(directory, Path::new(concat!("/M/", $id)).to_owned().into() $(, $($skip),+)?),
-					relative_media_path: notsettable!(relative_media_path, Path::new(concat!("M/Media", $id)).to_owned().into() $(, $($skip),+)?),
-					relative_poster_path: notsettable!(relative_poster_path, Some(Path::new(concat!("M/Poster", $id)).to_owned().into()) $(, $($skip),+)?),
+					relative_media_path: notsettable!(relative_media_path, concat!("M/Media", $id).to_owned() $(, $($skip),+)?),
+					relative_poster_path: notsettable!(relative_poster_path, Some(concat!("M/Poster", $id).to_owned()) $(, $($skip),+)?),
 				}.insert($db).await
 			};
 		}
@@ -187,7 +187,7 @@ mod tests {
 				assert_eq!(model.slug, concat!("S/", $id).to_string());
 				assert_eq!(model.library, LibraryId::from_raw($lid));
 				assert_eq!(model.directory, Path::new(concat!("/S/", $id)).to_owned().into());
-				assert_eq!(model.relative_poster_path, noneable!(relative_poster_path, Path::new(concat!("S/Poster", $id)).to_owned().into() $(, $($skip),+)?));
+				assert_eq!(model.relative_poster_path, noneable!(relative_poster_path, concat!("S/Poster", $id).to_owned() $(, $($skip),+)?));
 			};
 			($db:expr, $id:literal, $pid:expr, $lid:literal, $error:ident $(; $($skip:ident),+)?) => {
 				let model = assert_show!(@insert, $db, $id, $pid, $lid $(; $($skip),+)?)
@@ -202,7 +202,7 @@ mod tests {
 					slug: notsettable!(slug, concat!("S/", $id).to_string() $(, $($skip),+)?),
 					library: notsettable!(library, LibraryId::from_raw($lid) $(, $($skip),+)?),
 					directory: notsettable!(directory, Path::new(concat!("/S/", $id)).to_owned().into() $(, $($skip),+)?),
-					relative_poster_path: notsettable!(relative_poster_path, Some(Path::new(concat!("S/Poster", $id)).to_owned().into()) $(, $($skip),+)?),
+					relative_poster_path: notsettable!(relative_poster_path, Some(concat!("S/Poster", $id).to_owned()) $(, $($skip),+)?),
 				}.insert($db).await
 			};
 		}
@@ -242,7 +242,7 @@ mod tests {
 				assert_eq!(model.slug, concat!("S/S", $id).to_string());
 				assert_eq!(model.library, LibraryId::from_raw($lid));
 				assert_eq!(model.directory, Path::new(concat!("/S/S", $id)).to_owned().into());
-				assert_eq!(model.relative_poster_path, noneable!(relative_poster_path, Path::new(concat!("S/S/Poster", $id)).to_owned().into() $(, $($skip),+)?));
+				assert_eq!(model.relative_poster_path, noneable!(relative_poster_path, concat!("S/S/Poster", $id).to_owned() $(, $($skip),+)?));
 			};
 			($db:expr, $id:literal, $season:literal, $lid:literal, $error:ident $(; $($skip:ident),+)?) => {
 				let model = assert_season!(@insert, $db, $id, $season, $lid $(; $($skip),+)?)
@@ -257,7 +257,7 @@ mod tests {
 					slug: notsettable!(slug, concat!("S/S", $id).to_string() $(, $($skip),+)?),
 					library: notsettable!(library, LibraryId::from_raw($lid) $(, $($skip),+)?),
 					directory: notsettable!(directory, Path::new(concat!("/S/S", $id)).to_owned().into() $(, $($skip),+)?),
-					relative_poster_path: notsettable!(relative_poster_path, Some(Path::new(concat!("S/S/Poster", $id)).to_owned().into()) $(, $($skip),+)?),
+					relative_poster_path: notsettable!(relative_poster_path, Some(concat!("S/S/Poster", $id).to_owned()) $(, $($skip),+)?),
 				}.insert($db).await
 			};
 		}
@@ -292,8 +292,8 @@ mod tests {
 				assert_eq!(model.slug, concat!("S/S/E", $id).to_string());
 				assert_eq!(model.library, LibraryId::from_raw($lid));
 				assert_eq!(model.directory, Path::new(concat!("/S/S/E", $id)).to_owned().into());
-				assert_eq!(model.relative_media_path, Path::new(concat!("E/Media", $id)).to_owned().into());
-				assert_eq!(model.relative_poster_path, noneable!(relative_poster_path, Path::new(concat!("S/S/E/Poster", $id)).to_owned().into() $(, $($skip),+)?));
+				assert_eq!(model.relative_media_path, concat!("E/Media", $id));
+				assert_eq!(model.relative_poster_path, noneable!(relative_poster_path, concat!("S/S/E/Poster", $id).to_owned() $(, $($skip),+)?));
 			};
 			($db:expr, $id:literal, $season:literal, $episode:literal, $lid:literal, $error:ident $(; $($skip:ident),+)?) => {
 				let model = assert_episode!(@insert, $db, $id, $season, $episode, $lid $(; $($skip),+)?)
@@ -306,11 +306,12 @@ mod tests {
 					show: notsettable!(id, ShowId::from_raw($id) $(, $($skip),+)?),
 					season: notsettable!(season, $season $(, $($skip),+)?),
 					episode: notsettable!(episode, $episode $(, $($skip),+)?),
+					count: notsettable!(count, 0 $(, $($skip),+)?),
 					slug: notsettable!(slug, concat!("S/S/E", $id).to_string() $(, $($skip),+)?),
 					library: notsettable!(library, LibraryId::from_raw($lid) $(, $($skip),+)?),
 					directory: notsettable!(directory, Path::new(concat!("/S/S/E", $id)).to_owned().into() $(, $($skip),+)?),
-					relative_media_path: notsettable!(relative_media_path, Path::new(concat!("E/Media", $id)).to_owned().into() $(, $($skip),+)?),
-					relative_poster_path: notsettable!(relative_poster_path, Some(Path::new(concat!("S/S/E/Poster", $id)).to_owned().into()) $(, $($skip),+)?),
+					relative_media_path: notsettable!(relative_media_path, concat!("E/Media", $id).to_owned() $(, $($skip),+)?),
+					relative_poster_path: notsettable!(relative_poster_path, Some(concat!("S/S/E/Poster", $id).to_owned()) $(, $($skip),+)?),
 				}.insert($db).await
 			};
 		}
@@ -320,9 +321,9 @@ mod tests {
 		make_flix_episode!(&db, 1, 1, 2);
 		make_flix_episode!(&db, 2, 1, 1);
 		make_flix_episode!(&db, 3, 1, 1);
-		make_flix_show!(&db, 10);
-		make_flix_season!(&db, 10, 1);
-		make_flix_episode!(&db, 10, 1, 1);
+		make_flix_show!(&db, 11);
+		make_flix_season!(&db, 11, 1);
+		make_flix_episode!(&db, 11, 1, 1);
 
 		assert_episode!(&db, 1, 1, 1, 1, Success);
 		assert_episode!(&db, 1, 1, 2, 1, Success);
@@ -331,10 +332,11 @@ mod tests {
 		assert_episode!(&db, 3, 1, 1, 1, Success; show);
 		assert_episode!(&db, 4, 1, 1, 1, NotNullViolation; season);
 		assert_episode!(&db, 5, 1, 1, 1, NotNullViolation; episode);
-		assert_episode!(&db, 6, 1, 1, 1, NotNullViolation; slug);
-		assert_episode!(&db, 7, 1, 1, 1, NotNullViolation; library);
-		assert_episode!(&db, 8, 1, 1, 1, NotNullViolation; directory);
-		assert_episode!(&db, 9, 1, 1, 1, NotNullViolation; relative_media_path);
-		assert_episode!(&db, 10, 1, 1, 1, Success; relative_poster_path);
+		assert_episode!(&db, 6, 1, 1, 1, NotNullViolation; count);
+		assert_episode!(&db, 7, 1, 1, 1, NotNullViolation; slug);
+		assert_episode!(&db, 8, 1, 1, 1, NotNullViolation; library);
+		assert_episode!(&db, 9, 1, 1, 1, NotNullViolation; directory);
+		assert_episode!(&db, 10, 1, 1, 1, NotNullViolation; relative_media_path);
+		assert_episode!(&db, 11, 1, 1, 1, Success; relative_poster_path);
 	}
 }

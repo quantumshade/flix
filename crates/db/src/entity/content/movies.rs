@@ -25,9 +25,9 @@ pub struct Model {
 	/// The movie's directory
 	pub directory: PathBytes,
 	/// The movie's media path
-	pub relative_media_path: PathBytes,
+	pub relative_media_path: String,
 	/// The movie's poster path
-	pub relative_poster_path: Option<PathBytes>,
+	pub relative_poster_path: Option<String>,
 }
 
 impl ActiveModelBehavior for ActiveModel {}
@@ -53,6 +53,24 @@ pub enum Relation {
 		on_delete = "Cascade"
 	)]
 	Library,
+	/// The media info for this movie
+	#[sea_orm(
+		belongs_to = "super::super::info::movies::Entity",
+		from = "Column::Id",
+		to = "super::super::info::movies::Column::Id",
+		on_update = "Cascade",
+		on_delete = "Cascade"
+	)]
+	MediaInfo,
+	/// The watched info for this movie
+	#[sea_orm(
+		belongs_to = "super::super::watched::movies::Entity",
+		from = "Column::Id",
+		to = "super::super::watched::movies::Column::Id",
+		on_update = "Cascade",
+		on_delete = "Cascade"
+	)]
+	WatchInfo,
 }
 
 impl Related<super::collections::Entity> for Entity {
@@ -64,5 +82,17 @@ impl Related<super::collections::Entity> for Entity {
 impl Related<super::libraries::Entity> for Entity {
 	fn to() -> RelationDef {
 		Relation::Library.def()
+	}
+}
+
+impl Related<super::super::info::movies::Entity> for Entity {
+	fn to() -> RelationDef {
+		Relation::MediaInfo.def()
+	}
+}
+
+impl Related<super::super::watched::movies::Entity> for Entity {
+	fn to() -> RelationDef {
+		Relation::WatchInfo.def()
 	}
 }

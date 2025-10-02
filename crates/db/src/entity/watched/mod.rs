@@ -181,12 +181,10 @@ mod tests {
 		have_episode!(&db, 1, 1, 1, 1);
 		assert_episode!(&db, 1, 1, 1, 1, Success);
 		assert_episode!(&db, 1, 1, 1, 2, Success);
-		have_episode!(&db, 1, 1, 1, 2);
+		have_episode!(&db, 1, 1, 1, 2, >1); // Covers 2 and 3
+		make_flix_episode!(&db, 1, 1, 3);
 		assert_episode!(&db, 1, 1, 2, 1, Success);
 		assert_episode!(&db, 1, 1, 2, 2, Success);
-		have_episode!(&db, 1, 1, 1, 3);
-		assert_episode!(&db, 1, 1, 3, 1, Success);
-		assert_episode!(&db, 1, 1, 3, 2, Success);
 		have_season!(&db, 1, 1, 2);
 		have_episode!(&db, 1, 1, 2, 1);
 		assert_episode!(&db, 1, 2, 1, 1, Success);

@@ -1,6 +1,6 @@
 [package]
 name = "flix-fs"
-version = "0.0.9"
+version = "0.0.10"
 
 categories = []
 description = "Filesystem scanner for flix media"
@@ -22,7 +22,7 @@ workspace = true
 flix-model = { workspace = true }
 
 async-stream = { workspace = true }
-regex = { workspace = true }
+regex = { workspace = true, features = ["std", "perf"] }
 thiserror = { workspace = true }
 tokio = { workspace = true }
 tokio-stream = { workspace = true, features = ["fs"] }

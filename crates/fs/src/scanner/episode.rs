@@ -26,7 +26,7 @@ pub enum Scanner {
 		/// The season this episode belongs to
 		season: SeasonNumber,
 		/// The number(s) of this episode
-		number: EpisodeNumbers,
+		episode: EpisodeNumbers,
 		/// The file name of the media file
 		media_file_name: String,
 		/// The file name of the poster file
@@ -40,7 +40,7 @@ impl Scanner {
 		path: &Path,
 		show: ShowId,
 		season: SeasonNumber,
-		number: EpisodeNumbers,
+		episode: EpisodeNumbers,
 	) -> impl Stream<Item = Item> {
 		stream!({
 			let dirs = match fs::read_dir(path).await {
@@ -137,7 +137,7 @@ impl Scanner {
 				event: Ok(Self::Episode {
 					show,
 					season,
-					number,
+					episode,
 					media_file_name,
 					poster_file_name,
 				}),

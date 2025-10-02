@@ -4,7 +4,7 @@ use sea_orm::sea_query;
 use sea_orm::sea_query::{ForeignKeyCreateStatement, Table};
 use sea_orm::{DbErr, Iden};
 use sea_orm_migration::SchemaManager;
-use sea_orm_migration::schema::{binary, binary_null, integer, integer_null, string};
+use sea_orm_migration::schema::{binary, integer, integer_null, string, string_null};
 
 use crate::migration::m_000001::FlixInfoShows;
 use crate::migration::m_000003::{FlixCollections, FlixLibraries};
@@ -30,7 +30,7 @@ pub async fn up(manager: &SchemaManager<'_>) -> Result<(), DbErr> {
 				.col(string(FlixShows::Slug))
 				.col(integer(FlixShows::Library))
 				.col(binary(FlixShows::Directory))
-				.col(binary_null(FlixShows::RelativePosterPath))
+				.col(string_null(FlixShows::RelativePosterPath))
 				.foreign_key(
 					ForeignKeyCreateStatement::new()
 						.name("fk-flix_shows-id")

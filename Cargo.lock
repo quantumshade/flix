@@ -489,7 +489,7 @@ checksum = "1ced73b1dacfc750a6db6c0a0c3a3853c8b41997e2e2c563dc90804ae6867959"
 
 [[package]]
 name = "flix"
-version = "0.0.9"
+version = "0.0.10"
 dependencies = [
  "flix-db",
  "flix-fs",
@@ -499,7 +499,7 @@ dependencies = [
 
 [[package]]
 name = "flix-cli"
-version = "0.0.9"
+version = "0.0.10"
 dependencies = [
  "anyhow",
  "chrono",
@@ -515,7 +515,7 @@ dependencies = [
 
 [[package]]
 name = "flix-db"
-version = "0.0.9"
+version = "0.0.10"
 dependencies = [
  "chrono",
  "flix-model",
@@ -528,7 +528,7 @@ dependencies = [
 
 [[package]]
 name = "flix-fs"
-version = "0.0.9"
+version = "0.0.10"
 dependencies = [
  "async-stream",
  "flix-model",
@@ -540,7 +540,7 @@ dependencies = [
 
 [[package]]
 name = "flix-model"
-version = "0.0.9"
+version = "0.0.10"
 dependencies = [
  "seamantic",
  "serde",
@@ -549,7 +549,7 @@ dependencies = [
 
 [[package]]
 name = "flix-tmdb"
-version = "0.0.9"
+version = "0.0.10"
 dependencies = [
  "chrono",
  "flix-model",
@@ -1961,9 +1961,9 @@ dependencies = [
 
 [[package]]
 name = "seamantic"
-version = "0.0.5"
+version = "0.0.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "87f4b388ca1d150dd2f3cceff59e910543fe7c638f44a9cb6223ace53d06d38e"
+checksum = "f4672c35f48459f4c16151a51ec6a1f244406fdf08e2e8ad8bcc6c78867d18af"
 dependencies = [
  "sea-orm",
  "sea-orm-migration",

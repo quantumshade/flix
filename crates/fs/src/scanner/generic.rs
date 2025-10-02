@@ -51,17 +51,17 @@ pub enum Scanner {
 	Show {
 		/// The ID of the parent collection (if any)
 		parent: Option<CollectionId>,
-		/// The ID of the show this episode belongs to
+		/// The ID of the show
 		id: ShowId,
 		/// The file name of the poster file
 		poster_file_name: Option<String>,
 	},
 	/// A scanned episode
 	Season {
-		/// The ID of the show this episode belongs to
+		/// The ID of the show this season belongs to
 		show: ShowId,
 		/// The season this episode belongs to
-		number: SeasonNumber,
+		season: SeasonNumber,
 		/// The file name of the poster file
 		poster_file_name: Option<String>,
 	},
@@ -72,7 +72,7 @@ pub enum Scanner {
 		/// The season this episode belongs to
 		season: SeasonNumber,
 		/// The number(s) of this episode
-		number: EpisodeNumbers,
+		episode: EpisodeNumbers,
 		/// The file name of the media file
 		media_file_name: String,
 		/// The file name of the poster file
@@ -114,23 +114,23 @@ impl From<collection::Scanner> for Scanner {
 			},
 			collection::Scanner::Season {
 				show,
-				number,
+				season,
 				poster_file_name,
 			} => Self::Season {
 				show,
-				number,
+				season,
 				poster_file_name,
 			},
 			collection::Scanner::Episode {
 				show,
 				season,
-				number,
+				episode,
 				media_file_name,
 				poster_file_name,
 			} => Self::Episode {
 				show,
 				season,
-				number,
+				episode,
 				media_file_name,
 				poster_file_name,
 			},
@@ -170,23 +170,23 @@ impl From<show::Scanner> for Scanner {
 			},
 			show::Scanner::Season {
 				show,
-				number,
+				season,
 				poster_file_name,
 			} => Self::Season {
 				show,
-				number,
+				season,
 				poster_file_name,
 			},
 			show::Scanner::Episode {
 				show,
 				season,
-				number,
+				episode,
 				media_file_name,
 				poster_file_name,
 			} => Self::Episode {
 				show,
 				season,
-				number,
+				episode,
 				media_file_name,
 				poster_file_name,
 			},
@@ -211,10 +211,12 @@ impl Scanner {
 		}
 
 		let media_folder_re = MEDIA_FOLDER_REGEX.get_or_init(|| {
-			Regex::new(r"^[\w ]+ \(\d+\) \[\d+\]$").unwrap_or_else(|_| panic!("regex is invalid"))
+			Regex::new(r"^[[[:alnum:]] -]+ \([[:digit:]]+\) \[[[:digit:]]+\]$")
+				.unwrap_or_else(|err| panic!("regex is invalid: {err}"))
 		});
-		let season_folder_re = SEASON_FOLDER_REGEX
-			.get_or_init(|| Regex::new(r"^S\d+$").unwrap_or_else(|_| panic!("regex is invalid")));
+		let season_folder_re = SEASON_FOLDER_REGEX.get_or_init(|| {
+			Regex::new(r"^S[[:digit:]]+$").unwrap_or_else(|err| panic!("regex is invalid: {err}"))
+		});
 
 		stream!({
 			let Some(dir_name) = path.file_name().and_then(OsStr::to_str) else {

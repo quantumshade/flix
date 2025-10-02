@@ -2,7 +2,7 @@ use sea_orm::sea_query;
 use sea_orm::sea_query::{ForeignKeyCreateStatement, Index, Table};
 use sea_orm::{DbErr, Iden};
 use sea_orm_migration::SchemaManager;
-use sea_orm_migration::schema::{binary, binary_null, integer, string};
+use sea_orm_migration::schema::{binary, integer, string, string_null};
 
 use crate::migration::m_000001::FlixInfoSeasons;
 use crate::migration::m_000003::FlixLibraries;
@@ -28,7 +28,7 @@ pub async fn up(manager: &SchemaManager<'_>) -> Result<(), DbErr> {
 				.col(string(FlixSeasons::Slug))
 				.col(integer(FlixSeasons::Library))
 				.col(binary(FlixSeasons::Directory))
-				.col(binary_null(FlixSeasons::RelativePosterPath))
+				.col(string_null(FlixSeasons::RelativePosterPath))
 				.primary_key(
 					Index::create()
 						.col(FlixSeasons::Show)

@@ -7,7 +7,7 @@ use sea_orm_migration::MigratorTrait as _;
 pub struct Connection(DatabaseConnection);
 
 impl Connection {
-	/// Helper function for apllying database migrations while wrapping a
+	/// Helper function for applying database migrations while wrapping a
 	/// [DatabaseConnection] in a newtype
 	pub async fn try_from(database: DatabaseConnection) -> Result<Self, DbErr> {
 		crate::migration::Migrator::up(&database, None).await?;

@@ -1,6 +1,6 @@
 [package]
 name = "flix-fs"
-version = "0.0.10"
+version = "0.0.11"
 
 categories = []
 description = "Filesystem scanner for flix media"

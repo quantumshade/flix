@@ -4,8 +4,8 @@ use flix_model::id::{RawId, ShowId};
 
 use chrono::NaiveDate;
 use sea_orm::{
-	ActiveModelBehavior, DeriveEntityModel, DerivePrimaryKey, DeriveRelation, EnumIter,
-	PrimaryKeyTrait,
+	ActiveModelBehavior, DeriveEntityModel, DerivePrimaryKey, DeriveRelation, EntityTrait,
+	EnumIter, PrimaryKeyTrait,
 };
 
 /// The database representation of a watched movie

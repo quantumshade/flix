@@ -7,8 +7,8 @@ use seamantic::model::duration::Seconds;
 
 use chrono::NaiveDate;
 use sea_orm::{
-	ActiveModelBehavior, DeriveEntityModel, DerivePrimaryKey, DeriveRelation, EnumIter,
-	PrimaryKeyTrait,
+	ActiveModelBehavior, DeriveEntityModel, DerivePrimaryKey, DeriveRelation, EntityTrait,
+	EnumIter, PrimaryKeyTrait,
 };
 
 /// The database representation of a tmdb episode

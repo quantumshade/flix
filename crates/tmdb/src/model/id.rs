@@ -150,8 +150,8 @@ mod tests {
 	#[cfg(feature = "sea-orm")]
 	fn test_sea_orm() {
 		use sea_orm::{
-			ActiveModelBehavior, DeriveEntityModel, DerivePrimaryKey, DeriveRelation, EnumIter,
-			PrimaryKeyTrait,
+			ActiveModelBehavior, DeriveEntityModel, DerivePrimaryKey, DeriveRelation, EntityTrait,
+			EnumIter, PrimaryKeyTrait,
 		};
 
 		use super::Id;
@@ -184,7 +184,7 @@ mod tests {
 /// Type alias for the raw ID representation
 pub use self::TmdbRepr as RawId;
 
-/// A placeholder type used for CollectionId
+#[doc(hidden)]
 pub enum Collection {}
 /// Type alias for a collection ID
 pub type CollectionId = Id<Collection>;
@@ -203,7 +203,7 @@ impl TryFrom<flix_model::id::CollectionId> for CollectionId {
 	}
 }
 
-/// A placeholder type used for MovieId
+#[doc(hidden)]
 pub enum Movie {}
 /// Type alias for a movie ID
 pub type MovieId = Id<Movie>;
@@ -222,7 +222,7 @@ impl TryFrom<flix_model::id::MovieId> for MovieId {
 	}
 }
 
-/// A placeholder type used for ShowId
+#[doc(hidden)]
 pub enum Show {}
 /// Type alias for a show ID
 pub type ShowId = Id<Show>;

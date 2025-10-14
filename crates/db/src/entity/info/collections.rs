@@ -3,8 +3,8 @@
 use flix_model::id::CollectionId;
 
 use sea_orm::{
-	ActiveModelBehavior, DeriveEntityModel, DerivePrimaryKey, DeriveRelation, EnumIter,
-	PrimaryKeyTrait,
+	ActiveModelBehavior, DeriveEntityModel, DerivePrimaryKey, DeriveRelation, EntityTrait,
+	EnumIter, PrimaryKeyTrait,
 };
 
 /// The database representation of a flix collection

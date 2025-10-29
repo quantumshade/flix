@@ -6,7 +6,7 @@ resolver = "2"
 authors = []
 edition = "2024"
 license-file = "LICENSE.md"
-rust-version = "1.85.0"
+rust-version = "1.88.0"
 
 [workspace.lints.rust]
 arithmetic_overflow = "forbid"
@@ -35,17 +35,17 @@ overflow-checks = true
 strip = "debuginfo"
 
 [workspace.dependencies]
-flix = { path = "crates/flix", version = "=0.0.11", default-features = false }
-flix-cli = { path = "crates/cli", version = "=0.0.11", default-features = false }
-flix-db = { path = "crates/db", version = "=0.0.11", default-features = false }
-flix-fs = { path = "crates/fs", version = "=0.0.11", default-features = false }
-flix-model = { path = "crates/model", version = "=0.0.11", default-features = false }
-flix-tmdb = { path = "crates/tmdb", version = "=0.0.11", default-features = false }
+flix = { path = "crates/flix", version = "=0.0.12", default-features = false }
+flix-cli = { path = "crates/cli", version = "=0.0.12", default-features = false }
+flix-db = { path = "crates/db", version = "=0.0.12", default-features = false }
+flix-fs = { path = "crates/fs", version = "=0.0.12", default-features = false }
+flix-model = { path = "crates/model", version = "=0.0.12", default-features = false }
+flix-tmdb = { path = "crates/tmdb", version = "=0.0.12", default-features = false }
 
-seamantic = { version = "0.0.7", default-features = false }
+seamantic = { version = "0.0.9", default-features = false }
 
-sea-orm = { version = "2.0.0-rc.10", default-features = false }
-sea-orm-migration = { version = "2.0.0-rc.10", default-features = false }
+sea-orm = { version = "2.0.0-rc.16", default-features = false }
+sea-orm-migration = { version = "2.0.0-rc.16", default-features = false }
 
 anyhow = { version = "^1", default-features = false }
 async-stream = { version = "^0.3", default-features = false }

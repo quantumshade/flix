@@ -1,6 +1,6 @@
 [package]
 name = "flix-tmdb"
-version = "0.0.11"
+version = "0.0.12"
 
 categories = []
 description = "Clients and models for fetching data from TMDB"

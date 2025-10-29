@@ -1,6 +1,6 @@
 [package]
 name = "flix-cli"
-version = "0.0.11"
+version = "0.0.12"
 
 categories = ["command-line-utilities"]
 description = "CLI for interacting with a flix database"

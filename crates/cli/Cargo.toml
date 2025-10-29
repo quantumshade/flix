@@ -51,7 +51,6 @@ clap = { workspace = true, features = [
 	"usage",
 ] }
 futures = { workspace = true }
-home = { workspace = true }
 sea-orm = { workspace = true, features = ["runtime-tokio"] }
 serde = { workspace = true, features = ["derive"] }
 tokio = { workspace = true, features = ["rt", "fs", "macros"] }

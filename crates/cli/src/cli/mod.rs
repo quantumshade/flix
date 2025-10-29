@@ -24,7 +24,7 @@ impl Cli {
 	pub fn config_path(&self) -> PathBuf {
 		fn expect_home_dir() -> PathBuf {
 			#[allow(clippy::expect_used)]
-			home::home_dir().expect("you do not have a home directory")
+			std::env::home_dir().expect("you do not have a home directory")
 		}
 
 		match self.config.strip_prefix("~/") {

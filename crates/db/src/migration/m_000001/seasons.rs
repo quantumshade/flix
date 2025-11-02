@@ -1,46 +1,43 @@
-use sea_orm::sea_query;
-use sea_orm::sea_query::{ForeignKeyCreateStatement, Index, Table};
-use sea_orm::{DbErr, Iden};
-use sea_orm_migration::SchemaManager;
-use sea_orm_migration::schema::{date, integer, string};
-
-use super::FlixInfoShows;
-
-#[derive(Iden)]
-pub enum FlixInfoSeasons {
-	Table,
-	Show,
-	Season,
-	Title,
-	Overview,
-	Date,
-}
+use sea_orm::prelude::*;
+use sea_orm::sea_query::Table;
+use sea_orm::{ConnectionTrait, DbBackend, Statement};
+use sea_orm_migration::prelude::*;
 
 pub async fn up(manager: &SchemaManager<'_>) -> Result<(), DbErr> {
 	manager
-		.create_table(
-			Table::create()
-				.table(FlixInfoSeasons::Table)
-				.col(integer(FlixInfoSeasons::Show))
-				.col(integer(FlixInfoSeasons::Season))
-				.col(string(FlixInfoSeasons::Title))
-				.col(string(FlixInfoSeasons::Overview))
-				.col(date(FlixInfoSeasons::Date))
-				.primary_key(
-					Index::create()
-						.col(FlixInfoSeasons::Show)
-						.col(FlixInfoSeasons::Season),
+		.drop_table(Table::drop().table("flix_watched_seasons").to_owned())
+		.await?;
+
+	manager
+		.get_connection()
+		.execute_raw(Statement::from_string(
+			DbBackend::Sqlite,
+			r#"
+				CREATE VIEW flix_watched_seasons AS
+				SELECT
+					w.show_id,
+					w.season_number,
+					w.user_id,
+					MAX(w.watched_date) AS watched_date
+				FROM flix_watched_episodes w
+				WHERE NOT EXISTS (
+					SELECT 1
+					FROM flix_episodes e
+					WHERE e.show_id = w.show_id
+					AND e.season_number = w.season_number
+					AND NOT EXISTS (
+						SELECT 1
+						FROM flix_watched_episodes wc
+						WHERE wc.show_id = e.show_id
+						AND wc.season_number = e.season_number
+						AND wc.episode_number = e.episode_number
+						AND wc.user_id = w.user_id
+					)
 				)
-				.foreign_key(
-					ForeignKeyCreateStatement::new()
-						.name("fk-flix_info_seasons-show")
-						.from_tbl(FlixInfoSeasons::Table)
-						.from_col(FlixInfoSeasons::Show)
-						.to_tbl(FlixInfoShows::Table)
-						.to_col(FlixInfoShows::Id),
-				)
-				.to_owned(),
-		)
+				GROUP BY w.show_id, w.season_number, w.user_id
+				;
+			"#,
+		))
 		.await?;
 
 	Ok(())
@@ -48,6 +45,15 @@ pub async fn up(manager: &SchemaManager<'_>) -> Result<(), DbErr> {
 
 pub async fn down(manager: &SchemaManager<'_>) -> Result<(), DbErr> {
 	manager
-		.drop_table(Table::drop().table(FlixInfoSeasons::Table).to_owned())
-		.await
+		.get_connection()
+		.execute_raw(Statement::from_string(
+			DbBackend::Sqlite,
+			r#"
+				DROP VIEW flix_watched_seasons
+				;
+			"#,
+		))
+		.await?;
+
+	Ok(())
 }

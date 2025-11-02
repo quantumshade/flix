@@ -10,8 +10,17 @@ pub mod migration;
 mod tests {
 	use sea_orm::{ConnectOptions, Database, DatabaseConnection};
 
-	pub async fn new_memory_db() -> DatabaseConnection {
-		let options = ConnectOptions::new("sqlite:/tmp/db?mode=memory");
-		Database::connect(options).await.expect("Database::connect")
+	use crate::connection::Connection;
+
+	pub async fn new_initialized_memory_db() -> DatabaseConnection {
+		let options = ConnectOptions::new("sqlite::memory:");
+
+		let db = Database::connect(options)
+			.await
+			.expect("Database::connect()");
+		let connection = Connection::try_from(db)
+			.await
+			.expect("Connection::try_from");
+		connection.take()
 	}
 }

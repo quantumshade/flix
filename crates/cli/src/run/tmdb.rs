@@ -101,7 +101,7 @@ pub async fn add(client: Client, db: &DatabaseConnection, command: Command) -> R
 							flix_id: Set(flix.id),
 							last_update: Set(Utc::now().date_naive()),
 							runtime: Set(movie.runtime.into()),
-							collection: Set(movie.collection.map(|c| c.id)),
+							collection_id: Set(movie.collection.map(|c| c.id)),
 						}
 						.insert(txn)
 						.await?;
@@ -206,8 +206,8 @@ pub async fn add(client: Client, db: &DatabaseConnection, command: Command) -> R
 
 						for season in seasons {
 							entity::info::seasons::ActiveModel {
-								show: Set(flix.id),
-								season: Set(season.season_number),
+								show_id: Set(flix.id),
+								season_number: Set(season.season_number),
 								title: Set(season.title),
 								overview: Set(season.overview),
 								date: Set(season.air_date),
@@ -229,9 +229,9 @@ pub async fn add(client: Client, db: &DatabaseConnection, command: Command) -> R
 						for (season, episodes) in episodes {
 							for episode in episodes {
 								entity::info::episodes::ActiveModel {
-									show: Set(flix.id),
-									season: Set(season),
-									episode: Set(episode.episode_number),
+									show_id: Set(flix.id),
+									season_number: Set(season),
+									episode_number: Set(episode.episode_number),
 									title: Set(episode.title),
 									overview: Set(episode.overview),
 									date: Set(episode.air_date),
@@ -324,8 +324,8 @@ pub async fn add(client: Client, db: &DatabaseConnection, command: Command) -> R
 				.transaction(|txn| {
 					Box::pin(async move {
 						entity::info::seasons::ActiveModel {
-							show: Set(show.flix_id),
-							season: Set(season_number),
+							show_id: Set(show.flix_id),
+							season_number: Set(season_number),
 							title: Set(season.title),
 							overview: Set(season.overview),
 							date: Set(season.air_date),
@@ -345,9 +345,9 @@ pub async fn add(client: Client, db: &DatabaseConnection, command: Command) -> R
 
 						for episode in episodes {
 							entity::info::episodes::ActiveModel {
-								show: Set(show.flix_id),
-								season: Set(season_number),
-								episode: Set(episode.episode_number),
+								show_id: Set(show.flix_id),
+								season_number: Set(season_number),
+								episode_number: Set(episode.episode_number),
 								title: Set(episode.title),
 								overview: Set(episode.overview),
 								date: Set(episode.air_date),
@@ -436,9 +436,9 @@ pub async fn add(client: Client, db: &DatabaseConnection, command: Command) -> R
 					.transaction(|txn| {
 						Box::pin(async move {
 							entity::info::episodes::ActiveModel {
-								show: Set(flix_id),
-								season: Set(season),
-								episode: Set(episode_number),
+								show_id: Set(flix_id),
+								season_number: Set(season),
+								episode_number: Set(episode_number),
 								title: Set(episode.title),
 								overview: Set(episode.overview),
 								date: Set(episode.air_date),

@@ -1,6 +1,6 @@
 [package]
 name = "flix-db"
-version = "0.0.12"
+version = "0.0.13"
 
 categories = []
 description = "Types for storing persistent data about media"
@@ -30,7 +30,11 @@ flix-tmdb = { workspace = true, optional = true, features = ["sea-orm"] }
 seamantic = { workspace = true, features = ["sqlite"] }
 
 chrono = { workspace = true }
-sea-orm = { workspace = true, features = ["with-chrono"] }
+sea-orm = { workspace = true, features = [
+	"entity-registry",
+	"schema-sync",
+	"with-chrono",
+] }
 sea-orm-migration = { workspace = true }
 
 [dev-dependencies]

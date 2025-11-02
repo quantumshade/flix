@@ -16,6 +16,10 @@ pub struct Cli {
 	#[arg(short, long, value_name = "DATABASE", default_value = "./flix.db")]
 	database: PathBuf,
 
+	/// Enable tracing
+	#[arg(short, long)]
+	pub trace: bool,
+
 	#[command(subcommand)]
 	command: Command,
 }

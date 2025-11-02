@@ -35,17 +35,17 @@ overflow-checks = true
 strip = "debuginfo"
 
 [workspace.dependencies]
-flix = { path = "crates/flix", version = "=0.0.12", default-features = false }
-flix-cli = { path = "crates/cli", version = "=0.0.12", default-features = false }
-flix-db = { path = "crates/db", version = "=0.0.12", default-features = false }
-flix-fs = { path = "crates/fs", version = "=0.0.12", default-features = false }
-flix-model = { path = "crates/model", version = "=0.0.12", default-features = false }
-flix-tmdb = { path = "crates/tmdb", version = "=0.0.12", default-features = false }
+flix = { path = "crates/flix", version = "=0.0.13", default-features = false }
+flix-cli = { path = "crates/cli", version = "=0.0.13", default-features = false }
+flix-db = { path = "crates/db", version = "=0.0.13", default-features = false }
+flix-fs = { path = "crates/fs", version = "=0.0.13", default-features = false }
+flix-model = { path = "crates/model", version = "=0.0.13", default-features = false }
+flix-tmdb = { path = "crates/tmdb", version = "=0.0.13", default-features = false }
 
-seamantic = { version = "0.0.9", default-features = false }
+seamantic = { version = "0.0.10", default-features = false }
 
-sea-orm = { version = "2.0.0-rc.16", default-features = false }
-sea-orm-migration = { version = "2.0.0-rc.16", default-features = false }
+sea-orm = { version = "2.0.0-rc.17", default-features = false }
+sea-orm-migration = { version = "2.0.0-rc.17", default-features = false }
 
 anyhow = { version = "^1", default-features = false }
 async-stream = { version = "^0.3", default-features = false }
@@ -62,5 +62,7 @@ thiserror = { version = "^2", default-features = false }
 tokio = { version = "^1", default-features = false }
 tokio-stream = { version = "^0.1", default-features = false }
 toml = { version = "^0.9", default-features = false }
+tracing = { version = "^0.1", default-features = false }
+tracing-subscriber = { version = "^0.3", default-features = false }
 url = { version = "^2", default-features = false }
 url-macro = { version = "^0.2", default-features = false }

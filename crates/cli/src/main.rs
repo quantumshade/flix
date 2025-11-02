@@ -28,6 +28,13 @@ async fn main() -> Result<()> {
 
 	let client = Client::new(config.tmdb().bearer_token().to_owned());
 
+	if cli.trace {
+		tracing_subscriber::fmt()
+			.with_max_level(tracing::Level::DEBUG)
+			.with_test_writer()
+			.init();
+	}
+
 	match cli.command() {
 		Command::Init => exec_init(database_path).await?,
 		Command::Add { command } => exec_add(client, database_path, command).await?,

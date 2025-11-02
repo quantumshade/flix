@@ -1,6 +1,6 @@
 [package]
 name = "flix-cli"
-version = "0.0.12"
+version = "0.0.13"
 
 categories = ["command-line-utilities"]
 description = "CLI for interacting with a flix database"
@@ -51,7 +51,9 @@ clap = { workspace = true, features = [
 	"usage",
 ] }
 futures = { workspace = true }
-sea-orm = { workspace = true, features = ["runtime-tokio"] }
+sea-orm = { workspace = true, features = ["runtime-tokio", "debug-print"] }
 serde = { workspace = true, features = ["derive"] }
 tokio = { workspace = true, features = ["rt", "fs", "macros"] }
 toml = { workspace = true, features = ["parse", "serde"] }
+tracing = { workspace = true }
+tracing-subscriber = { workspace = true }

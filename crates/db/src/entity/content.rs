@@ -6,6 +6,7 @@ pub mod libraries {
 
 	use seamantic::model::path::PathBytes;
 
+	use chrono::NaiveDateTime;
 	use sea_orm::entity::prelude::*;
 
 	/// The database representation of a library media folder
@@ -18,6 +19,8 @@ pub mod libraries {
 		pub id: LibraryId,
 		/// The library's directory
 		pub directory: PathBytes,
+		/// The library's last scan data
+		pub last_scan: Option<NaiveDateTime>,
 
 		/// Collections that are part of this library
 		#[sea_orm(has_many, on_update = "Cascade", on_delete = "Cascade")]
@@ -312,6 +315,7 @@ pub mod test {
 			$crate::entity::content::libraries::ActiveModel {
 				id: Set(::flix_model::id::LibraryId::from_raw($id)),
 				directory: Set(::std::path::PathBuf::new().into()),
+				last_scan: Set(None),
 			}
 			.insert($db)
 			.await
@@ -427,6 +431,7 @@ mod tests {
 
 	use flix_model::id::{CollectionId, LibraryId, MovieId, ShowId};
 
+	use chrono::{NaiveDate, NaiveDateTime, NaiveTime};
 	use sea_orm::ActiveValue::{NotSet, Set};
 	use sea_orm::entity::prelude::*;
 	use sea_orm::sqlx::error::ErrorKind;
@@ -466,6 +471,7 @@ mod tests {
 
 				assert_eq!(model.id, LibraryId::from_raw($id));
 				assert_eq!(model.directory, Path::new(concat!("L Directory ", $id)).to_owned().into());
+				assert_eq!(model.last_scan, noneable!(last_scan, NaiveDateTime::new(NaiveDate::from_yo_opt($id, 1).expect("from_yo_opt"), NaiveTime::from_hms_opt(1, 1, 1).expect("from_yo_opt")) $(, $($skip),+)?));
 			};
 			($db:expr, $id:literal, $error:ident $(; $($skip:ident),+)?) => {
 				let model = assert_library!(@insert, $db, $id $(; $($skip),+)?)
@@ -477,6 +483,7 @@ mod tests {
 				super::libraries::ActiveModel {
 					id: notsettable!(id, LibraryId::from_raw($id) $(, $($skip),+)?),
 					directory: notsettable!(directory, Path::new(concat!("L Directory ", $id)).to_owned().into() $(, $($skip),+)?),
+					last_scan: notsettable!(last_scan, Some(NaiveDateTime::new(NaiveDate::from_yo_opt($id, 1).expect("from_yo_opt"), NaiveTime::from_hms_opt(1, 1, 1).expect("from_yo_opt"))) $(, $($skip),+)?),
 				}.insert($db).await
 			};
 		}
@@ -486,6 +493,7 @@ mod tests {
 		assert_library!(&db, 2, Success);
 		assert_library!(&db, 3, Success; id);
 		assert_library!(&db, 4, NotNullViolation; directory);
+		assert_library!(&db, 5, Success; last_scan);
 	}
 
 	#[tokio::test]

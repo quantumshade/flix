@@ -4,7 +4,7 @@
 pub mod collections {
 	use flix_model::id::{CollectionId, RawId};
 
-	use chrono::NaiveDate;
+	use chrono::{DateTime, Utc};
 	use sea_orm::entity::prelude::*;
 
 	use crate::entity;
@@ -21,7 +21,7 @@ pub mod collections {
 		#[sea_orm(primary_key, auto_increment = false)]
 		pub user_id: RawId,
 		/// The date this collection was watched
-		pub watched_date: NaiveDate,
+		pub watched_date: DateTime<Utc>,
 
 		/// The info for this collection
 		#[sea_orm(belongs_to, relation_enum = "Info", from = "id", to = "id")]
@@ -38,7 +38,7 @@ pub mod collections {
 pub mod movies {
 	use flix_model::id::{MovieId, RawId};
 
-	use chrono::NaiveDate;
+	use chrono::{DateTime, Utc};
 	use sea_orm::entity::prelude::*;
 
 	use crate::entity;
@@ -55,7 +55,7 @@ pub mod movies {
 		#[sea_orm(primary_key, auto_increment = false)]
 		pub user_id: RawId,
 		/// The date this movie was watched
-		pub watched_date: NaiveDate,
+		pub watched_date: DateTime<Utc>,
 
 		/// The info for this movie
 		#[sea_orm(belongs_to, from = "id", to = "id")]
@@ -72,7 +72,7 @@ pub mod movies {
 pub mod shows {
 	use flix_model::id::{RawId, ShowId};
 
-	use chrono::NaiveDate;
+	use chrono::{DateTime, Utc};
 	use sea_orm::entity::prelude::*;
 
 	use crate::entity;
@@ -89,7 +89,7 @@ pub mod shows {
 		#[sea_orm(primary_key, auto_increment = false)]
 		pub user_id: RawId,
 		/// The date this show was watched
-		pub watched_date: NaiveDate,
+		pub watched_date: DateTime<Utc>,
 
 		/// The info for this show
 		#[sea_orm(belongs_to, relation_enum = "Info", from = "id", to = "id")]
@@ -107,7 +107,7 @@ pub mod seasons {
 	use flix_model::id::{RawId, ShowId};
 	use flix_model::numbers::SeasonNumber;
 
-	use chrono::NaiveDate;
+	use chrono::{DateTime, Utc};
 	use sea_orm::entity::prelude::*;
 
 	use crate::entity;
@@ -127,7 +127,7 @@ pub mod seasons {
 		#[sea_orm(primary_key, auto_increment = false)]
 		pub user_id: RawId,
 		/// The date this season was watched
-		pub watched_date: NaiveDate,
+		pub watched_date: DateTime<Utc>,
 
 		/// The info for this season
 		#[sea_orm(
@@ -156,7 +156,7 @@ pub mod episodes {
 	use flix_model::id::{RawId, ShowId};
 	use flix_model::numbers::{EpisodeNumber, SeasonNumber};
 
-	use chrono::NaiveDate;
+	use chrono::{DateTime, Utc};
 	use sea_orm::entity::prelude::*;
 
 	use crate::entity;
@@ -179,7 +179,7 @@ pub mod episodes {
 		#[sea_orm(primary_key, auto_increment = false)]
 		pub user_id: RawId,
 		/// The date this episode was watched
-		pub watched_date: NaiveDate,
+		pub watched_date: DateTime<Utc>,
 
 		/// The info for this episode
 		#[sea_orm(
@@ -211,7 +211,7 @@ pub mod test {
 			$crate::entity::watched::movies::ActiveModel {
 				id: Set(::flix_model::id::MovieId::from_raw($id)),
 				user_id: Set($user),
-				watched_date: Set(::chrono::NaiveDate::from_yo_opt(1, 1).expect("from_yo_opt")),
+				watched_date: Set(::chrono::Utc::now()),
 			}
 			.insert($db)
 			.await
@@ -227,7 +227,7 @@ pub mod test {
 				season_number: Set($season),
 				episode_number: Set($episode),
 				user_id: Set($user),
-				watched_date: Set(::chrono::NaiveDate::from_yo_opt(1, 1).expect("from_yo_opt")),
+				watched_date: Set(::chrono::Utc::now()),
 			}
 			.insert($db)
 			.await
@@ -284,7 +284,7 @@ mod tests {
 
 				assert_eq!(model.id, MovieId::from_raw($id));
 				assert_eq!(model.user_id, $uid);
-				assert_eq!(model.watched_date, NaiveDate::from_yo_opt($uid, 1).expect("from_yo_opt"));
+				assert_eq!(model.watched_date, NaiveDate::from_yo_opt($uid, 1).expect("from_yo_opt").and_hms_opt(0, 0, 0).expect("and_hms_opt").and_utc());
 			};
 			($db:expr, $id:literal, $uid:literal, $error:ident $(; $($skip:ident),+)?) => {
 				let model = assert_movie!(@insert, $db, $id, $uid $(; $($skip),+)?)
@@ -296,7 +296,7 @@ mod tests {
 				super::movies::ActiveModel {
 					id: notsettable!(id, MovieId::from_raw($id) $(, $($skip),+)?),
 					user_id: notsettable!(user_id, $uid $(, $($skip),+)?),
-					watched_date: notsettable!(watched_date, NaiveDate::from_yo_opt($uid, 1).expect("from_yo_opt") $(, $($skip),+)?),
+					watched_date: notsettable!(watched_date, NaiveDate::from_yo_opt($uid, 1).expect("from_yo_opt").and_hms_opt(0, 0, 0).expect("and_hms_opt").and_utc() $(, $($skip),+)?),
 				}.insert($db).await
 			};
 		}
@@ -329,7 +329,7 @@ mod tests {
 				assert_eq!(model.season_number, $season);
 				assert_eq!(model.episode_number, $episode);
 				assert_eq!(model.user_id, $uid);
-				assert_eq!(model.watched_date, NaiveDate::from_yo_opt($uid, 1).expect("from_yo_opt"));
+				assert_eq!(model.watched_date, NaiveDate::from_yo_opt($uid, 1).expect("from_yo_opt").and_hms_opt(0, 0, 0).expect("and_hms_opt").and_utc());
 			};
 			($db:expr, $show:literal, $season:literal, $episode:literal, $uid:literal, $error:ident $(; $($skip:ident),+)?) => {
 				let model = assert_episode!(@insert, $db, $show, $season, $episode, $uid $(; $($skip),+)?)
@@ -343,7 +343,7 @@ mod tests {
 					season_number: notsettable!(season_number, $season $(, $($skip),+)?),
 					episode_number: notsettable!(episode_number, $episode $(, $($skip),+)?),
 					user_id: notsettable!(user_id, $uid $(, $($skip),+)?),
-					watched_date: notsettable!(watched_date, NaiveDate::from_yo_opt($uid, 1).expect("from_yo_opt") $(, $($skip),+)?),
+					watched_date: notsettable!(watched_date, NaiveDate::from_yo_opt($uid, 1).expect("from_yo_opt").and_hms_opt(0, 0, 0).expect("and_hms_opt").and_utc() $(, $($skip),+)?),
 				}.insert($db).await
 			};
 		}

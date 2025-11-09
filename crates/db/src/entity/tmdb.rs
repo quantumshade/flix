@@ -5,7 +5,7 @@ pub mod collections {
 	use flix_model::id::CollectionId as FlixId;
 	use flix_tmdb::model::id::CollectionId;
 
-	use chrono::NaiveDate;
+	use chrono::{DateTime, Utc};
 	use sea_orm::entity::prelude::*;
 
 	use crate::entity;
@@ -22,7 +22,7 @@ pub mod collections {
 		#[sea_orm(unique)]
 		pub flix_id: FlixId,
 		/// The date of the last update
-		pub last_update: NaiveDate,
+		pub last_update: DateTime<Utc>,
 		/// The number of movies in the collection
 		pub movie_count: u16,
 
@@ -44,7 +44,7 @@ pub mod movies {
 
 	use seamantic::model::duration::Seconds;
 
-	use chrono::NaiveDate;
+	use chrono::{DateTime, Utc};
 	use sea_orm::entity::prelude::*;
 
 	use crate::entity;
@@ -61,7 +61,7 @@ pub mod movies {
 		#[sea_orm(unique)]
 		pub flix_id: FlixId,
 		/// The date of the last update
-		pub last_update: NaiveDate,
+		pub last_update: DateTime<Utc>,
 		/// The movie's runtime in seconds
 		pub runtime: Seconds,
 		/// The TMDB ID of the collection this movie belongs to
@@ -84,7 +84,7 @@ pub mod shows {
 	use flix_model::id::ShowId as FlixId;
 	use flix_tmdb::model::id::ShowId;
 
-	use chrono::NaiveDate;
+	use chrono::{DateTime, Utc};
 	use sea_orm::entity::prelude::*;
 
 	use crate::entity;
@@ -101,7 +101,7 @@ pub mod shows {
 		#[sea_orm(unique)]
 		pub flix_id: FlixId,
 		/// The movie's runtime in seconds
-		pub last_update: NaiveDate,
+		pub last_update: DateTime<Utc>,
 		/// The number of seasons the show has
 		pub number_of_seasons: u32,
 
@@ -125,7 +125,7 @@ pub mod seasons {
 	use flix_model::numbers::SeasonNumber;
 	use flix_tmdb::model::id::ShowId;
 
-	use chrono::NaiveDate;
+	use chrono::{DateTime, Utc};
 	use sea_orm::entity::prelude::*;
 
 	use crate::entity;
@@ -148,7 +148,7 @@ pub mod seasons {
 		#[sea_orm(unique_key = "flix")]
 		pub flix_season: SeasonNumber,
 		/// The date of the last update
-		pub last_update: NaiveDate,
+		pub last_update: DateTime<Utc>,
 
 		/// The show this season belongs to
 		#[sea_orm(belongs_to, from = "tmdb_show", to = "tmdb_id")]
@@ -172,7 +172,7 @@ pub mod episodes {
 	use flix_tmdb::model::id::ShowId;
 	use seamantic::model::duration::Seconds;
 
-	use chrono::NaiveDate;
+	use chrono::{DateTime, Utc};
 	use sea_orm::entity::prelude::*;
 
 	use crate::entity;
@@ -201,7 +201,7 @@ pub mod episodes {
 		#[sea_orm(unique_key = "flix")]
 		pub flix_episode: EpisodeNumber,
 		/// The date of the last update
-		pub last_update: NaiveDate,
+		pub last_update: DateTime<Utc>,
 		/// The episode's runtime in seconds
 		pub runtime: Seconds,
 
@@ -235,7 +235,7 @@ pub mod test {
 			$crate::entity::tmdb::collections::ActiveModel {
 				tmdb_id: Set(::flix_tmdb::model::id::CollectionId::from_raw($id)),
 				flix_id: Set(::flix_model::id::CollectionId::from_raw($flix_id)),
-				last_update: Set(::chrono::NaiveDate::from_yo_opt(1, 1).expect("from_yo_opt")),
+				last_update: Set(::chrono::Utc::now()),
 				movie_count: Set(::core::default::Default::default()),
 			}
 			.insert($db)
@@ -250,7 +250,7 @@ pub mod test {
 			$crate::entity::tmdb::movies::ActiveModel {
 				tmdb_id: Set(::flix_tmdb::model::id::MovieId::from_raw($id)),
 				flix_id: Set(::flix_model::id::MovieId::from_raw($flix_id)),
-				last_update: Set(::chrono::NaiveDate::from_yo_opt(1, 1).expect("from_yo_opt")),
+				last_update: Set(::chrono::Utc::now()),
 				runtime: Set(::core::default::Default::default()),
 				collection_id: Set(None),
 			}
@@ -266,7 +266,7 @@ pub mod test {
 			$crate::entity::tmdb::shows::ActiveModel {
 				tmdb_id: Set(::flix_tmdb::model::id::ShowId::from_raw($id)),
 				flix_id: Set(::flix_model::id::ShowId::from_raw($flix_id)),
-				last_update: Set(::chrono::NaiveDate::from_yo_opt(1, 1).expect("from_yo_opt")),
+				last_update: Set(::chrono::Utc::now()),
 				number_of_seasons: Set(::core::default::Default::default()),
 			}
 			.insert($db)
@@ -283,7 +283,7 @@ pub mod test {
 				tmdb_season: Set($season),
 				flix_show: Set(::flix_model::id::ShowId::from_raw($flix_show)),
 				flix_season: Set($flix_season),
-				last_update: Set(::chrono::NaiveDate::from_yo_opt(1, 1).expect("from_yo_opt")),
+				last_update: Set(::chrono::Utc::now()),
 			}
 			.insert($db)
 			.await
@@ -301,7 +301,7 @@ pub mod test {
 				flix_show: Set(::flix_model::id::ShowId::from_raw($flix_show)),
 				flix_season: Set($flix_season),
 				flix_episode: Set($flix_episode),
-				last_update: Set(::chrono::NaiveDate::from_yo_opt(1, 1).expect("from_yo_opt")),
+				last_update: Set(::chrono::Utc::now()),
 				runtime: Set(::core::default::Default::default()),
 			}
 			.insert($db)
@@ -365,7 +365,7 @@ mod tests {
 
 				assert_eq!(model.tmdb_id, TmdbCollectionId::from_raw($tid));
 				assert_eq!(model.flix_id, CollectionId::from_raw($id));
-				assert_eq!(model.last_update, NaiveDate::from_yo_opt($id, 1).expect("from_yo_opt"));
+				assert_eq!(model.last_update, NaiveDate::from_yo_opt($id, 1).expect("from_yo_opt").and_hms_opt(0, 0, 0).expect("and_hms_opt").and_utc());
 				assert_eq!(model.movie_count, $id);
 			};
 			($db:expr, $id:literal, $tid:literal, $error:ident $(; $($skip:ident),+)?) => {
@@ -378,7 +378,7 @@ mod tests {
 				super::collections::ActiveModel {
 					tmdb_id: notsettable!(tmdb_id, TmdbCollectionId::from_raw($tid) $(, $($skip),+)?),
 					flix_id: notsettable!(flix_id, CollectionId::from_raw($id) $(, $($skip),+)?),
-					last_update: notsettable!(last_update, NaiveDate::from_yo_opt($id, 1).expect("from_yo_opt") $(, $($skip),+)?),
+					last_update: notsettable!(last_update, NaiveDate::from_yo_opt($id, 1).expect("from_yo_opt").and_hms_opt(0, 0, 0).expect("and_hms_opt").and_utc() $(, $($skip),+)?),
 					movie_count: notsettable!(movie_count, $id $(, $($skip),+)?),
 				}.insert($db).await
 			};
@@ -412,7 +412,7 @@ mod tests {
 
 				assert_eq!(model.tmdb_id, TmdbMovieId::from_raw($tid));
 				assert_eq!(model.flix_id, MovieId::from_raw($id));
-				assert_eq!(model.last_update, NaiveDate::from_yo_opt($id, 1).expect("from_yo_opt"));
+				assert_eq!(model.last_update, NaiveDate::from_yo_opt($id, 1).expect("from_yo_opt").and_hms_opt(0, 0, 0).expect("and_hms_opt").and_utc());
 				assert_eq!(model.runtime, Duration::from_secs($tid).into());
 				assert_eq!(model.collection_id, $cid.map(TmdbCollectionId::from_raw));
 			};
@@ -426,7 +426,7 @@ mod tests {
 				super::movies::ActiveModel {
 					tmdb_id: notsettable!(tmdb_id, TmdbMovieId::from_raw($tid) $(, $($skip),+)?),
 					flix_id: notsettable!(flix_id, MovieId::from_raw($id) $(, $($skip),+)?),
-					last_update: notsettable!(last_update, NaiveDate::from_yo_opt($id, 1).expect("from_yo_opt") $(, $($skip),+)?),
+					last_update: notsettable!(last_update, NaiveDate::from_yo_opt($id, 1).expect("from_yo_opt").and_hms_opt(0, 0, 0).expect("and_hms_opt").and_utc() $(, $($skip),+)?),
 					runtime: notsettable!(runtime, Duration::from_secs($tid).into() $(, $($skip),+)?),
 					collection_id: notsettable!(collection_id, $cid.map(TmdbCollectionId::from_raw) $(, $($skip),+)?),
 				}.insert($db).await
@@ -465,7 +465,7 @@ mod tests {
 
 				assert_eq!(model.tmdb_id, TmdbShowId::from_raw($tid));
 				assert_eq!(model.flix_id, ShowId::from_raw($id));
-				assert_eq!(model.last_update, NaiveDate::from_yo_opt(2000, $tid).expect("NaiveDate::from_yo_opt"));
+				assert_eq!(model.last_update, NaiveDate::from_yo_opt($tid, 1).expect("from_yo_opt").and_hms_opt(0, 0, 0).expect("and_hms_opt").and_utc());
 				assert_eq!(model.number_of_seasons, $id);
 			};
 			($db:expr, $id:literal, $tid:literal, $error:ident $(; $($skip:ident),+)?) => {
@@ -481,7 +481,7 @@ mod tests {
 				super::shows::ActiveModel {
 					tmdb_id: notsettable!(tmdb_id, TmdbShowId::from_raw($tid) $(, $($skip),+)?),
 					flix_id: notsettable!(flix_id, ShowId::from_raw($id) $(, $($skip),+)?),
-					last_update: notsettable!(last_update, NaiveDate::from_yo_opt(2000, $tid).expect("NaiveDate::from_yo_opt") $(, $($skip),+)?),
+					last_update: notsettable!(last_update, NaiveDate::from_yo_opt($tid, 1).expect("from_yo_opt").and_hms_opt(0, 0, 0).expect("and_hms_opt").and_utc() $(, $($skip),+)?),
 					number_of_seasons: notsettable!(number_of_seasons, $id $(, $($skip),+)?),
 				}.insert($db).await
 			};
@@ -517,7 +517,7 @@ mod tests {
 				assert_eq!(model.tmdb_season, $tseason);
 				assert_eq!(model.flix_show, ShowId::from_raw($show));
 				assert_eq!(model.flix_season, $season);
-				assert_eq!(model.last_update, NaiveDate::from_yo_opt(2000, $tshow).expect("NaiveDate::from_yo_opt"));
+				assert_eq!(model.last_update, NaiveDate::from_yo_opt($tshow, 1).expect("from_yo_opt").and_hms_opt(0, 0, 0).expect("and_hms_opt").and_utc());
 			};
 			($db:expr, $show:literal, $season:literal, $tshow:literal, $tseason:literal, $error:ident $(; $($skip:ident),+)?) => {
 				let model = assert_season!(@insert, $db, $show, $season, $tshow, $tseason $(; $($skip),+)?)
@@ -534,7 +534,7 @@ mod tests {
 					tmdb_season: notsettable!(tmdb_season, $tseason $(, $($skip),+)?),
 					flix_show: notsettable!(flix_show, ShowId::from_raw($show) $(, $($skip),+)?),
 					flix_season: notsettable!(flix_season, $season $(, $($skip),+)?),
-					last_update: notsettable!(last_update, NaiveDate::from_yo_opt(2000, $tshow).expect("NaiveDate::from_yo_opt") $(, $($skip),+)?),
+					last_update: notsettable!(last_update, NaiveDate::from_yo_opt($tshow, 1).expect("from_yo_opt").and_hms_opt(0, 0, 0).expect("and_hms_opt").and_utc() $(, $($skip),+)?),
 				}.insert($db).await
 			};
 		}
@@ -574,7 +574,7 @@ mod tests {
 				assert_eq!(model.flix_show, ShowId::from_raw($show));
 				assert_eq!(model.flix_season, $season);
 				assert_eq!(model.flix_episode, $episode);
-				assert_eq!(model.last_update, NaiveDate::from_yo_opt(2000, $tshow).expect("NaiveDate::from_yo_opt"));
+				assert_eq!(model.last_update, NaiveDate::from_yo_opt($tshow, 1).expect("from_yo_opt").and_hms_opt(0, 0, 0).expect("and_hms_opt").and_utc());
 				assert_eq!(model.runtime, Duration::from_secs($tshow).into());
 			};
 			($db:expr, $show:literal, $season:literal, $episode:literal, $tshow:literal, $tseason:literal, $tepisode:literal, $error:ident $(; $($skip:ident),+)?) => {
@@ -594,7 +594,7 @@ mod tests {
 					flix_show: notsettable!(flix_show, ShowId::from_raw($show) $(, $($skip),+)?),
 					flix_season: notsettable!(flix_season, $season $(, $($skip),+)?),
 					flix_episode: notsettable!(flix_episode, $episode $(, $($skip),+)?),
-					last_update: notsettable!(last_update, NaiveDate::from_yo_opt(2000, $tshow).expect("NaiveDate::from_yo_opt") $(, $($skip),+)?),
+					last_update: notsettable!(last_update, NaiveDate::from_yo_opt($tshow, 1).expect("from_yo_opt").and_hms_opt(0, 0, 0).expect("and_hms_opt").and_utc() $(, $($skip),+)?),
 					runtime: notsettable!(runtime, Duration::from_secs($tshow).into() $(, $($skip),+)?),
 				}.insert($db).await
 			};

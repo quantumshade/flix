@@ -1,6 +1,6 @@
 [package]
 name = "flix-db"
-version = "0.0.14"
+version = "0.0.15"
 
 categories = []
 description = "Types for storing persistent data about media"

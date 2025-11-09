@@ -578,7 +578,7 @@ checksum = "52051878f80a721bb68ebfbc930e07b65ba72f2da88968ea5c06fd6ca3d3a127"
 
 [[package]]
 name = "flix"
-version = "0.0.14"
+version = "0.0.15"
 dependencies = [
  "flix-db",
  "flix-fs",
@@ -588,7 +588,7 @@ dependencies = [
 
 [[package]]
 name = "flix-cli"
-version = "0.0.14"
+version = "0.0.15"
 dependencies = [
  "anyhow",
  "chrono",
@@ -605,7 +605,7 @@ dependencies = [
 
 [[package]]
 name = "flix-db"
-version = "0.0.14"
+version = "0.0.15"
 dependencies = [
  "chrono",
  "flix-model",
@@ -618,7 +618,7 @@ dependencies = [
 
 [[package]]
 name = "flix-fs"
-version = "0.0.14"
+version = "0.0.15"
 dependencies = [
  "async-stream",
  "flix-model",
@@ -630,7 +630,7 @@ dependencies = [
 
 [[package]]
 name = "flix-model"
-version = "0.0.14"
+version = "0.0.15"
 dependencies = [
  "seamantic",
  "serde",
@@ -639,7 +639,7 @@ dependencies = [
 
 [[package]]
 name = "flix-tmdb"
-version = "0.0.14"
+version = "0.0.15"
 dependencies = [
  "chrono",
  "flix-model",

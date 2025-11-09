@@ -6,7 +6,7 @@ pub mod libraries {
 
 	use seamantic::model::path::PathBytes;
 
-	use chrono::NaiveDateTime;
+	use chrono::{DateTime, Utc};
 	use sea_orm::entity::prelude::*;
 
 	/// The database representation of a library media folder
@@ -20,7 +20,7 @@ pub mod libraries {
 		/// The library's directory
 		pub directory: PathBytes,
 		/// The library's last scan data
-		pub last_scan: Option<NaiveDateTime>,
+		pub last_scan: Option<DateTime<Utc>>,
 
 		/// Collections that are part of this library
 		#[sea_orm(has_many, on_update = "Cascade", on_delete = "Cascade")]
@@ -431,7 +431,7 @@ mod tests {
 
 	use flix_model::id::{CollectionId, LibraryId, MovieId, ShowId};
 
-	use chrono::{NaiveDate, NaiveDateTime, NaiveTime};
+	use chrono::NaiveDate;
 	use sea_orm::ActiveValue::{NotSet, Set};
 	use sea_orm::entity::prelude::*;
 	use sea_orm::sqlx::error::ErrorKind;
@@ -471,7 +471,7 @@ mod tests {
 
 				assert_eq!(model.id, LibraryId::from_raw($id));
 				assert_eq!(model.directory, Path::new(concat!("L Directory ", $id)).to_owned().into());
-				assert_eq!(model.last_scan, noneable!(last_scan, NaiveDateTime::new(NaiveDate::from_yo_opt($id, 1).expect("from_yo_opt"), NaiveTime::from_hms_opt(1, 1, 1).expect("from_yo_opt")) $(, $($skip),+)?));
+				assert_eq!(model.last_scan, noneable!(last_scan, NaiveDate::from_yo_opt($id, 1).expect("from_yo_opt").and_hms_opt(0, 0, 0).expect("and_hms_opt").and_utc() $(, $($skip),+)?));
 			};
 			($db:expr, $id:literal, $error:ident $(; $($skip:ident),+)?) => {
 				let model = assert_library!(@insert, $db, $id $(; $($skip),+)?)
@@ -483,7 +483,7 @@ mod tests {
 				super::libraries::ActiveModel {
 					id: notsettable!(id, LibraryId::from_raw($id) $(, $($skip),+)?),
 					directory: notsettable!(directory, Path::new(concat!("L Directory ", $id)).to_owned().into() $(, $($skip),+)?),
-					last_scan: notsettable!(last_scan, Some(NaiveDateTime::new(NaiveDate::from_yo_opt($id, 1).expect("from_yo_opt"), NaiveTime::from_hms_opt(1, 1, 1).expect("from_yo_opt"))) $(, $($skip),+)?),
+					last_scan: notsettable!(last_scan, Some(NaiveDate::from_yo_opt($id, 1).expect("from_yo_opt").and_hms_opt(0, 0, 0).expect("and_hms_opt").and_utc()) $(, $($skip),+)?),
 				}.insert($db).await
 			};
 		}

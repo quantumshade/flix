@@ -49,7 +49,7 @@ pub async fn add(client: Client, db: &DatabaseConnection, command: Command) -> R
 						entity::tmdb::collections::ActiveModel {
 							tmdb_id: Set(id),
 							flix_id: Set(flix.id),
-							last_update: Set(Utc::now().naive_utc().date()),
+							last_update: Set(Utc::now()),
 							movie_count: Set(collection.movies.len().try_into().unwrap_or(0)),
 						}
 						.insert(txn)
@@ -99,7 +99,7 @@ pub async fn add(client: Client, db: &DatabaseConnection, command: Command) -> R
 						entity::tmdb::movies::ActiveModel {
 							tmdb_id: Set(id),
 							flix_id: Set(flix.id),
-							last_update: Set(Utc::now().naive_utc().date()),
+							last_update: Set(Utc::now()),
 							runtime: Set(movie.runtime.into()),
 							collection_id: Set(movie.collection.map(|c| c.id)),
 						}
@@ -198,7 +198,7 @@ pub async fn add(client: Client, db: &DatabaseConnection, command: Command) -> R
 						entity::tmdb::shows::ActiveModel {
 							tmdb_id: Set(id),
 							flix_id: Set(flix.id),
-							last_update: Set(Utc::now().naive_utc().date()),
+							last_update: Set(Utc::now()),
 							number_of_seasons: Set(show.number_of_seasons),
 						}
 						.insert(txn)
@@ -220,7 +220,7 @@ pub async fn add(client: Client, db: &DatabaseConnection, command: Command) -> R
 								tmdb_season: Set(season.season_number),
 								flix_show: Set(flix.id),
 								flix_season: Set(season.season_number),
-								last_update: Set(Utc::now().naive_utc().date()),
+								last_update: Set(Utc::now()),
 							}
 							.insert(txn)
 							.await?;
@@ -246,7 +246,7 @@ pub async fn add(client: Client, db: &DatabaseConnection, command: Command) -> R
 									flix_show: Set(flix.id),
 									flix_season: Set(season),
 									flix_episode: Set(episode.episode_number),
-									last_update: Set(Utc::now().naive_utc().date()),
+									last_update: Set(Utc::now()),
 									runtime: Set(episode.runtime.into()),
 								}
 								.insert(txn)
@@ -338,7 +338,7 @@ pub async fn add(client: Client, db: &DatabaseConnection, command: Command) -> R
 							tmdb_season: Set(season_number),
 							flix_show: Set(show.flix_id),
 							flix_season: Set(season_number),
-							last_update: Set(Utc::now().naive_utc().date()),
+							last_update: Set(Utc::now()),
 						}
 						.insert(txn)
 						.await?;
@@ -362,7 +362,7 @@ pub async fn add(client: Client, db: &DatabaseConnection, command: Command) -> R
 								flix_show: Set(show.flix_id),
 								flix_season: Set(season_number),
 								flix_episode: Set(episode.episode_number),
-								last_update: Set(Utc::now().naive_utc().date()),
+								last_update: Set(Utc::now()),
 								runtime: Set(episode.runtime.into()),
 							}
 							.insert(txn)
@@ -453,7 +453,7 @@ pub async fn add(client: Client, db: &DatabaseConnection, command: Command) -> R
 								flix_show: Set(flix_id),
 								flix_season: Set(season),
 								flix_episode: Set(episode_number),
-								last_update: Set(Utc::now().naive_utc().date()),
+								last_update: Set(Utc::now()),
 								runtime: Set(episode.runtime.into()),
 							}
 							.insert(txn)

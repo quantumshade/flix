@@ -20,7 +20,7 @@ pub enum Error {
 }
 
 /// A wrapper for handling single and multi-episode entries
-#[derive(Debug)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct EpisodeNumbers(RangeInclusive<EpisodeNumber>);
 
@@ -53,8 +53,27 @@ impl TryFrom<&[EpisodeNumber]> for EpisodeNumbers {
 }
 
 impl EpisodeNumbers {
+	/// Create an [EpisodeNumbers] from a starting number and a count.
+	/// `count` should be zero for single episodes.
+	pub fn new(start: EpisodeNumber, count: u8) -> Self {
+		Self(start..=start.saturating_add(count.into()))
+	}
+
 	/// Get the range of episodes
 	pub fn as_range(&self) -> &RangeInclusive<EpisodeNumber> {
 		&self.0
+	}
+
+	/// Render this [EpisodeNumbers] as a range. If only one episode is
+	/// is present it renders as `01`, if multiple it renders as `01-02`
+	pub fn range_string(&self) -> String {
+		let start = self.0.start();
+		let end = self.0.end();
+
+		if start == end {
+			format!("{:02}", start)
+		} else {
+			format!("{:02}-{:02}", start, end)
+		}
 	}
 }

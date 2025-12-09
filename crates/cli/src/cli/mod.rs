@@ -3,6 +3,7 @@ use std::path::PathBuf;
 use anyhow::{Result, anyhow};
 use clap::{Parser, Subcommand};
 
+pub mod flix;
 pub mod tmdb;
 
 #[derive(Parser)]
@@ -57,17 +58,17 @@ pub enum Command {
 	/// Add new items to the database
 	Add {
 		#[command(subcommand)]
-		command: BackendCommand,
+		command: AddCommand,
 	},
 	/// Update an existing item in the database
 	Update {
 		#[command(subcommand)]
-		command: BackendCommand,
+		command: UpdateCommand,
 	},
 	/// Delete an existing item in the database
 	Delete {
 		#[command(subcommand)]
-		command: BackendCommand,
+		command: DeleteCommand,
 	},
 	/// Create a toml backup of the database
 	Backup {
@@ -84,7 +85,12 @@ pub enum Command {
 }
 
 #[derive(Subcommand)]
-pub enum BackendCommand {
+pub enum AddCommand {
+	/// Use the flix backend
+	Flix {
+		#[command(subcommand)]
+		command: flix::AddCommand,
+	},
 	/// Use the TMDB backend
 	Tmdb {
 		#[command(subcommand)]
@@ -92,7 +98,43 @@ pub enum BackendCommand {
 	},
 }
 
-impl From<tmdb::Command> for BackendCommand {
+impl From<flix::AddCommand> for AddCommand {
+	fn from(value: flix::AddCommand) -> Self {
+		Self::Flix { command: value }
+	}
+}
+
+impl From<tmdb::Command> for AddCommand {
+	fn from(value: tmdb::Command) -> Self {
+		Self::Tmdb { command: value }
+	}
+}
+
+#[derive(Subcommand)]
+pub enum UpdateCommand {
+	/// Use the TMDB backend
+	Tmdb {
+		#[command(subcommand)]
+		command: tmdb::Command,
+	},
+}
+
+impl From<tmdb::Command> for UpdateCommand {
+	fn from(value: tmdb::Command) -> Self {
+		Self::Tmdb { command: value }
+	}
+}
+
+#[derive(Subcommand)]
+pub enum DeleteCommand {
+	/// Use the TMDB backend
+	Tmdb {
+		#[command(subcommand)]
+		command: tmdb::Command,
+	},
+}
+
+impl From<tmdb::Command> for DeleteCommand {
 	fn from(value: tmdb::Command) -> Self {
 		Self::Tmdb { command: value }
 	}

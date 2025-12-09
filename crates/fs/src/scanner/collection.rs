@@ -215,18 +215,19 @@ impl Scanner {
 			for await dir in ReadDirStream::new(dirs) {
 				match dir {
 					Ok(dir) => {
+						let path = dir.path();
+
 						let filetype = match dir.file_type().await {
 							Ok(filetype) => filetype,
 							Err(err) => {
 								yield Item {
-									path: path.to_owned(),
+									path,
 									event: Err(Error::FileType(err)),
 								};
 								continue;
 							}
 						};
 
-						let path = dir.path();
 						if filetype.is_dir() {
 							subdirs_to_scan.push(path);
 							continue;
@@ -236,7 +237,7 @@ impl Scanner {
 							is_image_extension!() => {
 								if poster_file_name.is_some() {
 									yield Item {
-										path: path.to_owned(),
+										path,
 										event: Err(Error::DuplicatePosterFile),
 									};
 									continue;
@@ -248,7 +249,7 @@ impl Scanner {
 							}
 							Some(_) | None => {
 								yield Item {
-									path: path.to_owned(),
+									path,
 									event: Err(Error::UnexpectedFile),
 								};
 							}

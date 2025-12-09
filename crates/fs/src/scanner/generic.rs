@@ -211,7 +211,7 @@ impl Scanner {
 		}
 
 		let media_folder_re = MEDIA_FOLDER_REGEX.get_or_init(|| {
-			Regex::new(r"^[[[:alnum:]] -]+ \([[:digit:]]+\) \[[[:digit:]]+\]$")
+			Regex::new(r"^[[[:alnum:]]' -]+ \([[:digit:]]+\) \[[[:digit:]]+\]$")
 				.unwrap_or_else(|err| panic!("regex is invalid: {err}"))
 		});
 		let season_folder_re = SEASON_FOLDER_REGEX.get_or_init(|| {
@@ -257,11 +257,13 @@ impl Scanner {
 				for await dir in ReadDirStream::new(dirs) {
 					match dir {
 						Ok(dir) => {
+							let path = dir.path();
+
 							let filetype = match dir.file_type().await {
 								Ok(filetype) => filetype,
 								Err(err) => {
 									yield Item {
-										path: path.to_owned(),
+										path,
 										event: Err(Error::FileType(err)),
 									};
 									continue;
@@ -271,11 +273,9 @@ impl Scanner {
 								continue;
 							}
 
-							let dir_path = dir.path();
-							let Some(folder_name) = dir_path.file_name().and_then(OsStr::to_str)
-							else {
+							let Some(folder_name) = path.file_name().and_then(OsStr::to_str) else {
 								yield Item {
-									path: path.to_owned(),
+									path,
 									event: Err(Error::UnexpectedFolder),
 								};
 								continue;

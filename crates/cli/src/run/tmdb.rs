@@ -9,7 +9,7 @@ use flix::tmdb::model::id::{
 };
 
 use anyhow::{Context, Result, bail};
-use chrono::Utc;
+use chrono::{Datelike, Utc};
 use sea_orm::ActiveValue::{NotSet, Set};
 use sea_orm::{
 	ActiveModelTrait, DatabaseConnection, DbErr, EntityTrait, TransactionError, TransactionTrait,
@@ -34,6 +34,8 @@ pub async fn add(client: Client, db: &DatabaseConnection, command: Command) -> R
 				.get_details(id, None)
 				.await
 				.with_context(|| format!("collections().get_details({})", id.into_raw()))?;
+
+			let title = collection.title.clone();
 
 			let result: Result<CollectionId, TransactionError<DbErr>> = db
 				.transaction(|txn| {
@@ -65,7 +67,7 @@ pub async fn add(client: Client, db: &DatabaseConnection, command: Command) -> R
 				Err(TransactionError::Connection(err)) => Err(err)?,
 				Err(TransactionError::Transaction(err)) => Err(err)?,
 			};
-			println!("Created Collection: {}", flix_id.into_raw());
+			println!("Created Collection: {} [{}]", title, flix_id.into_raw());
 
 			Ok(())
 		}
@@ -82,6 +84,9 @@ pub async fn add(client: Client, db: &DatabaseConnection, command: Command) -> R
 				.get_details(id, None)
 				.await
 				.with_context(|| format!("movies().get_details({})", id.into_raw()))?;
+
+			let title = movie.title.clone();
+			let year = movie.release_date.year();
 
 			let result: Result<MovieId, TransactionError<DbErr>> = db
 				.transaction(|txn| {
@@ -116,7 +121,12 @@ pub async fn add(client: Client, db: &DatabaseConnection, command: Command) -> R
 				Err(TransactionError::Connection(err)) => Err(err)?,
 				Err(TransactionError::Transaction(err)) => Err(err)?,
 			};
-			println!("Created Movie: {}", flix_id.into_raw());
+			println!(
+				"Created Movie: {} ({}) [{}]",
+				title,
+				year,
+				flix_id.into_raw(),
+			);
 
 			Ok(())
 		}
@@ -135,6 +145,9 @@ pub async fn add(client: Client, db: &DatabaseConnection, command: Command) -> R
 				.with_context(|| format!("shows().get_details({})", id.into_raw()))?;
 			let mut seasons = Vec::new();
 			let mut episodes = HashMap::new();
+
+			let title = show.title.clone();
+			let year = show.first_air_date.year();
 
 			for season in 1..=show.number_of_seasons {
 				let season = client
@@ -264,7 +277,12 @@ pub async fn add(client: Client, db: &DatabaseConnection, command: Command) -> R
 				Err(TransactionError::Connection(err)) => Err(err)?,
 				Err(TransactionError::Transaction(err)) => Err(err)?,
 			};
-			println!("Created Show: {}", flix_id.into_raw());
+			println!(
+				"Created Show: {} ({}) [{}]",
+				title,
+				year,
+				flix_id.into_raw()
+			);
 
 			Ok(())
 		}
@@ -497,11 +515,4 @@ pub async fn update(client: Client, database: &DatabaseConnection, command: Comm
 	_ = database;
 	_ = command;
 	unimplemented!("updates")
-}
-
-pub async fn delete(client: Client, database: &DatabaseConnection, command: Command) -> Result<()> {
-	_ = client;
-	_ = database;
-	_ = command;
-	unimplemented!("deletions")
 }

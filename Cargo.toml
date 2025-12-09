@@ -44,8 +44,8 @@ flix-tmdb = { path = "crates/tmdb", version = "=0.0.15", default-features = fals
 
 seamantic = { version = "0.0.10", default-features = false }
 
-sea-orm = { version = "2.0.0-rc.17", default-features = false }
-sea-orm-migration = { version = "2.0.0-rc.17", default-features = false }
+sea-orm = { version = "2.0.0-rc.18", default-features = false }
+sea-orm-migration = { version = "2.0.0-rc.18", default-features = false }
 
 anyhow = { version = "^1", default-features = false }
 async-stream = { version = "^0.3", default-features = false }

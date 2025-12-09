@@ -7,7 +7,7 @@ use clap::Parser;
 use tokio::fs;
 
 mod cli;
-use cli::{BackendCommand, Cli, Command};
+use cli::{AddCommand, Cli, Command, DeleteCommand, UpdateCommand};
 
 mod config;
 use config::Config;
@@ -53,11 +53,14 @@ async fn exec_init(database_path: String) -> Result<()> {
 	Ok(())
 }
 
-async fn exec_add(client: Client, database_path: String, command: BackendCommand) -> Result<()> {
+async fn exec_add(client: Client, database_path: String, command: AddCommand) -> Result<()> {
 	let database = db::open(database_path).await?;
 
 	match command {
-		BackendCommand::Tmdb { command } => {
+		AddCommand::Flix { command } => {
+			run::flix::add(database.as_ref(), command).await?;
+		}
+		AddCommand::Tmdb { command } => {
 			run::tmdb::add(client, database.as_ref(), command).await?;
 		}
 	}
@@ -65,11 +68,11 @@ async fn exec_add(client: Client, database_path: String, command: BackendCommand
 	Ok(())
 }
 
-async fn exec_update(client: Client, database_path: String, command: BackendCommand) -> Result<()> {
+async fn exec_update(client: Client, database_path: String, command: UpdateCommand) -> Result<()> {
 	let database = db::open(database_path).await?;
 
 	match command {
-		BackendCommand::Tmdb { command } => {
+		UpdateCommand::Tmdb { command } => {
 			run::tmdb::update(client, database.as_ref(), command).await?;
 		}
 	}
@@ -77,16 +80,11 @@ async fn exec_update(client: Client, database_path: String, command: BackendComm
 	Ok(())
 }
 
-async fn exec_delete(client: Client, database_path: String, command: BackendCommand) -> Result<()> {
-	let database = db::open(database_path).await?;
-
-	match command {
-		BackendCommand::Tmdb { command } => {
-			run::tmdb::delete(client, database.as_ref(), command).await?;
-		}
-	}
-
-	Ok(())
+async fn exec_delete(client: Client, database_path: String, command: DeleteCommand) -> Result<()> {
+	_ = client;
+	_ = database_path;
+	_ = command;
+	unimplemented!()
 }
 
 async fn exec_backup(database_path: String, output: PathBuf) -> Result<()> {

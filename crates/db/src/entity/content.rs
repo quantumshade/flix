@@ -384,7 +384,7 @@ pub mod test {
 			$crate::entity::info::test::make_info_season!($db, $show, $season);
 			$crate::entity::content::seasons::ActiveModel {
 				show_id: Set(::flix_model::id::ShowId::from_raw($show)),
-				season_number: Set($season),
+				season_number: Set(::flix_model::numbers::SeasonNumber::new($season)),
 				slug: Set(concat!("SS ", $show, $season).to_string()),
 				library_id: Set(::flix_model::id::LibraryId::from_raw($lid)),
 				directory: Set(::std::path::PathBuf::new().into()),
@@ -408,8 +408,8 @@ pub mod test {
 			$crate::entity::info::test::make_info_episode!($db, $show, $season, $episode);
 			$crate::entity::content::episodes::ActiveModel {
 				show_id: Set(::flix_model::id::ShowId::from_raw($show)),
-				season_number: Set($season),
-				episode_number: Set($episode),
+				season_number: Set(::flix_model::numbers::SeasonNumber::new($season)),
+				episode_number: Set(::flix_model::numbers::EpisodeNumber::new($episode)),
 				count: Set($count),
 				slug: Set(concat!("SSE ", $show, $season, $episode).to_string()),
 				library_id: Set(::flix_model::id::LibraryId::from_raw($lid)),
@@ -690,7 +690,7 @@ mod tests {
 					.expect("insert");
 
 				assert_eq!(model.show_id, ShowId::from_raw($id));
-				assert_eq!(model.season_number, $season);
+				assert_eq!(model.season_number, ::flix_model::numbers::SeasonNumber::new($season));
 				assert_eq!(model.slug, concat!("SS Slug ", $id, ",", $season).to_string());
 				assert_eq!(model.library_id, LibraryId::from_raw($lid));
 				assert_eq!(model.directory, Path::new(concat!("SS Directory ", $id, ",", $season)).to_owned().into());
@@ -705,7 +705,7 @@ mod tests {
 			(@insert, $db:expr, $id:literal, $season:literal, $lid:literal $(; $($skip:ident),+)?) => {
 				super::seasons::ActiveModel {
 					show_id: notsettable!(show_id, ShowId::from_raw($id) $(, $($skip),+)?),
-					season_number: notsettable!(season_number, $season $(, $($skip),+)?),
+					season_number: notsettable!(season_number, ::flix_model::numbers::SeasonNumber::new($season) $(, $($skip),+)?),
 					slug: notsettable!(slug, concat!("SS Slug ", $id, ",", $season).to_string() $(, $($skip),+)?),
 					library_id: notsettable!(library_id, LibraryId::from_raw($lid) $(, $($skip),+)?),
 					directory: notsettable!(directory, Path::new(concat!("SS Directory ", $id, ",", $season)).to_owned().into() $(, $($skip),+)?),
@@ -745,8 +745,8 @@ mod tests {
 					.expect("insert");
 
 				assert_eq!(model.show_id, ShowId::from_raw($id));
-				assert_eq!(model.season_number, $season);
-				assert_eq!(model.episode_number, $episode);
+				assert_eq!(model.season_number, ::flix_model::numbers::SeasonNumber::new($season));
+				assert_eq!(model.episode_number, ::flix_model::numbers::EpisodeNumber::new($episode));
 				assert_eq!(model.slug, concat!("SS Slug ", $id, ",", $season, $episode).to_string());
 				assert_eq!(model.library_id, LibraryId::from_raw($lid));
 				assert_eq!(model.directory, Path::new(concat!("SS Directory ", $id, ",", $season, $episode)).to_owned().into());
@@ -762,8 +762,8 @@ mod tests {
 			(@insert, $db:expr, $id:literal, $season:literal, $episode:literal, $lid:literal $(; $($skip:ident),+)?) => {
 				super::episodes::ActiveModel {
 					show_id: notsettable!(show_id, ShowId::from_raw($id) $(, $($skip),+)?),
-					season_number: notsettable!(season_number, $season $(, $($skip),+)?),
-					episode_number: notsettable!(episode_number, $episode $(, $($skip),+)?),
+					season_number: notsettable!(season_number, ::flix_model::numbers::SeasonNumber::new($season) $(, $($skip),+)?),
+					episode_number: notsettable!(episode_number, ::flix_model::numbers::EpisodeNumber::new($episode) $(, $($skip),+)?),
 					count: notsettable!(count, 0 $(, $($skip),+)?),
 					slug: notsettable!(slug, concat!("SS Slug ", $id, ",", $season, $episode).to_string() $(, $($skip),+)?),
 					library_id: notsettable!(library_id, LibraryId::from_raw($lid) $(, $($skip),+)?),

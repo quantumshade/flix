@@ -1,15 +1,12 @@
 [package]
 name = "flix-cli"
-version = "0.0.15"
-
-categories = ["command-line-utilities"]
+version = "0.0.16"
+edition.workspace = true
+rust-version.workspace = true
 description = "CLI for interacting with a flix database"
 repository = "https://github.com/QuantumShade/flix"
-
-authors.workspace = true
-edition.workspace = true
 license-file.workspace = true
-rust-version.workspace = true
+categories = ["command-line-utilities"]
 
 [package.metadata.docs.rs]
 all-features = true
@@ -20,9 +17,26 @@ doc = false
 name = "flix"
 path = "src/main.rs"
 
-[lints.rust]
-arithmetic_overflow = "forbid"
-unsafe_code = "forbid"
+[dependencies]
+anyhow = { workspace = true }
+chrono = { workspace = true, features = ["now"] }
+clap = { workspace = true, features = [
+	"color",
+	"derive",
+	"error-context",
+	"help",
+	"std",
+	"suggestions",
+	"usage",
+] }
+flix = { workspace = true, features = ["tmdb"] }
+futures = { workspace = true }
+sea-orm = { workspace = true, features = ["debug-print", "runtime-tokio"] }
+serde = { workspace = true, features = ["derive"] }
+tokio = { workspace = true, features = ["fs", "macros", "rt"] }
+toml = { workspace = true, features = ["parse", "serde"] }
+tracing = { workspace = true }
+tracing-subscriber = { workspace = true }
 
 [lints.clippy]
 arithmetic_side_effects = "deny"
@@ -34,26 +48,9 @@ indexing_slicing = "deny"
 integer_division = "deny"
 integer_division_remainder_used = "deny"
 transmute_undefined_repr = "deny"
-unchecked_duration_subtraction = "deny"
+unchecked_time_subtraction = "deny"
 unwrap_used = "deny"
 
-[dependencies]
-flix = { workspace = true, features = ["tmdb"] }
-
-anyhow = { workspace = true }
-chrono = { workspace = true, features = ["now"] }
-clap = { workspace = true, features = [
-	"derive",
-	"color",
-	"error-context",
-	"help",
-	"suggestions",
-	"usage",
-] }
-futures = { workspace = true }
-sea-orm = { workspace = true, features = ["runtime-tokio", "debug-print"] }
-serde = { workspace = true, features = ["derive"] }
-tokio = { workspace = true, features = ["rt", "fs", "macros"] }
-toml = { workspace = true, features = ["parse", "serde"] }
-tracing = { workspace = true }
-tracing-subscriber = { workspace = true }
+[lints.rust]
+arithmetic_overflow = "forbid"
+unsafe_code = "forbid"

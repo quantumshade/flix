@@ -1,0 +1,33 @@
+{
+	"project_name": null,
+
+	"auto_install_extensions": {
+		"tombi": true,
+		"cargo-appraiser": true,
+	},
+
+	"languages": {
+		"TOML": {
+			"format_on_save": "on",
+			"formatter": { "language_server": { "name": "tombi" } },
+		},
+	},
+
+	"lsp": {
+		"rust-analyzer": {
+			"initialization_options": {
+				"imports": {
+					"granularity": { "enforce": true, "group": "module" },
+					"group": { "enable": true },
+					"merge": { "glob": false },
+					"preferNoStd": true,
+				},
+				"server": {
+					"extraEnv": {
+						"RUSTUP_TOOLCHAIN": "stable",
+					},
+				},
+			},
+		},
+	},
+}

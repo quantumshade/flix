@@ -150,13 +150,20 @@ pub async fn add(client: Client, db: &DatabaseConnection, command: Command) -> R
 			let year = show.first_air_date.year();
 
 			for season in 1..=show.number_of_seasons {
-				let season = client
+				let season = SeasonNumber::new(season);
+				let season = match client
 					.seasons()
 					.get_details(id, season, None)
 					.await
 					.with_context(|| {
 						format!("seasons().get_details({}, {})", id.into_raw(), season)
-					})?;
+					}) {
+					Ok(season) => season,
+					Err(err) => {
+						eprintln!("{err:?}");
+						continue;
+					}
+				};
 				if season.air_date > Utc::now().naive_utc().date() {
 					eprintln!(
 						"skipping season ({}, {})",
@@ -166,7 +173,7 @@ pub async fn add(client: Client, db: &DatabaseConnection, command: Command) -> R
 					break;
 				}
 
-				let Ok(number_of_episodes) = EpisodeNumber::try_from(season.episodes.len()) else {
+				let Ok(number_of_episodes) = u32::try_from(season.episodes.len()) else {
 					bail!(
 						"could not convert {} to an EpisodeNumber",
 						season.episodes.len()
@@ -175,6 +182,7 @@ pub async fn add(client: Client, db: &DatabaseConnection, command: Command) -> R
 
 				let mut season_episodes = Vec::new();
 				for episode in 1..=number_of_episodes {
+					let episode = EpisodeNumber::new(episode);
 					let Ok(episode) = client
 						.episodes()
 						.get_details(id, season.season_number, episode, None)
@@ -314,7 +322,7 @@ pub async fn add(client: Client, db: &DatabaseConnection, command: Command) -> R
 				})?;
 			let mut episodes = Vec::new();
 
-			let Ok(number_of_episodes) = EpisodeNumber::try_from(season.episodes.len()) else {
+			let Ok(number_of_episodes) = u32::try_from(season.episodes.len()) else {
 				bail!(
 					"could not convert {} to an EpisodeNumber",
 					season.episodes.len()
@@ -322,6 +330,7 @@ pub async fn add(client: Client, db: &DatabaseConnection, command: Command) -> R
 			};
 
 			for episode in 1..=number_of_episodes {
+				let episode = EpisodeNumber::new(episode);
 				let Ok(episode) = client
 					.episodes()
 					.get_details(id, season.season_number, episode, None)

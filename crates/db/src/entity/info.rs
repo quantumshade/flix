@@ -228,7 +228,7 @@ pub mod test {
 		($db:expr, $show:literal, $season:literal) => {
 			$crate::entity::info::seasons::ActiveModel {
 				show_id: Set(::flix_model::id::ShowId::from_raw($show)),
-				season_number: Set($season),
+				season_number: Set(::flix_model::numbers::SeasonNumber::new($season)),
 				title: Set(::std::string::String::new()),
 				overview: Set(::std::string::String::new()),
 				date: Set(::chrono::NaiveDate::from_yo_opt(1, 1).expect("from_yo_opt")),
@@ -244,8 +244,8 @@ pub mod test {
 		($db:expr, $show:literal, $season:literal, $episode:literal) => {
 			$crate::entity::info::episodes::ActiveModel {
 				show_id: Set(::flix_model::id::ShowId::from_raw($show)),
-				season_number: Set($season),
-				episode_number: Set($episode),
+				season_number: Set(::flix_model::numbers::SeasonNumber::new($season)),
+				episode_number: Set(::flix_model::numbers::EpisodeNumber::new($episode)),
 				title: Set(::std::string::String::new()),
 				overview: Set(::std::string::String::new()),
 				date: Set(::chrono::NaiveDate::from_yo_opt(1, 1).expect("from_yo_opt")),
@@ -422,7 +422,7 @@ mod tests {
 					.expect("insert");
 
 				assert_eq!(model.show_id, ShowId::from_raw($show));
-				assert_eq!(model.season_number, $season);
+				assert_eq!(model.season_number, ::flix_model::numbers::SeasonNumber::new($season));
 				assert_eq!(model.title, concat!("SS Title ", $show, ",", $season));
 				assert_eq!(model.overview, concat!("SS Overview ", $show, ",", $season));
 				assert_eq!(model.date, NaiveDate::from_yo_opt($show + $season, 1).expect("from_yo_opt"));
@@ -439,7 +439,7 @@ mod tests {
 			(@insert, $db:expr, $show:literal, $season:literal $(; $($skip:ident),+)?) => {
 				super::seasons::ActiveModel {
 					show_id: notsettable!(show_id, ShowId::from_raw($show) $(, $($skip),+)?),
-					season_number: notsettable!(season_number, $season $(, $($skip),+)?),
+					season_number: notsettable!(season_number, ::flix_model::numbers::SeasonNumber::new($season) $(, $($skip),+)?),
 					title: notsettable!(title, concat!("SS Title ", $show, ",", $season).to_string() $(, $($skip),+)?),
 					overview: notsettable!(overview, concat!("SS Overview ", $show, ",", $season).to_string() $(, $($skip),+)?),
 					date: notsettable!(date, NaiveDate::from_yo_opt($show + $season, 1).expect("from_yo_opt") $(, $($skip),+)?),
@@ -473,8 +473,8 @@ mod tests {
 					.expect("insert");
 
 				assert_eq!(model.show_id, ShowId::from_raw($show));
-				assert_eq!(model.season_number, $season);
-				assert_eq!(model.episode_number, $episode);
+				assert_eq!(model.season_number, ::flix_model::numbers::SeasonNumber::new($season));
+				assert_eq!(model.episode_number, ::flix_model::numbers::EpisodeNumber::new($episode));
 				assert_eq!(model.title, concat!("SSE Title ", $show, ",", $season, ",", $episode));
 				assert_eq!(model.overview, concat!("SSE Overview ", $show, ",", $season, ",", $episode));
 				assert_eq!(model.date, NaiveDate::from_yo_opt($show + $season, 1).expect("from_yo_opt"));
@@ -491,8 +491,8 @@ mod tests {
 			(@insert, $db:expr, $show:literal, $season:literal, $episode:literal $(; $($skip:ident),+)?) => {
 				super::episodes::ActiveModel {
 					show_id: notsettable!(show_id, ShowId::from_raw($show) $(, $($skip),+)?),
-					season_number: notsettable!(season_number, $season $(, $($skip),+)?),
-					episode_number: notsettable!(episode_number, $episode $(, $($skip),+)?),
+					season_number: notsettable!(season_number, ::flix_model::numbers::SeasonNumber::new($season) $(, $($skip),+)?),
+					episode_number: notsettable!(episode_number, ::flix_model::numbers::EpisodeNumber::new($episode) $(, $($skip),+)?),
 					title: notsettable!(title, concat!("SSE Title ", $show, ",", $season, ",", $episode).to_string() $(, $($skip),+)?),
 					overview: notsettable!(overview, concat!("SSE Overview ", $show, ",", $season, ",", $episode).to_string() $(, $($skip),+)?),
 					date: notsettable!(date, NaiveDate::from_yo_opt($show + $season, 1).expect("from_yo_opt") $(, $($skip),+)?),

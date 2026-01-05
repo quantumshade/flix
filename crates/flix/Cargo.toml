@@ -1,22 +1,22 @@
 [package]
 name = "flix"
-version = "0.0.15"
-
-categories = []
+version = "0.0.16"
+edition.workspace = true
+rust-version.workspace = true
 description = "Mechanisms for interacting with flix media"
 repository = "https://github.com/QuantumShade/flix"
-
-authors.workspace = true
-edition.workspace = true
 license-file.workspace = true
-rust-version.workspace = true
+categories = []
 
 [package.metadata.docs.rs]
 all-features = true
 rustdoc-args = ["--cfg", "docsrs"]
 
-[lints]
-workspace = true
+[dependencies]
+flix-db = { workspace = true }
+flix-fs = { workspace = true, optional = true }
+flix-model = { workspace = true }
+flix-tmdb = { workspace = true, optional = true }
 
 [features]
 default = []
@@ -24,9 +24,5 @@ fs = ["dep:flix-fs"]
 serde = ["flix-model/serde"]
 tmdb = ["dep:flix-tmdb", "flix-db/tmdb"]
 
-[dependencies]
-flix-db = { workspace = true }
-flix-model = { workspace = true }
-
-flix-fs = { workspace = true, optional = true }
-flix-tmdb = { workspace = true, optional = true }
+[lints]
+workspace = true

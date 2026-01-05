@@ -280,9 +280,9 @@ pub mod test {
 		($db:expr, $show:literal, $season:literal, $flix_show:literal, $flix_season:literal) => {
 			$crate::entity::tmdb::seasons::ActiveModel {
 				tmdb_show: Set(::flix_tmdb::model::id::ShowId::from_raw($show)),
-				tmdb_season: Set($season),
+				tmdb_season: Set(::flix_model::numbers::SeasonNumber::new($season)),
 				flix_show: Set(::flix_model::id::ShowId::from_raw($flix_show)),
-				flix_season: Set($flix_season),
+				flix_season: Set(::flix_model::numbers::SeasonNumber::new($flix_season)),
 				last_update: Set(::chrono::Utc::now()),
 			}
 			.insert($db)
@@ -296,11 +296,11 @@ pub mod test {
 		($db:expr, $show:literal, $season:literal, $episode:literal, $flix_show:literal, $flix_season:literal, $flix_episode:literal) => {
 			$crate::entity::tmdb::episodes::ActiveModel {
 				tmdb_show: Set(::flix_tmdb::model::id::ShowId::from_raw($show)),
-				tmdb_season: Set($season),
-				tmdb_episode: Set($episode),
+				tmdb_season: Set(::flix_model::numbers::SeasonNumber::new($season)),
+				tmdb_episode: Set(::flix_model::numbers::EpisodeNumber::new($episode)),
 				flix_show: Set(::flix_model::id::ShowId::from_raw($flix_show)),
-				flix_season: Set($flix_season),
-				flix_episode: Set($flix_episode),
+				flix_season: Set(::flix_model::numbers::SeasonNumber::new($flix_season)),
+				flix_episode: Set(::flix_model::numbers::EpisodeNumber::new($flix_episode)),
 				last_update: Set(::chrono::Utc::now()),
 				runtime: Set(::core::default::Default::default()),
 			}
@@ -514,9 +514,9 @@ mod tests {
 					.expect("insert");
 
 				assert_eq!(model.tmdb_show, TmdbShowId::from_raw($tshow));
-				assert_eq!(model.tmdb_season, $tseason);
+				assert_eq!(model.tmdb_season, ::flix_model::numbers::SeasonNumber::new($tseason));
 				assert_eq!(model.flix_show, ShowId::from_raw($show));
-				assert_eq!(model.flix_season, $season);
+				assert_eq!(model.flix_season, ::flix_model::numbers::SeasonNumber::new($season));
 				assert_eq!(model.last_update, NaiveDate::from_yo_opt($tshow, 1).expect("from_yo_opt").and_hms_opt(0, 0, 0).expect("and_hms_opt").and_utc());
 			};
 			($db:expr, $show:literal, $season:literal, $tshow:literal, $tseason:literal, $error:ident $(; $($skip:ident),+)?) => {
@@ -531,9 +531,9 @@ mod tests {
 			(@insert, $db:expr, $show:literal, $season:literal, $tshow:literal, $tseason:literal $(; $($skip:ident),+)?) => {
 				super::seasons::ActiveModel {
 					tmdb_show: notsettable!(tmdb_show, TmdbShowId::from_raw($tshow) $(, $($skip),+)?),
-					tmdb_season: notsettable!(tmdb_season, $tseason $(, $($skip),+)?),
+					tmdb_season: notsettable!(tmdb_season, ::flix_model::numbers::SeasonNumber::new($tseason) $(, $($skip),+)?),
 					flix_show: notsettable!(flix_show, ShowId::from_raw($show) $(, $($skip),+)?),
-					flix_season: notsettable!(flix_season, $season $(, $($skip),+)?),
+					flix_season: notsettable!(flix_season, ::flix_model::numbers::SeasonNumber::new($season) $(, $($skip),+)?),
 					last_update: notsettable!(last_update, NaiveDate::from_yo_opt($tshow, 1).expect("from_yo_opt").and_hms_opt(0, 0, 0).expect("and_hms_opt").and_utc() $(, $($skip),+)?),
 				}.insert($db).await
 			};
@@ -569,11 +569,11 @@ mod tests {
 					.expect("insert");
 
 				assert_eq!(model.tmdb_show, TmdbShowId::from_raw($tshow));
-				assert_eq!(model.tmdb_season, $tseason);
-				assert_eq!(model.tmdb_episode, $tepisode);
+				assert_eq!(model.tmdb_season, ::flix_model::numbers::SeasonNumber::new($tseason));
+				assert_eq!(model.tmdb_episode, ::flix_model::numbers::EpisodeNumber::new($tepisode));
 				assert_eq!(model.flix_show, ShowId::from_raw($show));
-				assert_eq!(model.flix_season, $season);
-				assert_eq!(model.flix_episode, $episode);
+				assert_eq!(model.flix_season, ::flix_model::numbers::SeasonNumber::new($season));
+				assert_eq!(model.flix_episode, ::flix_model::numbers::EpisodeNumber::new($episode));
 				assert_eq!(model.last_update, NaiveDate::from_yo_opt($tshow, 1).expect("from_yo_opt").and_hms_opt(0, 0, 0).expect("and_hms_opt").and_utc());
 				assert_eq!(model.runtime, Duration::from_secs($tshow).into());
 			};
@@ -589,11 +589,11 @@ mod tests {
 			(@insert, $db:expr, $show:literal, $season:literal, $episode:literal, $tshow:literal, $tseason:literal, $tepisode:literal $(; $($skip:ident),+)?) => {
 				super::episodes::ActiveModel {
 					tmdb_show: notsettable!(tmdb_show, TmdbShowId::from_raw($tshow) $(, $($skip),+)?),
-					tmdb_season: notsettable!(tmdb_season, $tseason $(, $($skip),+)?),
-					tmdb_episode: notsettable!(tmdb_episode, $tepisode $(, $($skip),+)?),
+					tmdb_season: notsettable!(tmdb_season, ::flix_model::numbers::SeasonNumber::new($tseason) $(, $($skip),+)?),
+					tmdb_episode: notsettable!(tmdb_episode, ::flix_model::numbers::EpisodeNumber::new($tepisode) $(, $($skip),+)?),
 					flix_show: notsettable!(flix_show, ShowId::from_raw($show) $(, $($skip),+)?),
-					flix_season: notsettable!(flix_season, $season $(, $($skip),+)?),
-					flix_episode: notsettable!(flix_episode, $episode $(, $($skip),+)?),
+					flix_season: notsettable!(flix_season, ::flix_model::numbers::SeasonNumber::new($season) $(, $($skip),+)?),
+					flix_episode: notsettable!(flix_episode, ::flix_model::numbers::EpisodeNumber::new($episode) $(, $($skip),+)?),
 					last_update: notsettable!(last_update, NaiveDate::from_yo_opt($tshow, 1).expect("from_yo_opt").and_hms_opt(0, 0, 0).expect("and_hms_opt").and_utc() $(, $($skip),+)?),
 					runtime: notsettable!(runtime, Duration::from_secs($tshow).into() $(, $($skip),+)?),
 				}.insert($db).await

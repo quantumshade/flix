@@ -1,9 +1,0 @@
-{
-	"recommendations": [
-		"vadimcn.vscode-lldb",
-		"barbosshack.crates-io",
-		"usernamehw.errorlens",
-		"tamasfe.even-better-toml",
-		"rust-lang.rust-analyzer",
-	]
-}

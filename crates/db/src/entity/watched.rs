@@ -224,8 +224,8 @@ pub mod test {
 		($db:expr, $show:literal, $season:literal, $episode:literal, $user:literal) => {
 			$crate::entity::watched::episodes::ActiveModel {
 				show_id: Set(::flix_model::id::ShowId::from_raw($show)),
-				season_number: Set($season),
-				episode_number: Set($episode),
+				season_number: Set(::flix_model::numbers::SeasonNumber::new($season)),
+				episode_number: Set(::flix_model::numbers::EpisodeNumber::new($episode)),
 				user_id: Set($user),
 				watched_date: Set(::chrono::Utc::now()),
 			}
@@ -326,8 +326,8 @@ mod tests {
 					.expect("insert");
 
 				assert_eq!(model.show_id, ShowId::from_raw($show));
-				assert_eq!(model.season_number, $season);
-				assert_eq!(model.episode_number, $episode);
+				assert_eq!(model.season_number, ::flix_model::numbers::SeasonNumber::new($season));
+				assert_eq!(model.episode_number, ::flix_model::numbers::EpisodeNumber::new($episode));
 				assert_eq!(model.user_id, $uid);
 				assert_eq!(model.watched_date, NaiveDate::from_yo_opt($uid, 1).expect("from_yo_opt").and_hms_opt(0, 0, 0).expect("and_hms_opt").and_utc());
 			};
@@ -340,8 +340,8 @@ mod tests {
 			(@insert, $db:expr, $show:literal, $season:literal, $episode:literal, $uid:literal $(; $($skip:ident),+)?) => {
 				super::episodes::ActiveModel {
 					show_id: notsettable!(show_id, ShowId::from_raw($show) $(, $($skip),+)?),
-					season_number: notsettable!(season_number, $season $(, $($skip),+)?),
-					episode_number: notsettable!(episode_number, $episode $(, $($skip),+)?),
+					season_number: notsettable!(season_number, ::flix_model::numbers::SeasonNumber::new($season) $(, $($skip),+)?),
+					episode_number: notsettable!(episode_number, ::flix_model::numbers::EpisodeNumber::new($episode) $(, $($skip),+)?),
 					user_id: notsettable!(user_id, $uid $(, $($skip),+)?),
 					watched_date: notsettable!(watched_date, NaiveDate::from_yo_opt($uid, 1).expect("from_yo_opt").and_hms_opt(0, 0, 0).expect("and_hms_opt").and_utc() $(, $($skip),+)?),
 				}.insert($db).await

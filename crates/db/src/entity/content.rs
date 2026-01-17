@@ -15,7 +15,7 @@ pub mod libraries {
 	#[sea_orm(table_name = "flix_libraries")]
 	pub struct Model {
 		/// The library's ID
-		#[sea_orm(column_type = "Integer", primary_key, nullable, auto_increment = false)]
+		#[sea_orm(primary_key, auto_increment = false)]
 		pub id: LibraryId,
 		/// The library's directory
 		pub directory: PathBytes,
@@ -23,19 +23,19 @@ pub mod libraries {
 		pub last_scan: Option<DateTime<Utc>>,
 
 		/// Collections that are part of this library
-		#[sea_orm(has_many, on_update = "Cascade", on_delete = "Cascade")]
+		#[sea_orm(has_many)]
 		pub collections: HasMany<super::collections::Entity>,
 		/// Movies that are part of this library
-		#[sea_orm(has_many, on_update = "Cascade", on_delete = "Cascade")]
+		#[sea_orm(has_many)]
 		pub movies: HasMany<super::movies::Entity>,
 		/// Shows that are part of this library
-		#[sea_orm(has_many, on_update = "Cascade", on_delete = "Cascade")]
+		#[sea_orm(has_many)]
 		pub shows: HasMany<super::shows::Entity>,
 		/// Seasons that are part of this library
-		#[sea_orm(has_many, on_update = "Cascade", on_delete = "Cascade")]
+		#[sea_orm(has_many)]
 		pub seasons: HasMany<super::seasons::Entity>,
 		/// Episodes that are part of this library
-		#[sea_orm(has_many, on_update = "Cascade", on_delete = "Cascade")]
+		#[sea_orm(has_many)]
 		pub episodes: HasMany<super::episodes::Entity>,
 	}
 
@@ -58,14 +58,11 @@ pub mod collections {
 	#[sea_orm(table_name = "flix_collections")]
 	pub struct Model {
 		/// The collection's ID
-		#[sea_orm(column_type = "Integer", primary_key, nullable, auto_increment = false)]
+		#[sea_orm(primary_key, auto_increment = false)]
 		pub id: CollectionId,
 		/// The collection's parent
 		#[sea_orm(indexed)]
 		pub parent_id: Option<CollectionId>,
-		/// The collection's slug
-		#[sea_orm(unique)]
-		pub slug: String,
 		/// The collection's library ID
 		pub library_id: LibraryId,
 		/// The collection's directory
@@ -74,14 +71,35 @@ pub mod collections {
 		pub relative_poster_path: Option<String>,
 
 		/// This collection's parent
-		#[sea_orm(self_ref, relation_enum = "Parent", from = "parent_id", to = "id")]
+		#[sea_orm(
+			self_ref,
+			relation_enum = "Parent",
+			from = "parent_id",
+			to = "id",
+			on_update = "Cascade",
+			on_delete = "Cascade"
+		)]
 		pub parent: HasOne<Entity>,
 		/// The library this collection belongs to
-		#[sea_orm(belongs_to, from = "library_id", to = "id")]
+		#[sea_orm(
+			belongs_to,
+			from = "library_id",
+			to = "id",
+			on_update = "Cascade",
+			on_delete = "Cascade"
+		)]
 		pub library: HasOne<super::libraries::Entity>,
 		/// The info for this collection
-		#[sea_orm(belongs_to, relation_enum = "Info", from = "id", to = "id")]
+		#[sea_orm(
+			belongs_to,
+			relation_enum = "Info",
+			from = "id",
+			to = "id",
+			on_update = "Cascade",
+			on_delete = "Cascade"
+		)]
 		pub info: HasOne<entity::info::collections::Entity>,
+
 		/// The watched info for this collection
 		#[sea_orm(has_many, relation_enum = "Watched", from = "id", to = "id")]
 		pub watched: HasMany<entity::watched::collections::Entity>,
@@ -106,14 +124,11 @@ pub mod movies {
 	#[sea_orm(table_name = "flix_movies")]
 	pub struct Model {
 		/// The movie's ID
-		#[sea_orm(column_type = "Integer", primary_key, nullable, auto_increment = false)]
+		#[sea_orm(primary_key, auto_increment = false)]
 		pub id: MovieId,
 		/// The movie's parent
 		#[sea_orm(indexed)]
 		pub parent_id: Option<CollectionId>,
-		/// The movie's slug
-		#[sea_orm(unique)]
-		pub slug: String,
 		/// The movie's library
 		pub library_id: LibraryId,
 		/// The movie's directory
@@ -124,14 +139,34 @@ pub mod movies {
 		pub relative_poster_path: Option<String>,
 
 		/// This movie's parent
-		#[sea_orm(belongs_to, from = "parent_id", to = "id")]
+		#[sea_orm(
+			belongs_to,
+			from = "parent_id",
+			to = "id",
+			on_update = "Cascade",
+			on_delete = "Cascade"
+		)]
 		pub parent: HasOne<super::collections::Entity>,
 		/// The library this movie belongs to
-		#[sea_orm(belongs_to, from = "library_id", to = "id")]
+		#[sea_orm(
+			belongs_to,
+			from = "library_id",
+			to = "id",
+			on_update = "Cascade",
+			on_delete = "Cascade"
+		)]
 		pub library: HasOne<super::libraries::Entity>,
 		/// The info for this movie
-		#[sea_orm(belongs_to, relation_enum = "Info", from = "id", to = "id")]
+		#[sea_orm(
+			belongs_to,
+			relation_enum = "Info",
+			from = "id",
+			to = "id",
+			on_update = "Cascade",
+			on_delete = "Cascade"
+		)]
 		pub info: HasOne<entity::info::movies::Entity>,
+
 		/// The watched info for this movie
 		#[sea_orm(has_many, relation_enum = "Watched", from = "id", to = "id")]
 		pub watched: HasMany<entity::watched::movies::Entity>,
@@ -156,14 +191,11 @@ pub mod shows {
 	#[sea_orm(table_name = "flix_shows")]
 	pub struct Model {
 		/// The show's ID
-		#[sea_orm(column_type = "Integer", primary_key, nullable, auto_increment = false)]
+		#[sea_orm(primary_key, auto_increment = false)]
 		pub id: ShowId,
 		/// The show's parent
 		#[sea_orm(indexed)]
 		pub parent_id: Option<CollectionId>,
-		/// The show's slug
-		#[sea_orm(unique)]
-		pub slug: String,
 		/// The show's library
 		pub library_id: LibraryId,
 		/// The show's directory
@@ -172,14 +204,40 @@ pub mod shows {
 		pub relative_poster_path: Option<String>,
 
 		/// This show's parent
-		#[sea_orm(belongs_to, from = "parent_id", to = "id")]
+		#[sea_orm(
+			belongs_to,
+			from = "parent_id",
+			to = "id",
+			on_update = "Cascade",
+			on_delete = "Cascade"
+		)]
 		pub parent: HasOne<super::collections::Entity>,
 		/// The library this show belongs to
-		#[sea_orm(belongs_to, from = "library_id", to = "id")]
+		#[sea_orm(
+			belongs_to,
+			from = "library_id",
+			to = "id",
+			on_update = "Cascade",
+			on_delete = "Cascade"
+		)]
 		pub library: HasOne<super::libraries::Entity>,
 		/// The info for this show
-		#[sea_orm(belongs_to, relation_enum = "Info", from = "id", to = "id")]
+		#[sea_orm(
+			belongs_to,
+			relation_enum = "Info",
+			from = "id",
+			to = "id",
+			on_update = "Cascade",
+			on_delete = "Cascade"
+		)]
 		pub info: HasOne<entity::info::shows::Entity>,
+
+		/// Seasons that are part of this show
+		#[sea_orm(has_many)]
+		pub seasons: HasMany<super::seasons::Entity>,
+		/// Episodes that are part of this show
+		#[sea_orm(has_many)]
+		pub episodes: HasMany<super::episodes::Entity>,
 		/// The watched info for this show
 		#[sea_orm(has_many, relation_enum = "Watched", from = "id", to = "id")]
 		pub watched: HasMany<entity::watched::shows::Entity>,
@@ -210,9 +268,6 @@ pub mod seasons {
 		/// The season's number
 		#[sea_orm(primary_key, auto_increment = false)]
 		pub season_number: SeasonNumber,
-		/// The season's slug
-		#[sea_orm(unique)]
-		pub slug: String,
 		/// The season's library
 		pub library_id: LibraryId,
 		/// The season's directory
@@ -220,17 +275,38 @@ pub mod seasons {
 		/// The season's poster path
 		pub relative_poster_path: Option<String>,
 
+		/// This season's show
+		#[sea_orm(
+			belongs_to,
+			from = "show_id",
+			to = "id",
+			on_update = "Cascade",
+			on_delete = "Cascade"
+		)]
+		pub show: HasOne<super::shows::Entity>,
 		/// The library this season belongs to
-		#[sea_orm(belongs_to, from = "library_id", to = "id")]
+		#[sea_orm(
+			belongs_to,
+			from = "library_id",
+			to = "id",
+			on_update = "Cascade",
+			on_delete = "Cascade"
+		)]
 		pub library: HasOne<super::libraries::Entity>,
 		/// The info for this season
 		#[sea_orm(
 			belongs_to,
 			relation_enum = "Info",
 			from = "(show_id, season_number)",
-			to = "(show_id, season_number)"
+			to = "(show_id, season_number)",
+			on_update = "Cascade",
+			on_delete = "Cascade"
 		)]
 		pub info: HasOne<entity::info::seasons::Entity>,
+
+		/// Episodes that are part of this show
+		#[sea_orm(has_many)]
+		pub episodes: HasMany<super::episodes::Entity>,
 		/// The watched info for this season
 		#[sea_orm(
 			has_many,
@@ -271,9 +347,6 @@ pub mod episodes {
 		pub episode_number: EpisodeNumber,
 		/// The number of additional contained episodes
 		pub count: u8,
-		/// The episode's slug
-		#[sea_orm(unique)]
-		pub slug: String,
 		/// The episode's library
 		pub library_id: LibraryId,
 		/// The episode's directory
@@ -283,17 +356,44 @@ pub mod episodes {
 		/// The episode's poster path
 		pub relative_poster_path: Option<String>,
 
+		/// This episode's show
+		#[sea_orm(
+			belongs_to,
+			from = "show_id",
+			to = "id",
+			on_update = "Cascade",
+			on_delete = "Cascade"
+		)]
+		pub show: HasOne<super::shows::Entity>,
+		/// This episode's season
+		#[sea_orm(
+			belongs_to,
+			from = "(show_id, season_number)",
+			to = "(show_id, season_number)",
+			on_update = "Cascade",
+			on_delete = "Cascade"
+		)]
+		pub season: HasOne<super::seasons::Entity>,
 		/// The library this episode belongs to
-		#[sea_orm(belongs_to, from = "library_id", to = "id")]
+		#[sea_orm(
+			belongs_to,
+			from = "library_id",
+			to = "id",
+			on_update = "Cascade",
+			on_delete = "Cascade"
+		)]
 		pub library: HasOne<super::libraries::Entity>,
 		/// The info for this episode
 		#[sea_orm(
 			belongs_to,
 			relation_enum = "Info",
 			from = "(show_id, season_number, episode_number)",
-			to = "(show_id, season_number, episode_number)"
+			to = "(show_id, season_number, episode_number)",
+			on_update = "Cascade",
+			on_delete = "Cascade"
 		)]
 		pub info: HasOne<entity::info::episodes::Entity>,
+
 		/// The watched info for this episode
 		#[sea_orm(
 			has_many,
@@ -311,7 +411,7 @@ pub mod episodes {
 #[cfg(test)]
 pub mod test {
 	macro_rules! make_content_library {
-		($db:expr, $id:literal) => {
+		($db:expr, $id:expr) => {
 			$crate::entity::content::libraries::ActiveModel {
 				id: Set(::flix_model::id::LibraryId::from_raw($id)),
 				directory: Set(::std::path::PathBuf::new().into()),
@@ -325,12 +425,11 @@ pub mod test {
 	pub(crate) use make_content_library;
 
 	macro_rules! make_content_collection {
-		($db:expr, $lid:literal, $id:literal, $pid:expr) => {
+		($db:expr, $lid:expr, $id:expr, $pid:expr) => {
 			$crate::entity::info::test::make_info_collection!($db, $id);
 			$crate::entity::content::collections::ActiveModel {
 				id: Set(::flix_model::id::CollectionId::from_raw($id)),
 				parent_id: Set($pid.map(::flix_model::id::CollectionId::from_raw)),
-				slug: Set(concat!("C ", $id).to_string()),
 				library_id: Set(::flix_model::id::LibraryId::from_raw($lid)),
 				directory: Set(::std::path::PathBuf::new().into()),
 				relative_poster_path: Set(::core::option::Option::None),
@@ -343,12 +442,11 @@ pub mod test {
 	pub(crate) use make_content_collection;
 
 	macro_rules! make_content_movie {
-		($db:expr, $lid:literal, $id:literal, $pid:expr) => {
+		($db:expr, $lid:expr, $id:expr, $pid:expr) => {
 			$crate::entity::info::test::make_info_movie!($db, $id);
 			$crate::entity::content::movies::ActiveModel {
 				id: Set(::flix_model::id::MovieId::from_raw($id)),
 				parent_id: Set($pid.map(::flix_model::id::CollectionId::from_raw)),
-				slug: Set(concat!("< ", $id).to_string()),
 				library_id: Set(::flix_model::id::LibraryId::from_raw($lid)),
 				directory: Set(::std::path::PathBuf::new().into()),
 				relative_media_path: Set(::std::string::String::new()),
@@ -362,12 +460,11 @@ pub mod test {
 	pub(crate) use make_content_movie;
 
 	macro_rules! make_content_show {
-		($db:expr, $lid:literal, $id:literal, $pid:expr) => {
+		($db:expr, $lid:expr, $id:expr, $pid:expr) => {
 			$crate::entity::info::test::make_info_show!($db, $id);
 			$crate::entity::content::shows::ActiveModel {
 				id: Set(::flix_model::id::ShowId::from_raw($id)),
 				parent_id: Set($pid.map(::flix_model::id::CollectionId::from_raw)),
-				slug: Set(concat!("S ", $id).to_string()),
 				library_id: Set(::flix_model::id::LibraryId::from_raw($lid)),
 				directory: Set(::std::path::PathBuf::new().into()),
 				relative_poster_path: Set(::core::option::Option::None),
@@ -380,12 +477,11 @@ pub mod test {
 	pub(crate) use make_content_show;
 
 	macro_rules! make_content_season {
-		($db:expr, $lid:literal, $show:literal, $season:literal) => {
+		($db:expr, $lid:expr, $show:expr, $season:expr) => {
 			$crate::entity::info::test::make_info_season!($db, $show, $season);
 			$crate::entity::content::seasons::ActiveModel {
 				show_id: Set(::flix_model::id::ShowId::from_raw($show)),
 				season_number: Set(::flix_model::numbers::SeasonNumber::new($season)),
-				slug: Set(concat!("SS ", $show, $season).to_string()),
 				library_id: Set(::flix_model::id::LibraryId::from_raw($lid)),
 				directory: Set(::std::path::PathBuf::new().into()),
 				relative_poster_path: Set(::core::option::Option::None),
@@ -398,20 +494,19 @@ pub mod test {
 	pub(crate) use make_content_season;
 
 	macro_rules! make_content_episode {
-		($db:expr, $lid:literal, $show:literal, $season:literal, $episode:literal) => {
+		($db:expr, $lid:expr, $show:expr, $season:expr, $episode:expr) => {
 			make_content_episode!(@make, $db, $lid, $show, $season, $episode, 0);
 		};
 		($db:expr, $lid:literal, $show:literal, $season:literal, $episode:literal, >1) => {
 			make_content_episode!(@make, $db, $lid, $show, $season, $episode, 1);
 		};
-		(@make, $db:expr, $lid:literal, $show:literal, $season:literal, $episode:literal, $count:literal) => {
+		(@make, $db:expr, $lid:expr, $show:expr, $season:expr, $episode:expr, $count:literal) => {
 			$crate::entity::info::test::make_info_episode!($db, $show, $season, $episode);
 			$crate::entity::content::episodes::ActiveModel {
 				show_id: Set(::flix_model::id::ShowId::from_raw($show)),
 				season_number: Set(::flix_model::numbers::SeasonNumber::new($season)),
 				episode_number: Set(::flix_model::numbers::EpisodeNumber::new($episode)),
 				count: Set($count),
-				slug: Set(concat!("SSE ", $show, $season, $episode).to_string()),
 				library_id: Set(::flix_model::id::LibraryId::from_raw($lid)),
 				directory: Set(::std::path::PathBuf::new().into()),
 				relative_media_path: Set(::std::string::String::new()),
@@ -507,7 +602,6 @@ mod tests {
 
 				assert_eq!(model.id, CollectionId::from_raw($id));
 				assert_eq!(model.parent_id, $pid.map(CollectionId::from_raw));
-				assert_eq!(model.slug, concat!("C Slug ", $id).to_string());
 				assert_eq!(model.library_id, LibraryId::from_raw($lid));
 				assert_eq!(model.directory, Path::new(concat!("C Directory ", $id)).to_owned().into());
 				assert_eq!(model.relative_poster_path, noneable!(relative_poster_path, concat!("C Poster ", $id).to_owned() $(, $($skip),+)?));
@@ -522,7 +616,6 @@ mod tests {
 				super::collections::ActiveModel {
 					id: notsettable!(id, CollectionId::from_raw($id) $(, $($skip),+)?),
 					parent_id: notsettable!(parent_id, $pid.map(CollectionId::from_raw) $(, $($skip),+)?),
-					slug: notsettable!(slug, concat!("C Slug ", $id).to_string() $(, $($skip),+)?),
 					library_id: notsettable!(library_id, LibraryId::from_raw($lid) $(, $($skip),+)?),
 					directory: notsettable!(directory, Path::new(concat!("C Directory ", $id)).to_owned().into() $(, $($skip),+)?),
 					relative_poster_path: notsettable!(relative_poster_path, Some(concat!("C Poster ", $id).to_owned()) $(, $($skip),+)?),
@@ -548,10 +641,9 @@ mod tests {
 		make_info_collection!(&db, 8);
 		assert_collection!(&db, 3, None, 1, Success; id);
 		assert_collection!(&db, 4, None, 1, Success; parent_id);
-		assert_collection!(&db, 5, None, 1, NotNullViolation; slug);
-		assert_collection!(&db, 6, None, 1, NotNullViolation; library_id);
-		assert_collection!(&db, 7, None, 1, NotNullViolation; directory);
-		assert_collection!(&db, 8, None, 1, Success; relative_poster_path);
+		assert_collection!(&db, 5, None, 1, NotNullViolation; library_id);
+		assert_collection!(&db, 6, None, 1, NotNullViolation; directory);
+		assert_collection!(&db, 7, None, 1, Success; relative_poster_path);
 	}
 
 	#[tokio::test]
@@ -565,7 +657,6 @@ mod tests {
 
 				assert_eq!(model.id, MovieId::from_raw($id));
 				assert_eq!(model.parent_id, $pid.map(CollectionId::from_raw));
-				assert_eq!(model.slug, concat!("M Slug ", $id).to_string());
 				assert_eq!(model.library_id, LibraryId::from_raw($lid));
 				assert_eq!(model.directory, Path::new(concat!("M Directory ", $id)).to_owned().into());
 				assert_eq!(model.relative_media_path, concat!("M Media ", $id));
@@ -581,7 +672,6 @@ mod tests {
 				super::movies::ActiveModel {
 					id: notsettable!(id, MovieId::from_raw($id) $(, $($skip),+)?),
 					parent_id: notsettable!(parent_id, $pid.map(CollectionId::from_raw) $(, $($skip),+)?),
-					slug: notsettable!(slug, concat!("M Slug ", $id).to_string() $(, $($skip),+)?),
 					library_id: notsettable!(library_id, LibraryId::from_raw($lid) $(, $($skip),+)?),
 					directory: notsettable!(directory, Path::new(concat!("M Directory ", $id)).to_owned().into() $(, $($skip),+)?),
 					relative_media_path: notsettable!(relative_media_path, concat!("M Media ", $id).to_owned() $(, $($skip),+)?),
@@ -612,11 +702,10 @@ mod tests {
 		make_info_movie!(&db, 9);
 		assert_movie!(&db, 3, None, 1, Success; id);
 		assert_movie!(&db, 4, None, 1, Success; parent_id);
-		assert_movie!(&db, 5, None, 1, NotNullViolation; slug);
-		assert_movie!(&db, 6, None, 1, NotNullViolation; library_id);
-		assert_movie!(&db, 7, None, 1, NotNullViolation; directory);
-		assert_movie!(&db, 8, None, 1, NotNullViolation; relative_media_path);
-		assert_movie!(&db, 9, None, 1, Success; relative_poster_path);
+		assert_movie!(&db, 5, None, 1, NotNullViolation; library_id);
+		assert_movie!(&db, 6, None, 1, NotNullViolation; directory);
+		assert_movie!(&db, 7, None, 1, NotNullViolation; relative_media_path);
+		assert_movie!(&db, 8, None, 1, Success; relative_poster_path);
 	}
 
 	#[tokio::test]
@@ -630,7 +719,6 @@ mod tests {
 
 				assert_eq!(model.id, ShowId::from_raw($id));
 				assert_eq!(model.parent_id, $pid.map(CollectionId::from_raw));
-				assert_eq!(model.slug, concat!("S Slug ", $id).to_string());
 				assert_eq!(model.library_id, LibraryId::from_raw($lid));
 				assert_eq!(model.directory, Path::new(concat!("S Directory ", $id)).to_owned().into());
 				assert_eq!(model.relative_poster_path, noneable!(relative_poster_path, concat!("S Poster ", $id).to_owned() $(, $($skip),+)?));
@@ -645,7 +733,6 @@ mod tests {
 				super::shows::ActiveModel {
 					id: notsettable!(id, ShowId::from_raw($id) $(, $($skip),+)?),
 					parent_id: notsettable!(parent_id, $pid.map(CollectionId::from_raw) $(, $($skip),+)?),
-					slug: notsettable!(slug, concat!("S Slug ", $id).to_string() $(, $($skip),+)?),
 					library_id: notsettable!(library_id, LibraryId::from_raw($lid) $(, $($skip),+)?),
 					directory: notsettable!(directory, Path::new(concat!("S Directory ", $id)).to_owned().into() $(, $($skip),+)?),
 					relative_poster_path: notsettable!(relative_poster_path, Some(concat!("S Poster ", $id).to_owned()) $(, $($skip),+)?),
@@ -674,10 +761,9 @@ mod tests {
 		make_info_show!(&db, 8);
 		assert_show!(&db, 3, None, 1, Success; id);
 		assert_show!(&db, 4, None, 1, Success; parent_id);
-		assert_show!(&db, 5, None, 1, NotNullViolation; slug);
-		assert_show!(&db, 6, None, 1, NotNullViolation; library_id);
-		assert_show!(&db, 7, None, 1, NotNullViolation; directory);
-		assert_show!(&db, 8, None, 1, Success; relative_poster_path);
+		assert_show!(&db, 5, None, 1, NotNullViolation; library_id);
+		assert_show!(&db, 6, None, 1, NotNullViolation; directory);
+		assert_show!(&db, 7, None, 1, Success; relative_poster_path);
 	}
 
 	#[tokio::test]
@@ -691,7 +777,6 @@ mod tests {
 
 				assert_eq!(model.show_id, ShowId::from_raw($id));
 				assert_eq!(model.season_number, ::flix_model::numbers::SeasonNumber::new($season));
-				assert_eq!(model.slug, concat!("SS Slug ", $id, ",", $season).to_string());
 				assert_eq!(model.library_id, LibraryId::from_raw($lid));
 				assert_eq!(model.directory, Path::new(concat!("SS Directory ", $id, ",", $season)).to_owned().into());
 				assert_eq!(model.relative_poster_path, noneable!(relative_poster_path, concat!("SS Poster ", $id, ",", $season).to_owned() $(, $($skip),+)?));
@@ -706,7 +791,6 @@ mod tests {
 				super::seasons::ActiveModel {
 					show_id: notsettable!(show_id, ShowId::from_raw($id) $(, $($skip),+)?),
 					season_number: notsettable!(season_number, ::flix_model::numbers::SeasonNumber::new($season) $(, $($skip),+)?),
-					slug: notsettable!(slug, concat!("SS Slug ", $id, ",", $season).to_string() $(, $($skip),+)?),
 					library_id: notsettable!(library_id, LibraryId::from_raw($lid) $(, $($skip),+)?),
 					directory: notsettable!(directory, Path::new(concat!("SS Directory ", $id, ",", $season)).to_owned().into() $(, $($skip),+)?),
 					relative_poster_path: notsettable!(relative_poster_path, Some(concat!("SS Poster ", $id, ",", $season).to_owned()) $(, $($skip),+)?),
@@ -715,7 +799,7 @@ mod tests {
 		}
 
 		make_content_library!(&db, 1);
-		make_info_show!(&db, 1);
+		make_content_show!(&db, 1, 1, None);
 		assert_season!(&db, 1, 1, 1, ForeignKeyViolation);
 		make_info_season!(&db, 1, 1);
 		assert_season!(&db, 1, 1, 1, Success);
@@ -729,10 +813,9 @@ mod tests {
 		make_info_season!(&db, 1, 8);
 		assert_season!(&db, 1, 3, 1, NotNullViolation; show_id);
 		assert_season!(&db, 1, 4, 1, NotNullViolation; season_number);
-		assert_season!(&db, 1, 5, 1, NotNullViolation; slug);
-		assert_season!(&db, 1, 6, 1, NotNullViolation; library_id);
-		assert_season!(&db, 1, 7, 1, NotNullViolation; directory);
-		assert_season!(&db, 1, 8, 1, Success; relative_poster_path);
+		assert_season!(&db, 1, 5, 1, NotNullViolation; library_id);
+		assert_season!(&db, 1, 6, 1, NotNullViolation; directory);
+		assert_season!(&db, 1, 7, 1, Success; relative_poster_path);
 	}
 
 	#[tokio::test]
@@ -747,7 +830,6 @@ mod tests {
 				assert_eq!(model.show_id, ShowId::from_raw($id));
 				assert_eq!(model.season_number, ::flix_model::numbers::SeasonNumber::new($season));
 				assert_eq!(model.episode_number, ::flix_model::numbers::EpisodeNumber::new($episode));
-				assert_eq!(model.slug, concat!("SS Slug ", $id, ",", $season, $episode).to_string());
 				assert_eq!(model.library_id, LibraryId::from_raw($lid));
 				assert_eq!(model.directory, Path::new(concat!("SS Directory ", $id, ",", $season, $episode)).to_owned().into());
 				assert_eq!(model.relative_media_path, concat!("SS Media ", $id, ",", $season, $episode));
@@ -765,7 +847,6 @@ mod tests {
 					season_number: notsettable!(season_number, ::flix_model::numbers::SeasonNumber::new($season) $(, $($skip),+)?),
 					episode_number: notsettable!(episode_number, ::flix_model::numbers::EpisodeNumber::new($episode) $(, $($skip),+)?),
 					count: notsettable!(count, 0 $(, $($skip),+)?),
-					slug: notsettable!(slug, concat!("SS Slug ", $id, ",", $season, $episode).to_string() $(, $($skip),+)?),
 					library_id: notsettable!(library_id, LibraryId::from_raw($lid) $(, $($skip),+)?),
 					directory: notsettable!(directory, Path::new(concat!("SS Directory ", $id, ",", $season, $episode)).to_owned().into() $(, $($skip),+)?),
 					relative_media_path: notsettable!(relative_media_path, concat!("SS Media ", $id, ",", $season, $episode).to_owned() $(, $($skip),+)?),
@@ -775,8 +856,8 @@ mod tests {
 		}
 
 		make_content_library!(&db, 1);
-		make_info_show!(&db, 1);
-		make_info_season!(&db, 1, 1);
+		make_content_show!(&db, 1, 1, None);
+		make_content_season!(&db, 1, 1, 1);
 		assert_episode!(&db, 1, 1, 1, 1, ForeignKeyViolation);
 		make_info_episode!(&db, 1, 1, 1);
 		assert_episode!(&db, 1, 1, 1, 1, Success);
@@ -793,10 +874,9 @@ mod tests {
 		assert_episode!(&db, 1, 1, 3, 1, NotNullViolation; show_id);
 		assert_episode!(&db, 1, 1, 4, 1, NotNullViolation; season_number);
 		assert_episode!(&db, 1, 1, 5, 1, NotNullViolation; episode_number);
-		assert_episode!(&db, 1, 1, 6, 1, NotNullViolation; slug);
-		assert_episode!(&db, 1, 1, 7, 1, NotNullViolation; library_id);
-		assert_episode!(&db, 1, 1, 8, 1, NotNullViolation; directory);
-		assert_episode!(&db, 1, 1, 9, 1, NotNullViolation; relative_media_path);
-		assert_episode!(&db, 1, 1, 10, 1, Success; relative_poster_path);
+		assert_episode!(&db, 1, 1, 6, 1, NotNullViolation; library_id);
+		assert_episode!(&db, 1, 1, 7, 1, NotNullViolation; directory);
+		assert_episode!(&db, 1, 1, 8, 1, NotNullViolation; relative_media_path);
+		assert_episode!(&db, 1, 1, 9, 1, Success; relative_poster_path);
 	}
 }

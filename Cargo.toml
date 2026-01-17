@@ -4,7 +4,7 @@ members = ["crates/*"]
 
 [workspace.package]
 edition = "2024"
-rust-version = "1.85.0"
+rust-version = "1.87.0"
 license-file = "LICENSE.md"
 
 [workspace.dependencies]
@@ -20,6 +20,7 @@ flix-model = { path = "crates/model", version = "=0.0.16", default-features = fa
 flix-tmdb = { path = "crates/tmdb", version = "=0.0.16", default-features = false }
 futures = { version = "^0.3", default-features = false }
 governor = { version = "^0.10", default-features = false }
+itertools = { version = "^0.14", default-features = false }
 nonzero_ext = { version = "^0.3", default-features = false }
 regex = { version = "^1", default-features = false }
 reqwest = { version = "^0.13", default-features = false }

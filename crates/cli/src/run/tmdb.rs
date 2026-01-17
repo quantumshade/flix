@@ -3,6 +3,7 @@ use std::collections::HashMap;
 use flix::db::entity;
 use flix::model::id::{CollectionId, MovieId, ShowId};
 use flix::model::numbers::{EpisodeNumber, SeasonNumber};
+use flix::model::text;
 use flix::tmdb::Client;
 use flix::tmdb::model::id::{
 	CollectionId as TmdbCollectionId, MovieId as TmdbMovieId, ShowId as TmdbShowId,
@@ -37,6 +38,10 @@ pub async fn add(client: Client, db: &DatabaseConnection, command: Command) -> R
 
 			let title = collection.title.clone();
 
+			let sort_title = text::make_sortable_title(&title);
+			let fs_slug = text::make_fs_slug(&title);
+			let web_slug = text::make_web_slug(&title);
+
 			let result: Result<CollectionId, TransactionError<DbErr>> = db
 				.transaction(|txn| {
 					Box::pin(async move {
@@ -44,6 +49,9 @@ pub async fn add(client: Client, db: &DatabaseConnection, command: Command) -> R
 							id: NotSet,
 							title: Set(collection.title),
 							overview: Set(collection.overview),
+							sort_title: Set(sort_title),
+							fs_slug: Set(fs_slug),
+							web_slug: Set(web_slug),
 						}
 						.insert(txn)
 						.await?;
@@ -88,6 +96,10 @@ pub async fn add(client: Client, db: &DatabaseConnection, command: Command) -> R
 			let title = movie.title.clone();
 			let year = movie.release_date.year();
 
+			let sort_title = text::make_sortable_title(&title);
+			let fs_slug = text::make_fs_slug_year(&title, year);
+			let web_slug = text::make_web_slug_year(&title, year);
+
 			let result: Result<MovieId, TransactionError<DbErr>> = db
 				.transaction(|txn| {
 					Box::pin(async move {
@@ -97,6 +109,9 @@ pub async fn add(client: Client, db: &DatabaseConnection, command: Command) -> R
 							tagline: Set(movie.tagline),
 							overview: Set(movie.overview),
 							date: Set(movie.release_date),
+							sort_title: Set(sort_title),
+							fs_slug: Set(fs_slug),
+							web_slug: Set(web_slug),
 						}
 						.insert(txn)
 						.await?;
@@ -203,6 +218,10 @@ pub async fn add(client: Client, db: &DatabaseConnection, command: Command) -> R
 				seasons.push(season);
 			}
 
+			let sort_title = text::make_sortable_title(&show.title);
+			let fs_slug = text::make_fs_slug_year(&show.title, show.first_air_date.year());
+			let web_slug = text::make_web_slug_year(&show.title, show.first_air_date.year());
+
 			let result: Result<ShowId, TransactionError<DbErr>> = db
 				.transaction(|txn| {
 					Box::pin(async move {
@@ -212,6 +231,9 @@ pub async fn add(client: Client, db: &DatabaseConnection, command: Command) -> R
 							tagline: Set(show.tagline),
 							overview: Set(show.overview),
 							date: Set(show.first_air_date),
+							sort_title: Set(sort_title),
+							fs_slug: Set(fs_slug),
+							web_slug: Set(web_slug),
 						}
 						.insert(txn)
 						.await?;

@@ -16,7 +16,7 @@ pub mod collections {
 	#[sea_orm(table_name = "flix_tmdb_collections")]
 	pub struct Model {
 		/// The collection's TMDB ID
-		#[sea_orm(column_type = "Integer", primary_key, nullable, auto_increment = false)]
+		#[sea_orm(primary_key, auto_increment = false)]
 		pub tmdb_id: CollectionId,
 		/// The collection's ID
 		#[sea_orm(unique)]
@@ -26,12 +26,19 @@ pub mod collections {
 		/// The number of movies in the collection
 		pub movie_count: u16,
 
-		/// Movies that are in this collection
-		#[sea_orm(has_many, on_update = "Cascade", on_delete = "Cascade")]
-		pub movies: HasMany<super::movies::Entity>,
 		/// The info for this collection
-		#[sea_orm(belongs_to, from = "flix_id", to = "id")]
+		#[sea_orm(
+			belongs_to,
+			from = "flix_id",
+			to = "id",
+			on_update = "Cascade",
+			on_delete = "Cascade"
+		)]
 		pub info: HasOne<entity::info::collections::Entity>,
+
+		/// Movies that are in this collection
+		#[sea_orm(has_many)]
+		pub movies: HasMany<super::movies::Entity>,
 	}
 
 	impl ActiveModelBehavior for ActiveModel {}
@@ -55,7 +62,7 @@ pub mod movies {
 	#[sea_orm(table_name = "flix_tmdb_movies")]
 	pub struct Model {
 		/// The movie's TMDB ID
-		#[sea_orm(column_type = "Integer", primary_key, nullable, auto_increment = false)]
+		#[sea_orm(primary_key, auto_increment = false)]
 		pub tmdb_id: MovieId,
 		/// The movie's ID
 		#[sea_orm(unique)]
@@ -68,11 +75,23 @@ pub mod movies {
 		#[sea_orm(indexed)]
 		pub collection_id: Option<CollectionId>,
 
-		/// The info for this collection
-		#[sea_orm(belongs_to, from = "collection_id", to = "tmdb_id")]
+		/// The collection this movie belongs to
+		#[sea_orm(
+			belongs_to,
+			from = "collection_id",
+			to = "tmdb_id",
+			on_update = "Cascade",
+			on_delete = "Cascade"
+		)]
 		pub collection: HasOne<super::collections::Entity>,
 		/// The info for this movie
-		#[sea_orm(belongs_to, from = "flix_id", to = "id")]
+		#[sea_orm(
+			belongs_to,
+			from = "flix_id",
+			to = "id",
+			on_update = "Cascade",
+			on_delete = "Cascade"
+		)]
 		pub info: HasOne<entity::info::movies::Entity>,
 	}
 
@@ -95,7 +114,7 @@ pub mod shows {
 	#[sea_orm(table_name = "flix_tmdb_shows")]
 	pub struct Model {
 		/// The show's TMDB ID
-		#[sea_orm(column_type = "Integer", primary_key, nullable, auto_increment = false)]
+		#[sea_orm(primary_key, auto_increment = false)]
 		pub tmdb_id: ShowId,
 		/// The show's ID
 		#[sea_orm(unique)]
@@ -105,15 +124,22 @@ pub mod shows {
 		/// The number of seasons the show has
 		pub number_of_seasons: u32,
 
+		/// The info for this show
+		#[sea_orm(
+			belongs_to,
+			from = "flix_id",
+			to = "id",
+			on_update = "Cascade",
+			on_delete = "Cascade"
+		)]
+		pub info: HasOne<entity::info::shows::Entity>,
+
 		/// Seasons that are part of this show
-		#[sea_orm(has_many, on_update = "Cascade", on_delete = "Cascade")]
+		#[sea_orm(has_many)]
 		pub seasons: HasMany<super::seasons::Entity>,
 		/// Episodes that are part of this show
-		#[sea_orm(has_many, on_update = "Cascade", on_delete = "Cascade")]
+		#[sea_orm(has_many)]
 		pub episodes: HasMany<super::episodes::Entity>,
-		/// The info for this show
-		#[sea_orm(belongs_to, from = "flix_id", to = "id")]
-		pub info: HasOne<entity::info::shows::Entity>,
 	}
 
 	impl ActiveModelBehavior for ActiveModel {}
@@ -151,15 +177,27 @@ pub mod seasons {
 		pub last_update: DateTime<Utc>,
 
 		/// The show this season belongs to
-		#[sea_orm(belongs_to, from = "tmdb_show", to = "tmdb_id")]
+		#[sea_orm(
+			belongs_to,
+			from = "tmdb_show",
+			to = "tmdb_id",
+			on_update = "Cascade",
+			on_delete = "Cascade"
+		)]
 		pub show: HasOne<super::shows::Entity>,
 		/// The info for this season
 		#[sea_orm(
 			belongs_to,
 			from = "(flix_show, flix_season)",
-			to = "(show_id, season_number)"
+			to = "(show_id, season_number)",
+			on_update = "Cascade",
+			on_delete = "Cascade"
 		)]
 		pub info: HasOne<entity::info::seasons::Entity>,
+
+		/// Episodes that are part of this season
+		#[sea_orm(has_many)]
+		pub episodes: HasMany<super::episodes::Entity>,
 	}
 
 	impl ActiveModelBehavior for ActiveModel {}
@@ -206,20 +244,30 @@ pub mod episodes {
 		pub runtime: Seconds,
 
 		/// The show this episode belongs to
-		#[sea_orm(belongs_to, from = "tmdb_show", to = "tmdb_id")]
+		#[sea_orm(
+			belongs_to,
+			from = "tmdb_show",
+			to = "tmdb_id",
+			on_update = "Cascade",
+			on_delete = "Cascade"
+		)]
 		pub show: HasOne<super::shows::Entity>,
 		/// The season this episode belongs to
 		#[sea_orm(
 			belongs_to,
 			from = "(tmdb_show, tmdb_season)",
-			to = "(tmdb_show, tmdb_season)"
+			to = "(tmdb_show, tmdb_season)",
+			on_update = "Cascade",
+			on_delete = "Cascade"
 		)]
 		pub season: HasOne<super::seasons::Entity>,
 		/// The info for this episode
 		#[sea_orm(
 			belongs_to,
 			from = "(flix_show, flix_season, flix_episode)",
-			to = "(show_id, season_number, episode_number)"
+			to = "(show_id, season_number, episode_number)",
+			on_update = "Cascade",
+			on_delete = "Cascade"
 		)]
 		pub info: HasOne<entity::info::episodes::Entity>,
 	}
@@ -231,7 +279,7 @@ pub mod episodes {
 #[cfg(test)]
 pub mod test {
 	macro_rules! make_tmdb_collection {
-		($db:expr, $id:literal, $flix_id:literal) => {
+		($db:expr, $id:expr, $flix_id:expr) => {
 			$crate::entity::tmdb::collections::ActiveModel {
 				tmdb_id: Set(::flix_tmdb::model::id::CollectionId::from_raw($id)),
 				flix_id: Set(::flix_model::id::CollectionId::from_raw($flix_id)),
@@ -246,7 +294,7 @@ pub mod test {
 	pub(crate) use make_tmdb_collection;
 
 	macro_rules! make_tmdb_movie {
-		($db:expr, $id:literal, $flix_id:literal) => {
+		($db:expr, $id:expr, $flix_id:expr) => {
 			$crate::entity::tmdb::movies::ActiveModel {
 				tmdb_id: Set(::flix_tmdb::model::id::MovieId::from_raw($id)),
 				flix_id: Set(::flix_model::id::MovieId::from_raw($flix_id)),
@@ -262,7 +310,7 @@ pub mod test {
 	pub(crate) use make_tmdb_movie;
 
 	macro_rules! make_tmdb_show {
-		($db:expr, $id:literal, $flix_id:literal) => {
+		($db:expr, $id:expr, $flix_id:expr) => {
 			$crate::entity::tmdb::shows::ActiveModel {
 				tmdb_id: Set(::flix_tmdb::model::id::ShowId::from_raw($id)),
 				flix_id: Set(::flix_model::id::ShowId::from_raw($flix_id)),
@@ -277,7 +325,7 @@ pub mod test {
 	pub(crate) use make_tmdb_show;
 
 	macro_rules! make_tmdb_season {
-		($db:expr, $show:literal, $season:literal, $flix_show:literal, $flix_season:literal) => {
+		($db:expr, $show:expr, $season:expr, $flix_show:expr, $flix_season:expr) => {
 			$crate::entity::tmdb::seasons::ActiveModel {
 				tmdb_show: Set(::flix_tmdb::model::id::ShowId::from_raw($show)),
 				tmdb_season: Set(::flix_model::numbers::SeasonNumber::new($season)),
@@ -293,7 +341,7 @@ pub mod test {
 	pub(crate) use make_tmdb_season;
 
 	macro_rules! make_tmdb_episode {
-		($db:expr, $show:literal, $season:literal, $episode:literal, $flix_show:literal, $flix_season:literal, $flix_episode:literal) => {
+		($db:expr, $show:expr, $season:expr, $episode:expr, $flix_show:expr, $flix_season:expr, $flix_episode:expr) => {
 			$crate::entity::tmdb::episodes::ActiveModel {
 				tmdb_show: Set(::flix_tmdb::model::id::ShowId::from_raw($show)),
 				tmdb_season: Set(::flix_model::numbers::SeasonNumber::new($season)),

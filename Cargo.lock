@@ -698,6 +698,7 @@ dependencies = [
 name = "flix-model"
 version = "0.0.16"
 dependencies = [
+ "itertools",
  "seamantic",
  "serde",
  "thiserror 2.0.17",

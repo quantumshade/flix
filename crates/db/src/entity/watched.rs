@@ -24,7 +24,14 @@ pub mod collections {
 		pub watched_date: DateTime<Utc>,
 
 		/// The info for this collection
-		#[sea_orm(belongs_to, relation_enum = "Info", from = "id", to = "id")]
+		#[sea_orm(
+			belongs_to,
+			relation_enum = "Info",
+			from = "id",
+			to = "id",
+			on_update = "Cascade",
+			on_delete = "Cascade"
+		)]
 		pub info: HasOne<entity::info::collections::Entity>,
 		/// The content for this collection
 		#[sea_orm(belongs_to, relation_enum = "Content", from = "id", to = "id", skip_fk)]
@@ -58,7 +65,13 @@ pub mod movies {
 		pub watched_date: DateTime<Utc>,
 
 		/// The info for this movie
-		#[sea_orm(belongs_to, from = "id", to = "id")]
+		#[sea_orm(
+			belongs_to,
+			from = "id",
+			to = "id",
+			on_update = "Cascade",
+			on_delete = "Cascade"
+		)]
 		pub info: HasOne<entity::info::movies::Entity>,
 		/// The content for this movie
 		#[sea_orm(belongs_to, relation_enum = "Content", from = "id", to = "id", skip_fk)]
@@ -92,7 +105,14 @@ pub mod shows {
 		pub watched_date: DateTime<Utc>,
 
 		/// The info for this show
-		#[sea_orm(belongs_to, relation_enum = "Info", from = "id", to = "id")]
+		#[sea_orm(
+			belongs_to,
+			relation_enum = "Info",
+			from = "id",
+			to = "id",
+			on_update = "Cascade",
+			on_delete = "Cascade"
+		)]
 		pub info: HasOne<entity::info::shows::Entity>,
 		/// The content for this show
 		#[sea_orm(belongs_to, relation_enum = "Content", from = "id", to = "id", skip_fk)]
@@ -134,7 +154,9 @@ pub mod seasons {
 			belongs_to,
 			relation_enum = "Info",
 			from = "(show_id, season_number)",
-			to = "(show_id, season_number)"
+			to = "(show_id, season_number)",
+			on_update = "Cascade",
+			on_delete = "Cascade"
 		)]
 		pub info: HasOne<entity::info::seasons::Entity>,
 		/// The content for this season
@@ -186,7 +208,9 @@ pub mod episodes {
 			belongs_to,
 			relation_enum = "Info",
 			from = "(show_id, season_number, episode_number)",
-			to = "(show_id, season_number, episode_number)"
+			to = "(show_id, season_number, episode_number)",
+			on_update = "Cascade",
+			on_delete = "Cascade"
 		)]
 		pub info: HasOne<entity::info::episodes::Entity>,
 		/// The content for this episode
@@ -207,7 +231,7 @@ pub mod episodes {
 #[cfg(test)]
 pub mod test {
 	macro_rules! make_watched_movie {
-		($db:expr, $id:literal, $user:literal) => {
+		($db:expr, $id:expr, $user:expr) => {
 			$crate::entity::watched::movies::ActiveModel {
 				id: Set(::flix_model::id::MovieId::from_raw($id)),
 				user_id: Set($user),
@@ -221,7 +245,7 @@ pub mod test {
 	pub(crate) use make_watched_movie;
 
 	macro_rules! make_watched_episode {
-		($db:expr, $show:literal, $season:literal, $episode:literal, $user:literal) => {
+		($db:expr, $show:expr, $season:expr, $episode:expr, $user:expr) => {
 			$crate::entity::watched::episodes::ActiveModel {
 				show_id: Set(::flix_model::id::ShowId::from_raw($show)),
 				season_number: Set(::flix_model::numbers::SeasonNumber::new($season)),

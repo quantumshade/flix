@@ -4,3 +4,4 @@
 
 pub mod id;
 pub mod numbers;
+pub mod text;

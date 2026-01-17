@@ -13,13 +13,22 @@ pub mod collections {
 	#[sea_orm(table_name = "flix_info_collections")]
 	pub struct Model {
 		/// The collection's ID
-		#[sea_orm(column_type = "Integer", primary_key, nullable, auto_increment = false)]
+		#[sea_orm(primary_key, auto_increment = false)]
 		pub id: CollectionId,
 		/// The collection's title
-		#[sea_orm(indexed)]
 		pub title: String,
 		/// The collection's overview
 		pub overview: String,
+
+		/// The sortable title
+		#[sea_orm(indexed)]
+		pub sort_title: String,
+		/// The filesystem-safe slug
+		#[sea_orm(indexed, unique)]
+		pub fs_slug: String,
+		/// The url-safe slug
+		#[sea_orm(indexed, unique)]
+		pub web_slug: String,
 	}
 
 	impl ActiveModelBehavior for ActiveModel {}
@@ -38,10 +47,9 @@ pub mod movies {
 	#[sea_orm(table_name = "flix_info_movies")]
 	pub struct Model {
 		/// The movie's ID
-		#[sea_orm(column_type = "Integer", primary_key, nullable, auto_increment = false)]
+		#[sea_orm(primary_key, auto_increment = false)]
 		pub id: MovieId,
 		/// The movie's title
-		#[sea_orm(indexed)]
 		pub title: String,
 		/// The movie's tagline
 		pub tagline: String,
@@ -50,6 +58,16 @@ pub mod movies {
 		/// The movie's release date
 		#[sea_orm(indexed)]
 		pub date: NaiveDate,
+
+		/// The sortable title
+		#[sea_orm(indexed)]
+		pub sort_title: String,
+		/// The filesystem-safe slug
+		#[sea_orm(indexed, unique)]
+		pub fs_slug: String,
+		/// The url-safe slug
+		#[sea_orm(indexed, unique)]
+		pub web_slug: String,
 	}
 
 	impl ActiveModelBehavior for ActiveModel {}
@@ -68,10 +86,9 @@ pub mod shows {
 	#[sea_orm(table_name = "flix_info_shows")]
 	pub struct Model {
 		/// The show's ID
-		#[sea_orm(column_type = "Integer", primary_key, nullable, auto_increment = false)]
+		#[sea_orm(primary_key, auto_increment = false)]
 		pub id: ShowId,
 		/// The show's title
-		#[sea_orm(indexed)]
 		pub title: String,
 		/// The show's tagline
 		pub tagline: String,
@@ -81,11 +98,21 @@ pub mod shows {
 		#[sea_orm(indexed)]
 		pub date: NaiveDate,
 
+		/// The sortable title
+		#[sea_orm(indexed)]
+		pub sort_title: String,
+		/// The filesystem-safe slug
+		#[sea_orm(indexed, unique)]
+		pub fs_slug: String,
+		/// The url-safe slug
+		#[sea_orm(indexed, unique)]
+		pub web_slug: String,
+
 		/// Seasons that are part of this show
-		#[sea_orm(has_many, on_update = "Cascade", on_delete = "Cascade")]
+		#[sea_orm(has_many)]
 		pub seasons: HasMany<super::seasons::Entity>,
 		/// Episodes that are part of this show
-		#[sea_orm(has_many, on_update = "Cascade", on_delete = "Cascade")]
+		#[sea_orm(has_many)]
 		pub episodes: HasMany<super::episodes::Entity>,
 	}
 
@@ -120,10 +147,16 @@ pub mod seasons {
 		pub date: NaiveDate,
 
 		/// The show this season belongs to
-		#[sea_orm(belongs_to, from = "show_id", to = "id")]
+		#[sea_orm(
+			belongs_to,
+			from = "show_id",
+			to = "id",
+			on_update = "Cascade",
+			on_delete = "Cascade"
+		)]
 		pub show: HasOne<super::shows::Entity>,
 		/// Episodes that are part of this season
-		#[sea_orm(has_many, on_update = "Cascade", on_delete = "Cascade")]
+		#[sea_orm(has_many)]
 		pub episodes: HasMany<super::episodes::Entity>,
 	}
 
@@ -161,13 +194,21 @@ pub mod episodes {
 		pub date: NaiveDate,
 
 		/// The show this episode belongs to
-		#[sea_orm(belongs_to, from = "show_id", to = "id")]
+		#[sea_orm(
+			belongs_to,
+			from = "show_id",
+			to = "id",
+			on_update = "Cascade",
+			on_delete = "Cascade"
+		)]
 		pub show: HasOne<super::shows::Entity>,
 		/// The season this episode belongs to
 		#[sea_orm(
 			belongs_to,
 			from = "(show_id, season_number)",
-			to = "(show_id, season_number)"
+			to = "(show_id, season_number)",
+			on_update = "Cascade",
+			on_delete = "Cascade"
 		)]
 		pub season: HasOne<super::seasons::Entity>,
 	}
@@ -179,11 +220,14 @@ pub mod episodes {
 #[cfg(test)]
 pub mod test {
 	macro_rules! make_info_collection {
-		($db:expr, $id:literal) => {
+		($db:expr, $id:expr) => {
 			$crate::entity::info::collections::ActiveModel {
 				id: Set(::flix_model::id::CollectionId::from_raw($id)),
 				title: Set(::std::string::String::new()),
 				overview: Set(::std::string::String::new()),
+				sort_title: Set(::std::string::String::new()),
+				fs_slug: Set(format!("C FS {}", $id)),
+				web_slug: Set(format!("C Web {}", $id)),
 			}
 			.insert($db)
 			.await
@@ -193,13 +237,16 @@ pub mod test {
 	pub(crate) use make_info_collection;
 
 	macro_rules! make_info_movie {
-		($db:expr, $id:literal) => {
+		($db:expr, $id:expr) => {
 			$crate::entity::info::movies::ActiveModel {
 				id: Set(::flix_model::id::MovieId::from_raw($id)),
 				title: Set(::std::string::String::new()),
 				tagline: Set(::std::string::String::new()),
 				overview: Set(::std::string::String::new()),
 				date: Set(::chrono::NaiveDate::from_yo_opt(1, 1).expect("from_yo_opt")),
+				sort_title: Set(::std::string::String::new()),
+				fs_slug: Set(format!("M FS {}", $id)),
+				web_slug: Set(format!("M Web {}", $id)),
 			}
 			.insert($db)
 			.await
@@ -209,13 +256,16 @@ pub mod test {
 	pub(crate) use make_info_movie;
 
 	macro_rules! make_info_show {
-		($db:expr, $id:literal) => {
+		($db:expr, $id:expr) => {
 			$crate::entity::info::shows::ActiveModel {
 				id: Set(::flix_model::id::ShowId::from_raw($id)),
 				title: Set(::std::string::String::new()),
 				tagline: Set(::std::string::String::new()),
 				overview: Set(::std::string::String::new()),
 				date: Set(::chrono::NaiveDate::from_yo_opt(1, 1).expect("from_yo_opt")),
+				sort_title: Set(::std::string::String::new()),
+				fs_slug: Set(format!("S FS {}", $id)),
+				web_slug: Set(format!("S Web {}", $id)),
 			}
 			.insert($db)
 			.await
@@ -225,7 +275,7 @@ pub mod test {
 	pub(crate) use make_info_show;
 
 	macro_rules! make_info_season {
-		($db:expr, $show:literal, $season:literal) => {
+		($db:expr, $show:expr, $season:expr) => {
 			$crate::entity::info::seasons::ActiveModel {
 				show_id: Set(::flix_model::id::ShowId::from_raw($show)),
 				season_number: Set(::flix_model::numbers::SeasonNumber::new($season)),
@@ -241,7 +291,7 @@ pub mod test {
 	pub(crate) use make_info_season;
 
 	macro_rules! make_info_episode {
-		($db:expr, $show:literal, $season:literal, $episode:literal) => {
+		($db:expr, $show:expr, $season:expr, $episode:expr) => {
 			$crate::entity::info::episodes::ActiveModel {
 				show_id: Set(::flix_model::id::ShowId::from_raw($show)),
 				season_number: Set(::flix_model::numbers::SeasonNumber::new($season)),
@@ -310,6 +360,9 @@ mod tests {
 					id: notsettable!(id, CollectionId::from_raw($id) $(, $($skip),+)?),
 					title: notsettable!(title, concat!("C Title ", $id).to_string() $(, $($skip),+)?),
 					overview: notsettable!(overview, concat!("C Overview ", $id).to_string() $(, $($skip),+)?),
+					sort_title: notsettable!(sort_title, concat!("C Sort Title ", $id).to_string() $(, $($skip),+)?),
+					fs_slug: notsettable!(fs_slug, concat!("C FS Slug ", $id).to_string() $(, $($skip),+)?),
+					web_slug: notsettable!(web_slug, concat!("C Web Slug ", $id).to_string() $(, $($skip),+)?),
 				}.insert($db).await
 			};
 		}
@@ -321,6 +374,9 @@ mod tests {
 		assert_collection!(&db, 3, Success; id);
 		assert_collection!(&db, 4, NotNullViolation; title);
 		assert_collection!(&db, 5, NotNullViolation; overview);
+		assert_collection!(&db, 6, NotNullViolation; sort_title);
+		assert_collection!(&db, 7, NotNullViolation; fs_slug);
+		assert_collection!(&db, 8, NotNullViolation; web_slug);
 	}
 
 	#[tokio::test]
@@ -351,6 +407,9 @@ mod tests {
 					tagline: notsettable!(tagline, concat!("M Tagline ", $id).to_string() $(, $($skip),+)?),
 					overview: notsettable!(overview, concat!("M Overview ", $id).to_string() $(, $($skip),+)?),
 					date: notsettable!(date, NaiveDate::from_yo_opt($id, 1).expect("from_yo_opt") $(, $($skip),+)?),
+					sort_title: notsettable!(sort_title, concat!("M Sort Title ", $id).to_string() $(, $($skip),+)?),
+					fs_slug: notsettable!(fs_slug, concat!("M FS Slug ", $id).to_string() $(, $($skip),+)?),
+					web_slug: notsettable!(web_slug, concat!("M Web Slug ", $id).to_string() $(, $($skip),+)?),
 				}.insert($db).await
 			};
 		}
@@ -364,6 +423,9 @@ mod tests {
 		assert_movie!(&db, 5, NotNullViolation; tagline);
 		assert_movie!(&db, 6, NotNullViolation; overview);
 		assert_movie!(&db, 7, NotNullViolation; date);
+		assert_movie!(&db, 8, NotNullViolation; sort_title);
+		assert_movie!(&db, 9, NotNullViolation; fs_slug);
+		assert_movie!(&db, 10, NotNullViolation; web_slug);
 	}
 
 	#[tokio::test]
@@ -397,6 +459,9 @@ mod tests {
 					tagline: notsettable!(tagline, concat!("S Tagline ", $id).to_string() $(, $($skip),+)?),
 					overview: notsettable!(overview, concat!("S Overview ", $id).to_string() $(, $($skip),+)?),
 					date: notsettable!(date, NaiveDate::from_yo_opt($id, 1).expect("from_yo_opt") $(, $($skip),+)?),
+					sort_title: notsettable!(sort_title, concat!("S Sort Title ", $id).to_string() $(, $($skip),+)?),
+					fs_slug: notsettable!(fs_slug, concat!("S FS Slug ", $id).to_string() $(, $($skip),+)?),
+					web_slug: notsettable!(web_slug, concat!("S Web Slug ", $id).to_string() $(, $($skip),+)?),
 				}.insert($db).await
 			};
 		}
@@ -410,6 +475,9 @@ mod tests {
 		assert_show!(&db, 5, NotNullViolation; tagline);
 		assert_show!(&db, 6, NotNullViolation; overview);
 		assert_show!(&db, 7, NotNullViolation; date);
+		assert_show!(&db, 8, NotNullViolation; sort_title);
+		assert_show!(&db, 9, NotNullViolation; fs_slug);
+		assert_show!(&db, 10, NotNullViolation; web_slug);
 	}
 
 	#[tokio::test]

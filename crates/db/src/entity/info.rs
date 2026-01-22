@@ -7,6 +7,8 @@ pub mod collections {
 
 	use sea_orm::entity::prelude::*;
 
+	use crate::entity;
+
 	/// The database representation of a flix collection
 	#[sea_orm::model]
 	#[derive(Debug, Clone, DeriveEntityModel)]
@@ -29,6 +31,10 @@ pub mod collections {
 		/// The url-safe slug
 		#[sea_orm(indexed, unique)]
 		pub web_slug: String,
+
+		/// Potential content for this collection
+		#[sea_orm(has_one)]
+		pub content: HasOne<entity::content::collections::Entity>,
 	}
 
 	impl ActiveModelBehavior for ActiveModel {}
@@ -40,6 +46,8 @@ pub mod movies {
 
 	use chrono::NaiveDate;
 	use sea_orm::entity::prelude::*;
+
+	use crate::entity;
 
 	/// The database representation of a flix movie
 	#[sea_orm::model]
@@ -68,6 +76,10 @@ pub mod movies {
 		/// The url-safe slug
 		#[sea_orm(indexed, unique)]
 		pub web_slug: String,
+
+		/// Potential content for this movie
+		#[sea_orm(has_one)]
+		pub content: HasOne<entity::content::movies::Entity>,
 	}
 
 	impl ActiveModelBehavior for ActiveModel {}
@@ -79,6 +91,8 @@ pub mod shows {
 
 	use chrono::NaiveDate;
 	use sea_orm::entity::prelude::*;
+
+	use crate::entity;
 
 	/// The database representation of a flix show
 	#[sea_orm::model]
@@ -114,6 +128,10 @@ pub mod shows {
 		/// Episodes that are part of this show
 		#[sea_orm(has_many)]
 		pub episodes: HasMany<super::episodes::Entity>,
+
+		/// Potential content for this show
+		#[sea_orm(has_one)]
+		pub content: HasOne<entity::content::shows::Entity>,
 	}
 
 	impl ActiveModelBehavior for ActiveModel {}
@@ -126,6 +144,8 @@ pub mod seasons {
 
 	use chrono::NaiveDate;
 	use sea_orm::entity::prelude::*;
+
+	use crate::entity;
 
 	/// The database representation of a flix season
 	#[sea_orm::model]
@@ -158,6 +178,10 @@ pub mod seasons {
 		/// Episodes that are part of this season
 		#[sea_orm(has_many)]
 		pub episodes: HasMany<super::episodes::Entity>,
+
+		/// Potential content for this season
+		#[sea_orm(has_one)]
+		pub content: HasOne<entity::content::seasons::Entity>,
 	}
 
 	impl ActiveModelBehavior for ActiveModel {}
@@ -170,6 +194,8 @@ pub mod episodes {
 
 	use chrono::NaiveDate;
 	use sea_orm::entity::prelude::*;
+
+	use crate::entity;
 
 	/// The database representation of a flix episode
 	#[sea_orm::model]
@@ -211,6 +237,10 @@ pub mod episodes {
 			on_delete = "Cascade"
 		)]
 		pub season: HasOne<super::seasons::Entity>,
+
+		/// Potential content for this episode
+		#[sea_orm(has_one)]
+		pub content: HasOne<entity::content::episodes::Entity>,
 	}
 
 	impl ActiveModelBehavior for ActiveModel {}

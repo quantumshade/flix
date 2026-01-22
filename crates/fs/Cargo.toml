@@ -1,6 +1,6 @@
 [package]
 name = "flix-fs"
-version = "0.0.16"
+version = "0.0.17"
 edition.workspace = true
 rust-version.workspace = true
 description = "Filesystem scanner for flix media"
@@ -14,6 +14,7 @@ rustdoc-args = ["--cfg", "docsrs"]
 
 [dependencies]
 async-stream = { workspace = true }
+either = { workspace = true }
 flix-model = { workspace = true }
 regex = { workspace = true, features = ["perf", "std"] }
 thiserror = { workspace = true }

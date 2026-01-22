@@ -1,7 +1,7 @@
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 
 use anyhow::{Result, anyhow};
-use clap::{Parser, Subcommand};
+use clap::{Args, Parser, Subcommand};
 
 pub mod flix;
 pub mod tmdb;
@@ -13,8 +13,12 @@ pub struct Cli {
 	#[arg(short, long, value_name = "FILE", default_value = "~/.flix")]
 	config: PathBuf,
 
+	/// Use a custom cache file
+	#[arg(short = 'C', long, value_name = "FILE", default_value = "./flix.redb")]
+	cache: PathBuf,
+
 	/// Use a custom database file
-	#[arg(short, long, value_name = "DATABASE", default_value = "./flix.db")]
+	#[arg(short, long, value_name = "FILE", default_value = "./flix.db")]
 	database: PathBuf,
 
 	/// Enable tracing
@@ -38,6 +42,10 @@ impl Cli {
 		}
 	}
 
+	pub fn cache_path(&self) -> &Path {
+		&self.cache
+	}
+
 	pub fn database_path(&self) -> Result<String> {
 		self.database
 			.as_os_str()
@@ -51,12 +59,26 @@ impl Cli {
 	}
 }
 
+#[derive(Args)]
+pub struct AddOverrides {
+	#[arg(long)]
+	pub title: Option<String>,
+	#[arg(long)]
+	pub sort_title: Option<String>,
+	#[arg(long)]
+	pub fs_slug: Option<String>,
+	#[arg(long)]
+	pub web_slug: Option<String>,
+}
+
 #[derive(Subcommand)]
 pub enum Command {
 	/// Initialize a new database
 	Init,
 	/// Add new items to the database
 	Add {
+		#[command(flatten)]
+		overrides: AddOverrides,
 		#[command(subcommand)]
 		command: AddCommand,
 	},

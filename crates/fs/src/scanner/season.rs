@@ -13,53 +13,23 @@ use tokio_stream::wrappers::ReadDirStream;
 
 use crate::Error;
 use crate::macros::is_image_extension;
-use crate::scanner::episode;
+use crate::scanner::{EpisodeScan, MediaRef, SeasonScan, episode};
 
 /// A season item
 pub type Item = crate::Item<Scanner>;
 
 /// The scanner for seasons
 pub enum Scanner {
+	/// A scanned season
+	Season(SeasonScan),
 	/// A scanned episode
-	Season {
-		/// The ID of the show this season belongs to
-		show: ShowId,
-		/// The season this episode belongs to
-		season: SeasonNumber,
-		/// The file name of the poster file
-		poster_file_name: Option<String>,
-	},
-	/// A scanned episode
-	Episode {
-		/// The ID of the show this episode belongs to
-		show: ShowId,
-		/// The season this episode belongs to
-		season: SeasonNumber,
-		/// The number(s) of this episode
-		episode: EpisodeNumbers,
-		/// The file name of the media file
-		media_file_name: String,
-		/// The file name of the poster file
-		poster_file_name: Option<String>,
-	},
+	Episode(EpisodeScan),
 }
 
 impl From<episode::Scanner> for Scanner {
 	fn from(value: episode::Scanner) -> Self {
 		match value {
-			episode::Scanner::Episode {
-				show,
-				season,
-				episode,
-				media_file_name,
-				poster_file_name,
-			} => Self::Episode {
-				show,
-				season,
-				episode,
-				media_file_name,
-				poster_file_name,
-			},
+			episode::Scanner::Episode(e) => Self::Episode(e),
 		}
 	}
 }
@@ -68,7 +38,7 @@ impl Scanner {
 	/// Scan a folder for a season and its episodes
 	pub fn scan_season(
 		path: &Path,
-		show: ShowId,
+		show_ref: MediaRef<ShowId>,
 		season: SeasonNumber,
 	) -> impl Stream<Item = Item> {
 		stream!({
@@ -140,11 +110,11 @@ impl Scanner {
 
 			yield Item {
 				path: path.to_owned(),
-				event: Ok(Self::Season {
-					show,
+				event: Ok(Self::Season(SeasonScan {
+					show_ref: show_ref.clone(),
 					season,
 					poster_file_name,
-				}),
+				})),
 			};
 
 			for episode_dir in episode_dirs_to_scan {
@@ -207,7 +177,7 @@ impl Scanner {
 
 				for await event in episode::Scanner::scan_episode(
 					&episode_dir,
-					show,
+					show_ref.clone(),
 					season_number,
 					episode_numbers,
 				) {

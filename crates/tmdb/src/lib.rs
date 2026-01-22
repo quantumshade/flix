@@ -5,6 +5,9 @@
 pub mod api;
 pub mod model;
 
+mod cache;
+pub use cache::{Cache, CachePolicy, RedbCache};
+
 mod client;
 pub use client::Client;
 

@@ -6,16 +6,18 @@ use std::path::Path;
 use std::sync::OnceLock;
 
 use flix_model::id::{CollectionId, MovieId, RawId, ShowId};
-use flix_model::numbers::{EpisodeNumbers, SeasonNumber};
 
 use async_stream::stream;
+use either::Either;
 use regex::Regex;
 use tokio::fs;
 use tokio_stream::Stream;
 use tokio_stream::wrappers::ReadDirStream;
 
 use crate::Error;
-use crate::scanner::{collection, movie, show};
+use crate::scanner::{
+	CollectionScan, EpisodeScan, MediaRef, MovieScan, SeasonScan, ShowScan, collection, movie, show,
+};
 
 static MEDIA_FOLDER_REGEX: OnceLock<Regex> = OnceLock::new();
 static SEASON_FOLDER_REGEX: OnceLock<Regex> = OnceLock::new();
@@ -24,116 +26,28 @@ static SEASON_FOLDER_REGEX: OnceLock<Regex> = OnceLock::new();
 pub type Item = crate::Item<Scanner>;
 
 /// The scanner for collections
+#[derive(Debug)]
 pub enum Scanner {
 	/// A scanned collection
-	Collection {
-		/// The ID of the parent collection (if any)
-		parent: Option<CollectionId>,
-		/// The ID of the collection
-		id: CollectionId,
-		/// The file name of the poster file
-		poster_file_name: Option<String>,
-	},
-
+	Collection(CollectionScan),
 	/// A scanned movie
-	Movie {
-		/// The ID of the parent collection (if any)
-		parent: Option<CollectionId>,
-		/// The ID of the movie
-		id: MovieId,
-		/// The file name of the media file
-		media_file_name: String,
-		/// The file name of the poster file
-		poster_file_name: Option<String>,
-	},
-
+	Movie(MovieScan),
 	/// A scanned show
-	Show {
-		/// The ID of the parent collection (if any)
-		parent: Option<CollectionId>,
-		/// The ID of the show
-		id: ShowId,
-		/// The file name of the poster file
-		poster_file_name: Option<String>,
-	},
+	Show(ShowScan),
 	/// A scanned episode
-	Season {
-		/// The ID of the show this season belongs to
-		show: ShowId,
-		/// The season this episode belongs to
-		season: SeasonNumber,
-		/// The file name of the poster file
-		poster_file_name: Option<String>,
-	},
+	Season(SeasonScan),
 	/// A scanned episode
-	Episode {
-		/// The ID of the show this episode belongs to
-		show: ShowId,
-		/// The season this episode belongs to
-		season: SeasonNumber,
-		/// The number(s) of this episode
-		episode: EpisodeNumbers,
-		/// The file name of the media file
-		media_file_name: String,
-		/// The file name of the poster file
-		poster_file_name: Option<String>,
-	},
+	Episode(EpisodeScan),
 }
 
 impl From<collection::Scanner> for Scanner {
 	fn from(value: collection::Scanner) -> Self {
 		match value {
-			collection::Scanner::Collection {
-				parent,
-				id,
-				poster_file_name,
-			} => Self::Collection {
-				parent,
-				id,
-				poster_file_name,
-			},
-			collection::Scanner::Movie {
-				parent,
-				id,
-				media_file_name,
-				poster_file_name,
-			} => Self::Movie {
-				parent,
-				id,
-				media_file_name,
-				poster_file_name,
-			},
-			collection::Scanner::Show {
-				parent,
-				id,
-				poster_file_name,
-			} => Self::Show {
-				parent,
-				id,
-				poster_file_name,
-			},
-			collection::Scanner::Season {
-				show,
-				season,
-				poster_file_name,
-			} => Self::Season {
-				show,
-				season,
-				poster_file_name,
-			},
-			collection::Scanner::Episode {
-				show,
-				season,
-				episode,
-				media_file_name,
-				poster_file_name,
-			} => Self::Episode {
-				show,
-				season,
-				episode,
-				media_file_name,
-				poster_file_name,
-			},
+			collection::Scanner::Collection(c) => Self::Collection(c),
+			collection::Scanner::Movie(m) => Self::Movie(m),
+			collection::Scanner::Show(s) => Self::Show(s),
+			collection::Scanner::Season(s) => Self::Season(s),
+			collection::Scanner::Episode(e) => Self::Episode(e),
 		}
 	}
 }
@@ -141,17 +55,7 @@ impl From<collection::Scanner> for Scanner {
 impl From<movie::Scanner> for Scanner {
 	fn from(value: movie::Scanner) -> Self {
 		match value {
-			movie::Scanner::Movie {
-				parent,
-				id,
-				media_file_name,
-				poster_file_name,
-			} => Self::Movie {
-				parent,
-				id,
-				media_file_name,
-				poster_file_name,
-			},
+			movie::Scanner::Movie(m) => Self::Movie(m),
 		}
 	}
 }
@@ -159,42 +63,22 @@ impl From<movie::Scanner> for Scanner {
 impl From<show::Scanner> for Scanner {
 	fn from(value: show::Scanner) -> Self {
 		match value {
-			show::Scanner::Show {
-				parent,
-				id,
-				poster_file_name,
-			} => Self::Show {
-				parent,
-				id,
-				poster_file_name,
-			},
-			show::Scanner::Season {
-				show,
-				season,
-				poster_file_name,
-			} => Self::Season {
-				show,
-				season,
-				poster_file_name,
-			},
-			show::Scanner::Episode {
-				show,
-				season,
-				episode,
-				media_file_name,
-				poster_file_name,
-			} => Self::Episode {
-				show,
-				season,
-				episode,
-				media_file_name,
-				poster_file_name,
-			},
+			show::Scanner::Show(s) => Self::Show(s),
+			show::Scanner::Season(s) => Self::Season(s),
+			show::Scanner::Episode(e) => Self::Episode(e),
 		}
 	}
 }
 
 impl Scanner {
+	/// Helper function for stripping allowed numerical prefixes for sorting ("01 - ")
+	fn strip_numeric_prefix(mut s: &str) -> &str {
+		while let Some('0'..='9') = s.chars().next() {
+			s = &s[1..]
+		}
+		s.strip_prefix(" - ").unwrap_or(s)
+	}
+
 	/// Detect the type of a folder and call the correct scanner. Use
 	/// this only for detecting possibly ambiguous media:
 	///   - Collections
@@ -202,7 +86,7 @@ impl Scanner {
 	///   - Shows
 	pub fn scan_detect_folder(
 		path: &Path,
-		parent: Option<CollectionId>,
+		parent: Option<MediaRef<CollectionId>>,
 	) -> impl Stream<Item = Item> {
 		enum MediaType {
 			Collection,
@@ -211,7 +95,7 @@ impl Scanner {
 		}
 
 		let media_folder_re = MEDIA_FOLDER_REGEX.get_or_init(|| {
-			Regex::new(r"^[[[:alnum:]]' -]+ \([[:digit:]]+\) \[[[:digit:]]+\]$")
+			Regex::new(r"^[[[:alnum:]]' -]+ \([[:digit:]]+\)( \[[[:digit:]]+\])?$")
 				.unwrap_or_else(|err| panic!("regex is invalid: {err}"))
 		});
 		let season_folder_re = SEASON_FOLDER_REGEX.get_or_init(|| {
@@ -227,16 +111,23 @@ impl Scanner {
 				return;
 			};
 
-			let Some(Ok(id)) = dir_name
+			let dir_name = Self::strip_numeric_prefix(dir_name);
+
+			// Use the explicit ID ("[X]") if it exists, otherwise parse the folder name
+			let media_id = if let Some((id_str, _)) = dir_name
 				.split_once('[')
 				.and_then(|(_, s)| s.split_once(']'))
-				.map(|(s, _)| s.parse::<RawId>())
-			else {
-				yield Item {
-					path: path.to_owned(),
-					event: Err(Error::UnexpectedFolder),
+			{
+				let Ok(id) = id_str.parse::<RawId>() else {
+					yield Item {
+						path: path.to_owned(),
+						event: Err(Error::UnexpectedFolder),
+					};
+					return;
 				};
-				return;
+				Either::Left(id)
+			} else {
+				Either::Right(flix_model::text::normalize_fs_name(dir_name))
 			};
 
 			let media_type: MediaType;
@@ -306,24 +197,32 @@ impl Scanner {
 
 			match media_type {
 				MediaType::Collection => {
-					for await event in collection::Scanner::scan_collection(
-						path,
-						parent,
-						CollectionId::from_raw(id),
-					) {
+					let id = match media_id {
+						Either::Left(raw) => MediaRef::Id(CollectionId::from_raw(raw)),
+						Either::Right(slug) => MediaRef::Slug(slug),
+					};
+
+					for await event in collection::Scanner::scan_collection(path, parent, id) {
 						yield event.map(|e| e.into());
 					}
 				}
 				MediaType::Movie => {
-					for await event in
-						movie::Scanner::scan_movie(path, parent, MovieId::from_raw(id))
-					{
+					let id = match media_id {
+						Either::Left(raw) => MediaRef::Id(MovieId::from_raw(raw)),
+						Either::Right(slug) => MediaRef::Slug(slug),
+					};
+
+					for await event in movie::Scanner::scan_movie(path, parent, id) {
 						yield event.map(|e| e.into());
 					}
 				}
 				MediaType::Show => {
-					for await event in show::Scanner::scan_show(path, parent, ShowId::from_raw(id))
-					{
+					let id = match media_id {
+						Either::Left(raw) => MediaRef::Id(ShowId::from_raw(raw)),
+						Either::Right(slug) => MediaRef::Slug(slug),
+					};
+
+					for await event in show::Scanner::scan_show(path, parent, id) {
 						yield event.map(|e| e.into());
 					}
 				}

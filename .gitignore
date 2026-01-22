@@ -5,3 +5,7 @@
 
 # Rust
 /target
+
+# Flix
+flix.db
+flix.redb

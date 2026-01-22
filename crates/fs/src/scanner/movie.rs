@@ -12,6 +12,7 @@ use tokio_stream::wrappers::ReadDirStream;
 
 use crate::Error;
 use crate::macros::{is_image_extension, is_media_extension};
+use crate::scanner::{MediaRef, MovieScan};
 
 /// An movie item
 pub type Item = crate::Item<Scanner>;
@@ -19,24 +20,15 @@ pub type Item = crate::Item<Scanner>;
 /// The scanner for movies
 pub enum Scanner {
 	/// A scanned movie
-	Movie {
-		/// The ID of the parent collection (if any)
-		parent: Option<CollectionId>,
-		/// The ID of the movie
-		id: MovieId,
-		/// The file name of the media file
-		media_file_name: String,
-		/// The file name of the poster file
-		poster_file_name: Option<String>,
-	},
+	Movie(MovieScan),
 }
 
 impl Scanner {
 	/// Scan a folder for a movie
 	pub fn scan_movie(
 		path: &Path,
-		parent: Option<CollectionId>,
-		id: MovieId,
+		parent_ref: Option<MediaRef<CollectionId>>,
+		id_ref: MediaRef<MovieId>,
 	) -> impl Stream<Item = Item> {
 		stream!({
 			let dirs = match fs::read_dir(path).await {
@@ -131,12 +123,12 @@ impl Scanner {
 
 			yield Item {
 				path: path.to_owned(),
-				event: Ok(Self::Movie {
-					parent,
-					id,
+				event: Ok(Self::Movie(MovieScan {
+					parent_ref,
+					id_ref,
 					media_file_name,
 					poster_file_name,
-				}),
+				})),
 			};
 		})
 	}

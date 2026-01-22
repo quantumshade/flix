@@ -16,9 +16,15 @@ use sea_orm::{
 	ActiveModelTrait, DatabaseConnection, DbErr, EntityTrait, TransactionError, TransactionTrait,
 };
 
+use crate::cli::AddOverrides;
 use crate::cli::tmdb::Command;
 
-pub async fn add(client: Client, db: &DatabaseConnection, command: Command) -> Result<()> {
+pub async fn add(
+	client: Client,
+	db: &DatabaseConnection,
+	command: Command,
+	overrides: AddOverrides,
+) -> Result<()> {
 	match command {
 		Command::Collection { id } => {
 			let id = TmdbCollectionId::from_raw(id);
@@ -36,18 +42,25 @@ pub async fn add(client: Client, db: &DatabaseConnection, command: Command) -> R
 				.await
 				.with_context(|| format!("collections().get_details({})", id.into_raw()))?;
 
-			let title = collection.title.clone();
+			let title = overrides.title.unwrap_or(collection.title);
 
-			let sort_title = text::make_sortable_title(&title);
-			let fs_slug = text::make_fs_slug(&title);
-			let web_slug = text::make_web_slug(&title);
+			let sort_title = overrides
+				.sort_title
+				.unwrap_or_else(|| text::make_sortable_title(&title));
+			let fs_slug = overrides
+				.fs_slug
+				.unwrap_or_else(|| text::make_fs_slug(&title));
+			let web_slug = overrides
+				.web_slug
+				.unwrap_or_else(|| text::make_web_slug(&title));
 
 			let result: Result<CollectionId, TransactionError<DbErr>> = db
 				.transaction(|txn| {
+					let title = title.clone();
 					Box::pin(async move {
 						let flix = entity::info::collections::ActiveModel {
 							id: NotSet,
-							title: Set(collection.title),
+							title: Set(title),
 							overview: Set(collection.overview),
 							sort_title: Set(sort_title),
 							fs_slug: Set(fs_slug),
@@ -93,19 +106,26 @@ pub async fn add(client: Client, db: &DatabaseConnection, command: Command) -> R
 				.await
 				.with_context(|| format!("movies().get_details({})", id.into_raw()))?;
 
-			let title = movie.title.clone();
+			let title = overrides.title.unwrap_or(movie.title);
 			let year = movie.release_date.year();
 
-			let sort_title = text::make_sortable_title(&title);
-			let fs_slug = text::make_fs_slug_year(&title, year);
-			let web_slug = text::make_web_slug_year(&title, year);
+			let sort_title = overrides
+				.sort_title
+				.unwrap_or_else(|| text::make_sortable_title(&title));
+			let fs_slug = overrides
+				.fs_slug
+				.unwrap_or_else(|| text::make_fs_slug_year(&title, year));
+			let web_slug = overrides
+				.web_slug
+				.unwrap_or_else(|| text::make_web_slug_year(&title, year));
 
 			let result: Result<MovieId, TransactionError<DbErr>> = db
 				.transaction(|txn| {
+					let title = title.clone();
 					Box::pin(async move {
 						let flix = entity::info::movies::ActiveModel {
 							id: NotSet,
-							title: Set(movie.title),
+							title: Set(title),
 							tagline: Set(movie.tagline),
 							overview: Set(movie.overview),
 							date: Set(movie.release_date),
@@ -161,9 +181,6 @@ pub async fn add(client: Client, db: &DatabaseConnection, command: Command) -> R
 			let mut seasons = Vec::new();
 			let mut episodes = HashMap::new();
 
-			let title = show.title.clone();
-			let year = show.first_air_date.year();
-
 			for season in 1..=show.number_of_seasons {
 				let season = SeasonNumber::new(season);
 				let season = match client
@@ -218,16 +235,26 @@ pub async fn add(client: Client, db: &DatabaseConnection, command: Command) -> R
 				seasons.push(season);
 			}
 
-			let sort_title = text::make_sortable_title(&show.title);
-			let fs_slug = text::make_fs_slug_year(&show.title, show.first_air_date.year());
-			let web_slug = text::make_web_slug_year(&show.title, show.first_air_date.year());
+			let title = overrides.title.unwrap_or(show.title);
+			let year = show.first_air_date.year();
+
+			let sort_title = overrides
+				.sort_title
+				.unwrap_or_else(|| text::make_sortable_title(&title));
+			let fs_slug = overrides
+				.fs_slug
+				.unwrap_or_else(|| text::make_fs_slug_year(&title, year));
+			let web_slug = overrides
+				.web_slug
+				.unwrap_or_else(|| text::make_web_slug_year(&title, year));
 
 			let result: Result<ShowId, TransactionError<DbErr>> = db
 				.transaction(|txn| {
+					let title = title.clone();
 					Box::pin(async move {
 						let flix = entity::info::shows::ActiveModel {
 							id: NotSet,
-							title: Set(show.title),
+							title: Set(title),
 							tagline: Set(show.tagline),
 							overview: Set(show.overview),
 							date: Set(show.first_air_date),

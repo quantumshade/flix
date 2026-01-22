@@ -1,6 +1,7 @@
 use std::rc::Rc;
+use std::sync::RwLock;
 
-use crate::{Config, api};
+use crate::{Cache, CachePolicy, Config, api};
 
 /// The primary client that references all other clients
 pub struct Client {
@@ -9,23 +10,42 @@ pub struct Client {
 	shows: api::shows::Client,
 	seasons: api::seasons::Client,
 	episodes: api::episodes::Client,
+
+	cache_policy: Rc<RwLock<CachePolicy>>,
 }
 
 impl Client {
-	/// Create a new client from a default configuration using the bearer token
-	pub fn new(bearer_token: String) -> Self {
-		Self::new_with_config(Config::new(bearer_token))
+	/// Create a new client with the given configuration
+	pub fn new(config: Config, cache: Rc<dyn Cache>, cache_policy: CachePolicy) -> Self {
+		let config = Rc::new(config);
+		let cache_policy = Rc::new(RwLock::new(cache_policy));
+		Self {
+			collections: api::collections::Client::new(
+				config.clone(),
+				cache.clone(),
+				cache_policy.clone(),
+			),
+			movies: api::movies::Client::new(config.clone(), cache.clone(), cache_policy.clone()),
+			shows: api::shows::Client::new(config.clone(), cache.clone(), cache_policy.clone()),
+			seasons: api::seasons::Client::new(config.clone(), cache.clone(), cache_policy.clone()),
+			episodes: api::episodes::Client::new(
+				config.clone(),
+				cache.clone(),
+				cache_policy.clone(),
+			),
+
+			cache_policy,
+		}
 	}
 
-	/// Create a new client with the given configuration
-	pub fn new_with_config(config: Config) -> Self {
-		let config = Rc::new(config);
-		Self {
-			collections: api::collections::Client::new(config.clone()),
-			movies: api::movies::Client::new(config.clone()),
-			shows: api::shows::Client::new(config.clone()),
-			seasons: api::seasons::Client::new(config.clone()),
-			episodes: api::episodes::Client::new(config.clone()),
+	/// Modify the [CachePolicy]
+	pub fn set_cache_policy(&self, new_policy: CachePolicy) {
+		match self.cache_policy.write() {
+			Ok(mut policy) => *policy = new_policy,
+			Err(mut poison) => {
+				**poison.get_mut() = new_policy;
+				self.cache_policy.clear_poison();
+			}
 		}
 	}
 }

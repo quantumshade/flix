@@ -4,7 +4,7 @@ use std::ffi::OsStr;
 use std::path::Path;
 
 use flix_model::id::{CollectionId, ShowId};
-use flix_model::numbers::{EpisodeNumbers, SeasonNumber};
+use flix_model::numbers::SeasonNumber;
 
 use async_stream::stream;
 use tokio::fs;
@@ -13,7 +13,7 @@ use tokio_stream::wrappers::ReadDirStream;
 
 use crate::Error;
 use crate::macros::is_image_extension;
-use crate::scanner::season;
+use crate::scanner::{EpisodeScan, MediaRef, SeasonScan, ShowScan, season};
 
 /// A show item
 pub type Item = crate::Item<Scanner>;
@@ -21,63 +21,18 @@ pub type Item = crate::Item<Scanner>;
 /// The scanner for shows
 pub enum Scanner {
 	/// A scanned show
-	Show {
-		/// The ID of the parent collection (if any)
-		parent: Option<CollectionId>,
-		/// The ID of the show
-		id: ShowId,
-		/// The file name of the poster file
-		poster_file_name: Option<String>,
-	},
+	Show(ShowScan),
+	/// A scanned season
+	Season(SeasonScan),
 	/// A scanned episode
-	Season {
-		/// The ID of the show this season belongs to
-		show: ShowId,
-		/// The season this episode belongs to
-		season: SeasonNumber,
-		/// The file name of the poster file
-		poster_file_name: Option<String>,
-	},
-	/// A scanned episode
-	Episode {
-		/// The ID of the show this episode belongs to
-		show: ShowId,
-		/// The season this episode belongs to
-		season: SeasonNumber,
-		/// The number(s) of this episode
-		episode: EpisodeNumbers,
-		/// The file name of the media file
-		media_file_name: String,
-		/// The file name of the poster file
-		poster_file_name: Option<String>,
-	},
+	Episode(EpisodeScan),
 }
 
 impl From<season::Scanner> for Scanner {
 	fn from(value: season::Scanner) -> Self {
 		match value {
-			season::Scanner::Season {
-				show,
-				season,
-				poster_file_name,
-			} => Self::Season {
-				show,
-				season,
-				poster_file_name,
-			},
-			season::Scanner::Episode {
-				show,
-				season,
-				episode,
-				media_file_name,
-				poster_file_name,
-			} => Self::Episode {
-				show,
-				season,
-				episode,
-				media_file_name,
-				poster_file_name,
-			},
+			season::Scanner::Season(s) => Self::Season(s),
+			season::Scanner::Episode(e) => Self::Episode(e),
 		}
 	}
 }
@@ -86,8 +41,8 @@ impl Scanner {
 	/// Scan a folder for a show and its seasons/episodes
 	pub fn scan_show(
 		path: &Path,
-		parent: Option<CollectionId>,
-		id: ShowId,
+		parent_ref: Option<MediaRef<CollectionId>>,
+		id_ref: MediaRef<ShowId>,
 	) -> impl Stream<Item = Item> {
 		stream!({
 			let dirs = match fs::read_dir(path).await {
@@ -158,11 +113,11 @@ impl Scanner {
 
 			yield Item {
 				path: path.to_owned(),
-				event: Ok(Self::Show {
-					parent,
-					id,
+				event: Ok(Self::Show(ShowScan {
+					parent_ref,
+					id_ref: id_ref.clone(),
 					poster_file_name,
-				}),
+				})),
 			};
 
 			for season_dir in season_dirs_to_scan {
@@ -185,7 +140,9 @@ impl Scanner {
 					continue;
 				};
 
-				for await event in season::Scanner::scan_season(&season_dir, id, season_number) {
+				for await event in
+					season::Scanner::scan_season(&season_dir, id_ref.clone(), season_number)
+				{
 					yield event.map(|e| e.into());
 				}
 			}

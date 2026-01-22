@@ -1,27 +1,32 @@
 //! Seasons API
 
-use core::time::Duration;
 use std::rc::Rc;
+use std::sync::RwLock;
 
 use flix_model::numbers::SeasonNumber;
 
-use governor::Jitter;
-
-use crate::Config;
+use crate::api::exec_request;
 use crate::model::Season;
 use crate::model::id::ShowId;
+use crate::{Cache, CachePolicy, Config};
 
 use super::{Error, make_request};
 
 /// TMDB Seasons API client
 pub struct Client {
 	config: Rc<Config>,
+	cache: Rc<dyn Cache>,
+	policy: Rc<RwLock<CachePolicy>>,
 }
 
 impl Client {
 	/// Create a new client with the given configuration
-	pub fn new(config: Rc<Config>) -> Self {
-		Self { config }
+	pub fn new(config: Rc<Config>, cache: Rc<dyn Cache>, policy: Rc<RwLock<CachePolicy>>) -> Self {
+		Self {
+			config,
+			cache,
+			policy,
+		}
 	}
 }
 
@@ -33,25 +38,11 @@ impl Client {
 		season: impl Into<SeasonNumber>,
 		language: Option<&str>,
 	) -> Result<Season, Error> {
-		self.config
-			.limiter
-			.until_ready_with_jitter(Jitter::new(
-				Duration::from_millis(0),
-				Duration::from_millis(50),
-			))
-			.await;
-
-		Ok(self
-			.config
-			.client
-			.execute(make_request(
-				&self.config,
-				&format!("/3/tv/{}/season/{}", id.into().into_raw(), season.into()),
-				language,
-			)?)
-			.await?
-			.error_for_status()?
-			.json()
-			.await?)
+		let request = make_request(
+			&self.config,
+			&format!("/3/tv/{}/season/{}", id.into().into_raw(), season.into()),
+			language,
+		)?;
+		exec_request(&self.config, &*self.cache, &self.policy, request).await
 	}
 }

@@ -1,6 +1,7 @@
 use std::path::PathBuf;
+use std::rc::Rc;
 
-use flix::tmdb::Client;
+use flix::tmdb::{self, CachePolicy, Client, RedbCache};
 
 use anyhow::{Context, Result};
 use clap::Parser;
@@ -11,6 +12,8 @@ use cli::{AddCommand, Cli, Command, DeleteCommand, UpdateCommand};
 
 mod config;
 use config::Config;
+
+use crate::cli::AddOverrides;
 
 mod db;
 mod run;
@@ -26,7 +29,11 @@ async fn main() -> Result<()> {
 
 	let database_path = cli.database_path()?;
 
-	let client = Client::new(config.tmdb().bearer_token().to_owned());
+	let client = Client::new(
+		tmdb::Config::new(config.tmdb().bearer_token().to_owned()),
+		Rc::new(RedbCache::new(cli.cache_path())?),
+		CachePolicy::Full,
+	);
 
 	if cli.trace {
 		tracing_subscriber::fmt()
@@ -37,7 +44,9 @@ async fn main() -> Result<()> {
 
 	match cli.command() {
 		Command::Init => exec_init(database_path).await?,
-		Command::Add { command } => exec_add(client, database_path, command).await?,
+		Command::Add { command, overrides } => {
+			exec_add(client, database_path, command, overrides).await?
+		}
 		Command::Update { command } => exec_update(client, database_path, command).await?,
 		Command::Delete { command } => exec_delete(client, database_path, command).await?,
 		Command::Backup { output } => exec_backup(database_path, output).await?,
@@ -53,15 +62,20 @@ async fn exec_init(database_path: String) -> Result<()> {
 	Ok(())
 }
 
-async fn exec_add(client: Client, database_path: String, command: AddCommand) -> Result<()> {
+async fn exec_add(
+	client: Client,
+	database_path: String,
+	command: AddCommand,
+	overrides: AddOverrides,
+) -> Result<()> {
 	let database = db::open(database_path).await?;
 
 	match command {
 		AddCommand::Flix { command } => {
-			run::flix::add(database.as_ref(), command).await?;
+			run::flix::add(database.as_ref(), command, overrides).await?;
 		}
 		AddCommand::Tmdb { command } => {
-			run::tmdb::add(client, database.as_ref(), command).await?;
+			run::tmdb::add(client, database.as_ref(), command, overrides).await?;
 		}
 	}
 

@@ -13,6 +13,7 @@ use tokio_stream::wrappers::ReadDirStream;
 
 use crate::Error;
 use crate::macros::{is_image_extension, is_media_extension};
+use crate::scanner::{EpisodeScan, MediaRef};
 
 /// An episode item
 pub type Item = crate::Item<Scanner>;
@@ -20,25 +21,14 @@ pub type Item = crate::Item<Scanner>;
 /// The scanner for epispdes
 pub enum Scanner {
 	/// A scanned episode
-	Episode {
-		/// The ID of the show this episode belongs to
-		show: ShowId,
-		/// The season this episode belongs to
-		season: SeasonNumber,
-		/// The number(s) of this episode
-		episode: EpisodeNumbers,
-		/// The file name of the media file
-		media_file_name: String,
-		/// The file name of the poster file
-		poster_file_name: Option<String>,
-	},
+	Episode(EpisodeScan),
 }
 
 impl Scanner {
 	/// Scan a folder for an episode
 	pub fn scan_episode(
 		path: &Path,
-		show: ShowId,
+		show_ref: MediaRef<ShowId>,
 		season: SeasonNumber,
 		episode: EpisodeNumbers,
 	) -> impl Stream<Item = Item> {
@@ -135,13 +125,13 @@ impl Scanner {
 
 			yield Item {
 				path: path.to_owned(),
-				event: Ok(Self::Episode {
-					show,
+				event: Ok(Self::Episode(EpisodeScan {
+					show_ref,
 					season,
 					episode,
 					media_file_name,
 					poster_file_name,
-				}),
+				})),
 			};
 		})
 	}

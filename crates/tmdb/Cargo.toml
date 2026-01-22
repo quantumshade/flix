@@ -1,6 +1,6 @@
 [package]
 name = "flix-tmdb"
-version = "0.0.16"
+version = "0.0.17"
 edition.workspace = true
 rust-version.workspace = true
 description = "Clients and models for fetching data from TMDB"
@@ -13,13 +13,16 @@ all-features = true
 rustdoc-args = ["--cfg", "docsrs"]
 
 [dependencies]
+bytes = { workspace = true }
 chrono = { workspace = true, features = ["serde"] }
 flix-model = { workspace = true, features = ["serde"] }
 governor = { workspace = true, features = ["jitter", "std"] }
 nonzero_ext = { workspace = true }
-reqwest = { workspace = true, features = ["json", "query", "rustls"] }
+redb = { workspace = true }
+reqwest = { workspace = true, features = ["query", "rustls"] }
 sea-orm = { workspace = true, optional = true }
 serde = { workspace = true, features = ["derive"] }
+serde_json = { workspace = true }
 thiserror = { workspace = true }
 url = { workspace = true }
 url-macro = { workspace = true }

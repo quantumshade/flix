@@ -1,12 +1,14 @@
 [package]
 name = "flix-fs"
-version = "0.0.17"
-edition.workspace = true
-rust-version.workspace = true
+version = "0.0.18"
+license-file.workspace = true
+
 description = "Filesystem scanner for flix media"
 repository = "https://github.com/QuantumShade/flix"
-license-file.workspace = true
 categories = []
+
+edition.workspace = true
+rust-version.workspace = true
 
 [package.metadata.docs.rs]
 all-features = true

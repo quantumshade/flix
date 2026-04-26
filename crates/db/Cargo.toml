@@ -1,12 +1,14 @@
 [package]
 name = "flix-db"
-version = "0.0.17"
-edition.workspace = true
-rust-version.workspace = true
+version = "0.0.18"
+license-file.workspace = true
+
 description = "Types for storing persistent data about media"
 repository = "https://github.com/QuantumShade/flix"
-license-file.workspace = true
 categories = []
+
+edition.workspace = true
+rust-version.workspace = true
 
 [package.metadata.docs.rs]
 all-features = true
@@ -15,7 +17,6 @@ rustdoc-args = ["--cfg", "docsrs"]
 [dependencies]
 chrono = { workspace = true }
 flix-model = { workspace = true }
-flix-tmdb = { workspace = true, features = ["sea-orm"], optional = true }
 sea-orm = { workspace = true, features = [
 	"entity-registry",
 	"schema-sync",
@@ -23,6 +24,8 @@ sea-orm = { workspace = true, features = [
 ] }
 sea-orm-migration = { workspace = true }
 seamantic = { workspace = true, features = ["sqlite"] }
+
+flix-tmdb = { workspace = true, features = ["sea-orm"], optional = true }
 
 [dev-dependencies]
 sea-orm-migration = { workspace = true, features = ["runtime-tokio-rustls"] }

@@ -1,4 +1,5 @@
-use std::path::PathBuf;
+//! flix-cli
+
 use std::rc::Rc;
 
 use flix::tmdb::{self, CachePolicy, Client, RedbCache};
@@ -8,7 +9,7 @@ use clap::Parser;
 use tokio::fs;
 
 mod cli;
-use cli::{AddCommand, Cli, Command, DeleteCommand, UpdateCommand};
+use cli::{AddCommand, Cli, Command, UpdateCommand};
 
 mod config;
 use config::Config;
@@ -48,9 +49,6 @@ async fn main() -> Result<()> {
 			exec_add(client, database_path, command, overrides).await?
 		}
 		Command::Update { command } => exec_update(client, database_path, command).await?,
-		Command::Delete { command } => exec_delete(client, database_path, command).await?,
-		Command::Backup { output } => exec_backup(database_path, output).await?,
-		Command::Restore { input } => exec_restore(database_path, input).await?,
 	}
 
 	Ok(())
@@ -92,23 +90,4 @@ async fn exec_update(client: Client, database_path: String, command: UpdateComma
 	}
 
 	Ok(())
-}
-
-async fn exec_delete(client: Client, database_path: String, command: DeleteCommand) -> Result<()> {
-	_ = client;
-	_ = database_path;
-	_ = command;
-	unimplemented!()
-}
-
-async fn exec_backup(database_path: String, output: PathBuf) -> Result<()> {
-	_ = database_path;
-	_ = output;
-	unimplemented!()
-}
-
-async fn exec_restore(database_path: String, input: PathBuf) -> Result<()> {
-	_ = database_path;
-	_ = input;
-	unimplemented!()
 }

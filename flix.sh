@@ -61,6 +61,10 @@ cargo run -- add tmdb show 1920           # Twin Peaks (1990)
 # Movie Collections #
 #####################
 
+# Avatar: The Last Airbender
+cargo run -- add tmdb collection 1136366  # Avatar: The Last Airbender - Collection
+cargo run -- add tmdb movie 980431        # Avatar: Aang, The Last Airbender (2026)
+
 # Disney Live-Action Remakes
 cargo run -- add flix collection "Disney Live-Action Remakes" "Live-action or photorealistic remakes produced by Walt Disney Pictures of its animated films."
 cargo run -- add tmdb movie 447273        # Snow White (2025)
@@ -73,6 +77,16 @@ cargo run -- add tmdb movie 1263256       # Happy Gilmore 2 (2025)
 # Minecraft
 cargo run -- add tmdb collection 1461530  # The Minecraft Movie Collection
 cargo run -- add tmdb movie 950387        # A Minecraft Movie (2025)
+
+# Super Mario
+cargo run -- add tmdb collection 1434561  # The Super Mario Collection
+cargo run -- add tmdb movie 502356        # The Super Mario Bros. Movie (2023)
+cargo run -- add tmdb movie 1226863       # The Super Mario Galaxy Movie (2026)
+
+# Zootopia
+cargo run -- add tmdb collection 1084247  # Zootopia Collection
+cargo run -- add tmdb movie 269149        # Zootopia (2016)
+cargo run -- add tmdb movie 1084242       # Zootopia 2 (2025)
 
 
 ####################
@@ -106,6 +120,7 @@ cargo run -- add tmdb show 95             # Buffy the Vampire Slayer (1997)
 ##########
 # Movies #
 ##########
+cargo run -- add tmdb movie 286217        # The Martian (2015)
 cargo run -- add tmdb movie 940551        # Migration (2023)
 
 
@@ -115,6 +130,7 @@ cargo run -- add tmdb movie 940551        # Migration (2023)
 cargo run -- add tmdb show 62110          # Assassination Classroom (2015)
 cargo run -- add tmdb show 1429           # Attack on Titan (2013)
 cargo run -- add tmdb show 42009          # Black Mirror (2011)
+cargo run -- add tmdb season 42009 0      # Black Mirror Specials
 cargo run -- add tmdb show 1911           # Bones (2005)
 cargo run -- add tmdb show 48891          # Brooklyn Nine-Nine (2013)
 cargo run -- add flix episode "brooklyn-nine-nine-2013" 8 10 "The Last Day (Part 2)" "The squad takes stock of its eight years together and looks toward the future." "2021-09-16"
@@ -132,6 +148,7 @@ cargo run -- add tmdb show 60846          # Log Horizon (2013)
 cargo run -- add tmdb show 64432          # The Magicians (2015)
 cargo run -- add tmdb show 5920           # The Mentalist (2008)
 cargo run -- add tmdb show 12786          # Murdoch Mysteries (2008)
+cargo run -- add tmdb season 12786 0      # Murdoch Mysteries Specials
 cargo run -- add tmdb show 65930          # My Hero Academia (2016)
 cargo run -- add tmdb show 2288           # Prison Break (2005)
 cargo run -- add tmdb show 95396          # Severance (2022)

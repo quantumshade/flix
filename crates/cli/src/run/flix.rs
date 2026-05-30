@@ -48,12 +48,12 @@ pub async fn add(
 				})
 				.await;
 
-			let flix_id = match result {
-				Ok(id) => id,
+			match result {
+				Ok(_) => {}
 				Err(TransactionError::Connection(err)) => Err(err)?,
 				Err(TransactionError::Transaction(err)) => Err(err)?,
 			};
-			println!("Created Collection: {} [{}]", title, flix_id.into_raw());
+			println!("Created Collection: {}", title);
 
 			Ok(())
 		}
@@ -93,18 +93,12 @@ pub async fn add(
 				})
 				.await;
 
-			let (flix_show, season_number, episode_number) = match result {
-				Ok(id) => id,
+			match result {
+				Ok(_) => {}
 				Err(TransactionError::Connection(err)) => Err(err)?,
 				Err(TransactionError::Transaction(err)) => Err(err)?,
 			};
-			println!(
-				"Created Episode: {} [{} S{} E{}]",
-				title,
-				flix_show.into_raw(),
-				season_number,
-				episode_number
-			);
+			println!("Created Episode: {}", title);
 
 			Ok(())
 		}

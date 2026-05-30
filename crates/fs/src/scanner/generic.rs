@@ -72,11 +72,12 @@ impl From<show::Scanner> for Scanner {
 
 impl Scanner {
 	/// Helper function for stripping allowed numerical prefixes for sorting ("01 - ")
-	fn strip_numeric_prefix(mut s: &str) -> &str {
+	fn strip_numeric_prefix(original: &str) -> &str {
+		let mut s = original;
 		while let Some('0'..='9') = s.chars().next() {
 			s = &s[1..]
 		}
-		s.strip_prefix(" - ").unwrap_or(s)
+		s.strip_prefix(" - ").unwrap_or(original)
 	}
 
 	/// Detect the type of a folder and call the correct scanner. Use

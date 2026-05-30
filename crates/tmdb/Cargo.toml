@@ -1,6 +1,6 @@
 [package]
 name = "flix-tmdb"
-version = "0.0.18"
+version = "0.0.19"
 license-file.workspace = true
 
 description = "Clients and models for fetching data from TMDB"

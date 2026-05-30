@@ -30,11 +30,9 @@ async fn main() -> Result<()> {
 
 	let database_path = cli.database_path()?;
 
-	let client = Client::new(
-		tmdb::Config::new(config.tmdb().bearer_token().to_owned()),
-		Rc::new(RedbCache::new(cli.cache_path())?),
-		CachePolicy::Full,
-	);
+	let config = tmdb::Config::new(config.tmdb().bearer_token().to_owned());
+	let cache = Rc::new(RedbCache::new(cli.cache_path())?);
+	let client = Client::new(config, cache, CachePolicy::Full);
 
 	if cli.trace {
 		tracing_subscriber::fmt()

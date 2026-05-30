@@ -4,6 +4,7 @@
 pub mod libraries {
 	use flix_model::id::LibraryId;
 
+	use seamantic::model::duration::Seconds;
 	use seamantic::model::path::PathBytes;
 
 	use chrono::{DateTime, Utc};
@@ -20,7 +21,9 @@ pub mod libraries {
 		/// The library's directory
 		pub directory: PathBytes,
 		/// The library's last scan data
-		pub last_scan: Option<DateTime<Utc>>,
+		pub last_scan_date: Option<DateTime<Utc>>,
+		/// The library's last scan duration
+		pub last_scan_duration: Option<Seconds>,
 
 		/// Collections that are part of this library
 		#[sea_orm(has_many)]
@@ -415,7 +418,8 @@ pub mod test {
 			$crate::entity::content::libraries::ActiveModel {
 				id: Set(::flix_model::id::LibraryId::from_raw($id)),
 				directory: Set(::std::path::PathBuf::new().into()),
-				last_scan: Set(None),
+				last_scan_date: Set(None),
+				last_scan_duration: Set(None),
 			}
 			.insert($db)
 			.await
@@ -522,9 +526,12 @@ pub mod test {
 
 #[cfg(test)]
 mod tests {
+	use core::time::Duration;
 	use std::path::Path;
 
 	use flix_model::id::{CollectionId, LibraryId, MovieId, ShowId};
+
+	use seamantic::model::duration::Seconds;
 
 	use chrono::NaiveDate;
 	use sea_orm::ActiveValue::{NotSet, Set};
@@ -566,7 +573,8 @@ mod tests {
 
 				assert_eq!(model.id, LibraryId::from_raw($id));
 				assert_eq!(model.directory, Path::new(concat!("L Directory ", $id)).to_owned().into());
-				assert_eq!(model.last_scan, noneable!(last_scan, NaiveDate::from_yo_opt($id, 1).expect("from_yo_opt").and_hms_opt(0, 0, 0).expect("and_hms_opt").and_utc() $(, $($skip),+)?));
+				assert_eq!(model.last_scan_date, noneable!(last_scan_date, NaiveDate::from_yo_opt($id, 1).expect("from_yo_opt").and_hms_opt(0, 0, 0).expect("and_hms_opt").and_utc() $(, $($skip),+)?));
+				assert_eq!(model.last_scan_duration, noneable!(last_scan_duration, Seconds(Duration::from_secs($id)) $(, $($skip),+)?));
 			};
 			($db:expr, $id:literal, $error:ident $(; $($skip:ident),+)?) => {
 				let model = assert_library!(@insert, $db, $id $(; $($skip),+)?)
@@ -578,7 +586,8 @@ mod tests {
 				super::libraries::ActiveModel {
 					id: notsettable!(id, LibraryId::from_raw($id) $(, $($skip),+)?),
 					directory: notsettable!(directory, Path::new(concat!("L Directory ", $id)).to_owned().into() $(, $($skip),+)?),
-					last_scan: notsettable!(last_scan, Some(NaiveDate::from_yo_opt($id, 1).expect("from_yo_opt").and_hms_opt(0, 0, 0).expect("and_hms_opt").and_utc()) $(, $($skip),+)?),
+					last_scan_date: notsettable!(last_scan_date, Some(NaiveDate::from_yo_opt($id, 1).expect("from_yo_opt").and_hms_opt(0, 0, 0).expect("and_hms_opt").and_utc()) $(, $($skip),+)?),
+					last_scan_duration: notsettable!(last_scan_duration, Some(Seconds(Duration::from_secs($id))) $(, $($skip),+)?),
 				}.insert($db).await
 			};
 		}
@@ -588,7 +597,8 @@ mod tests {
 		assert_library!(&db, 2, Success);
 		assert_library!(&db, 3, Success; id);
 		assert_library!(&db, 4, NotNullViolation; directory);
-		assert_library!(&db, 5, Success; last_scan);
+		assert_library!(&db, 5, Success; last_scan_date);
+		assert_library!(&db, 6, Success; last_scan_duration);
 	}
 
 	#[tokio::test]

@@ -1,6 +1,6 @@
 [package]
 name = "flix"
-version = "0.0.18"
+version = "0.0.19"
 license-file.workspace = true
 
 description = "Mechanisms for interacting with flix media"

@@ -11,6 +11,7 @@ Libraries and tools for dealing with media metadata
 - fmt: `cargo fmt --check`
 - docs: `RUSTDOCFLAGS="--cfg docsrs" cargo +nightly doc --all-features`
 - install: `cargo install --path crates/cli`
+- install: `cargo install --path crates/cli-mux`
 - semver: `cargo semver-checks --all-features`
 - publish: `cargo publish --dry-run --workspace`
 

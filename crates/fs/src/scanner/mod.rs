@@ -27,6 +27,16 @@ pub enum MediaRef<ID> {
 	Slug(String),
 }
 
+impl<ID> MediaRef<ID> {
+	/// Get the slug if it exists
+	pub fn into_slug(self) -> Option<String> {
+		match self {
+			MediaRef::Id(_) => None,
+			MediaRef::Slug(slug) => Some(slug),
+		}
+	}
+}
+
 /// A scanned collection
 #[derive(Debug)]
 pub struct CollectionScan {

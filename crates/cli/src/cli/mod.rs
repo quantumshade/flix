@@ -10,7 +10,12 @@ pub mod tmdb;
 #[command(version, about, long_about = None)]
 pub struct Cli {
 	/// Use a custom config file
-	#[arg(short, long, value_name = "FILE", default_value = "~/.flix")]
+	#[arg(
+		short,
+		long,
+		value_name = "FILE",
+		default_value = "~/.config/flix/config.toml"
+	)]
 	config: PathBuf,
 
 	/// Use a custom cache file

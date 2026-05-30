@@ -1,6 +1,6 @@
 [package]
 name = "flix-cli"
-version = "0.0.18"
+version = "0.0.19"
 license-file.workspace = true
 
 description = "CLI for interacting with a flix database"

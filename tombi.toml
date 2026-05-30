@@ -3,3 +3,9 @@ toml-version = "v1.0.0"
 [format.rules]
 indent-style = "tab"
 indent-width = 4
+
+# Required for rust <1.94
+[[schemas]]
+toml-version = "v1.0.0"
+path = "tombi://www.schemastore.org/cargo.json"
+include = ["Cargo.toml"]

@@ -83,12 +83,12 @@ pub async fn add(
 				})
 				.await;
 
-			let flix_id = match result {
-				Ok(id) => id,
+			match result {
+				Ok(_) => {}
 				Err(TransactionError::Connection(err)) => Err(err)?,
 				Err(TransactionError::Transaction(err)) => Err(err)?,
 			};
-			println!("Created Collection: {} [{}]", title, flix_id.into_raw());
+			println!("Created Collection: {}", title);
 
 			Ok(())
 		}
@@ -151,17 +151,12 @@ pub async fn add(
 				})
 				.await;
 
-			let flix_id = match result {
-				Ok(id) => id,
+			match result {
+				Ok(_) => {}
 				Err(TransactionError::Connection(err)) => Err(err)?,
 				Err(TransactionError::Transaction(err)) => Err(err)?,
 			};
-			println!(
-				"Created Movie: {} ({}) [{}]",
-				title,
-				year,
-				flix_id.into_raw(),
-			);
+			println!("Created Movie: {} ({})", title, year);
 
 			Ok(())
 		}
@@ -215,18 +210,22 @@ pub async fn add(
 				let mut season_episodes = Vec::new();
 				for episode in 1..=number_of_episodes {
 					let episode = EpisodeNumber::new(episode);
-					let Ok(episode) = client
+					let episode = match client
 						.episodes()
 						.get_details(id, season.season_number, episode, None)
 						.await
-					else {
-						eprintln!(
-							"skipping episode ({}, {}, {})",
-							id.into_raw(),
-							season.season_number,
-							episode
-						);
-						break;
+					{
+						Ok(value) => value,
+						Err(err) => {
+							eprintln!(
+								"skipping episode ({}, {}, {}) - {}",
+								id.into_raw(),
+								season.season_number,
+								episode,
+								err
+							);
+							break;
+						}
 					};
 					season_episodes.push(episode);
 				}
@@ -329,17 +328,12 @@ pub async fn add(
 				})
 				.await;
 
-			let flix_id = match result {
-				Ok(id) => id,
+			match result {
+				Ok(_) => {}
 				Err(TransactionError::Connection(err)) => Err(err)?,
 				Err(TransactionError::Transaction(err)) => Err(err)?,
 			};
-			println!(
-				"Created Show: {} ({}) [{}]",
-				title,
-				year,
-				flix_id.into_raw()
-			);
+			println!("Created Show: {} ({})", title, year);
 
 			Ok(())
 		}
@@ -380,18 +374,22 @@ pub async fn add(
 
 			for episode in 1..=number_of_episodes {
 				let episode = EpisodeNumber::new(episode);
-				let Ok(episode) = client
+				let episode = match client
 					.episodes()
 					.get_details(id, season.season_number, episode, None)
 					.await
-				else {
-					eprintln!(
-						"skipping episode ({}, {}, {})",
-						id.into_raw(),
-						season.season_number,
-						episode
-					);
-					break;
+				{
+					Ok(value) => value,
+					Err(err) => {
+						eprintln!(
+							"skipping episode ({}, {}, {}) - {}",
+							id.into_raw(),
+							season.season_number,
+							episode,
+							err
+						);
+						break;
+					}
 				};
 				episodes.push(episode);
 			}
@@ -451,7 +449,7 @@ pub async fn add(
 				.await;
 
 			match result {
-				Ok(_) => (),
+				Ok(_) => {}
 				Err(TransactionError::Connection(err)) => Err(err)?,
 				Err(TransactionError::Transaction(err)) => Err(err)?,
 			};
@@ -541,7 +539,7 @@ pub async fn add(
 					.await;
 
 				match result {
-					Ok(_) => (),
+					Ok(_) => {}
 					Err(TransactionError::Connection(err)) => Err(err)?,
 					Err(TransactionError::Transaction(err)) => Err(err)?,
 				};
@@ -637,7 +635,7 @@ pub async fn update(client: Client, db: &DatabaseConnection, command: Command) -
 	// 			Err(TransactionError::Connection(err)) => Err(err)?,
 	// 			Err(TransactionError::Transaction(err)) => Err(err)?,
 	// 		};
-	// 		println!("Created Collection: {} [{}]", title, flix_id.into_raw());
+	// 		println!("Created Collection: {}", title, flix_id.into_raw());
 
 	// 		Ok(())
 	// 	}
@@ -706,7 +704,7 @@ pub async fn update(client: Client, db: &DatabaseConnection, command: Command) -
 	// 			Err(TransactionError::Transaction(err)) => Err(err)?,
 	// 		};
 	// 		println!(
-	// 			"Created Movie: {} ({}) [{}]",
+	// 			"Created Movie: {} ({})",
 	// 			title,
 	// 			year,
 	// 			flix_id.into_raw(),
@@ -884,7 +882,7 @@ pub async fn update(client: Client, db: &DatabaseConnection, command: Command) -
 	// 			Err(TransactionError::Transaction(err)) => Err(err)?,
 	// 		};
 	// 		println!(
-	// 			"Created Show: {} ({}) [{}]",
+	// 			"Created Show: {} ({})",
 	// 			title,
 	// 			year,
 	// 			flix_id.into_raw()

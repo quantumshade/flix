@@ -12,22 +12,25 @@ fn split_normalized_words(input: &str) -> impl Iterator<Item = String> {
 		panic!("Input is not ASCII: {input}");
 	}
 
-	input.split_ascii_whitespace().map(|s| {
-		let chars = s
-			.chars()
-			.filter(|c| c.is_ascii_alphanumeric() || *c == '-')
-			.map(|c| c.to_ascii_lowercase());
+	input
+		.split_ascii_whitespace()
+		.map(|s| {
+			let chars = s
+				.chars()
+				.filter(|c| c.is_ascii_alphanumeric() || *c == '-')
+				.map(|c| c.to_ascii_lowercase());
 
-		if s.len() > 4
-			&& s.len().is_multiple_of(2)
-			&& chars.clone().tuples().all(|(l, r)| l != '.' && r == '.')
-		{
-			// Collapse acronym
-			chars.tuples().map(|(l, _)| l).collect()
-		} else {
-			chars.collect()
-		}
-	})
+			if s.len() > 4
+				&& s.len().is_multiple_of(2)
+				&& chars.clone().tuples().all(|(l, r)| l != '.' && r == '.')
+			{
+				// Collapse acronym
+				chars.tuples().map(|(l, _)| l).collect()
+			} else {
+				chars.collect()
+			}
+		})
+		.filter(|part: &String| !part.is_empty())
 }
 
 fn split_leading_article<I: Iterator<Item = String>>(iter: I) -> (Option<String>, Peekable<I>) {

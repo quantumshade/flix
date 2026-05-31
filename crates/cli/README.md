@@ -7,6 +7,6 @@ CLI for interacting with a flix database
 ## Commands
 
 ```sh
-cargo run -- init
-cargo run -- add tmdb movie <id>
+flix init
+flix add tmdb movie <id>
 ```

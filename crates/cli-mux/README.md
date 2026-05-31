@@ -7,5 +7,5 @@ CLI for bulk media muxing
 ## Commands
 
 ```sh
-cargo run -- <DIR>
+flix-mux -s 'v:0>eng;a:eng;s:eng:forced?;s:eng?;s:eng:sdh?' <DIR>
 ```

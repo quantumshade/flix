@@ -1,0 +1,12 @@
+run flix add tmdb collection 9485                # The Fast and the Furious Collection
+run flix add tmdb movie 9799                     # The Fast and the Furious (2001)
+run flix add tmdb movie 584                      # 2 Fast 2 Furious (2003)
+run flix add tmdb movie 9615                     # The Fast and the Furious: Tokyo Drift (2006)
+run flix add tmdb movie 13804                    # Fast & Furious (2009)
+run flix add tmdb movie 51497                    # Fast Five (2011)
+run flix add tmdb movie 82992                    # Fast & Furious 6 (2013)
+run flix add tmdb movie 168259                   # Furious 7 (2015)
+run flix add tmdb movie 337339                   # The Fate of the Furious (2017)
+run flix add tmdb movie 385128                   # F9 (2021)
+run flix add tmdb movie 385687                   # Fast X (2023)
+run flix add tmdb movie 384018                   # Fast & Furious Presents: Hobbs & Shaw (2019)

@@ -1,6 +1,6 @@
 [package]
 name = "flix-mux"
-version = "0.0.19"
+version = "0.0.20"
 license-file.workspace = true
 
 description = "CLI for bulk media muxing"

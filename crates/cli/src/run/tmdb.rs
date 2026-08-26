@@ -50,9 +50,18 @@ pub async fn add(
 			let fs_slug = overrides
 				.fs_slug
 				.unwrap_or_else(|| text::make_fs_slug(&title));
-			let web_slug = overrides
+			let mut web_slug = overrides
 				.web_slug
 				.unwrap_or_else(|| text::make_web_slug(&title));
+
+			const COLLECTION_SUFFIX_TO_REMOVE: &str = "-collection";
+			if web_slug.ends_with(COLLECTION_SUFFIX_TO_REMOVE) {
+				web_slug.truncate(
+					web_slug
+						.len()
+						.saturating_sub(COLLECTION_SUFFIX_TO_REMOVE.len()),
+				);
+			}
 
 			let result: Result<CollectionId, TransactionError<DbErr>> = db
 				.transaction(|txn| {

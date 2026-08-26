@@ -5,6 +5,13 @@ use anyhow::{Context as _, Result};
 use crate::model::MediaFile;
 use crate::parser::{Matcher, Selector, StreamFlag, StreamType};
 
+#[derive(Default)]
+struct OutputIndex {
+	video: usize,
+	audio: usize,
+	subtitle: usize,
+}
+
 pub fn mux_files<T>(
 	dry_run: bool,
 	files: &[MediaFile],
@@ -40,14 +47,16 @@ fn mux(dry_run: bool, file: &MediaFile, selectors: &[Selector]) -> Result<()> {
 	}
 
 	command = command.args(["-c:v", "copy", "-c:a", "copy", "-c:s", "mov_text"]);
+	command = command.args(["-strict", "-2"]);
 	command = command.args(["-movflags", "faststart+disable_chpl+write_colr"]);
 	command = command.args(["-map_chapters", "-1"]);
 	command = command.args(["-map_metadata", "-1"]);
 	command = command.args(["-metadata:g", "encoding_tool=Skrundzflix"]);
 
+	let mut ouput_index = OutputIndex::default();
 	for selector in selectors {
 		command = command.args(
-			make_metadata_args(file, selector)
+			make_metadata_args(file, selector, &mut ouput_index)
 				.with_context(|| format!("Failed to mux {:?}", file.path))?,
 		);
 	}
@@ -91,9 +100,16 @@ fn make_map_args(file: &MediaFile, selector: &Selector) -> Result<Vec<String>> {
 	])
 }
 
-fn make_metadata_args(file: &MediaFile, selector: &Selector) -> Result<Vec<String>> {
+fn make_metadata_args(
+	file: &MediaFile,
+	selector: &Selector,
+	index: &mut OutputIndex,
+) -> Result<Vec<String>> {
 	let stream_type = selector.stream_type.as_ref();
-	let Some(stream_index) = find_stream_index(file, selector) else {
+	let stream_language = selector.language();
+
+	// Bail early if the stream is not selected
+	let Some(_) = find_stream_index(file, selector) else {
 		if selector.optional {
 			return Ok(vec![]);
 		} else {
@@ -101,7 +117,13 @@ fn make_metadata_args(file: &MediaFile, selector: &Selector) -> Result<Vec<Strin
 		}
 	};
 
-	let stream_language = selector.language();
+	let counter = match selector.stream_type {
+		StreamType::Video => &mut index.video,
+		StreamType::Audio => &mut index.audio,
+		StreamType::Subtitle => &mut index.subtitle,
+	};
+	let stream_index = *counter;
+	*counter = counter.saturating_add(1);
 
 	let mut args = vec![
 		format!("-metadata:s:{}:{}", stream_type, stream_index),

@@ -1,0 +1,42 @@
+# Individual Shows
+run flix add tmdb show 68421                     # Altered Carbon (2018)
+run flix add tmdb show 62110                     # Assassination Classroom (2015)
+run flix add tmdb show 1429                      # Attack on Titan (2013)
+run flix add tmdb show 42009                     # Black Mirror (2011)
+run flix add tmdb show 1911                      # Bones (2005)
+run flix add tmdb show 48891                     # Brooklyn Nine-Nine (2013)
+run flix add tmdb show 3787                      # Chaotic (2006)
+run flix add tmdb show 2557                      # Class of the Titans (2006)
+run flix add tmdb show 13916                     # Death Note (2006)
+run flix add tmdb show 1405                      # Dexter (2006)
+run flix add tmdb show 1399                      # Game of Thrones (2011)
+run flix add tmdb show 40075                     # Gravity Falls (2012)
+run flix add tmdb show 1639                      # Heroes (2006)
+run flix add tmdb show 60858                     # Heroes Reborn (2015)
+run flix add tmdb show 62687                     # Limitless (2015)
+run flix add tmdb show 60846                     # Log Horizon (2013)
+run flix add tmdb show 64432                     # The Magicians (2015)
+run flix add tmdb show 5920                      # The Mentalist (2008)
+run flix add tmdb show 12786                     # Murdoch Mysteries (2008)
+run flix add tmdb show 65930                     # My Hero Academia (2016)
+run flix add tmdb show 2288                      # Prison Break (2005)
+run flix add tmdb show 95396                     # Severance (2022)
+run flix add tmdb show 60573                     # Silicon Valley (2014)
+run flix add tmdb show 37680                     # Suits (2011)
+run flix add tmdb show 45782                     # Sword Art Online (2012)
+run flix add tmdb show 63404                     # Taskmaster (2015)
+run flix add tmdb show 48860                     # The Tomorrow People (2013)
+run flix add tmdb show 46331                     # Under the Dome (2013)
+run flix add tmdb show 1432                      # Veronica Mars (2004)
+run flix add tmdb show 186                       # Weeds (2005)
+run flix add tmdb show 63247                     # Westworld (2016)
+run flix add tmdb show 71912                     # The Witcher (2019)
+
+# Fixups
+run flix add flix episode \
+	"brooklyn-nine-nine-2013" 8 10 \
+	"The Last Day (Part 2)" \
+	"The squad takes stock of its eight years together and looks toward the future." \
+	"2021-09-16"                                 # Brooklyn Nine-Nine Split Episode
+run flix add tmdb season 12786 0                 # Murdoch Mysteries Specials
+run flix add tmdb season 63404 0                 # Taskmaster Specials

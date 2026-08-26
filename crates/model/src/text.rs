@@ -15,6 +15,10 @@ fn split_normalized_words(input: &str) -> impl Iterator<Item = String> {
 	input
 		.split_ascii_whitespace()
 		.map(|s| {
+			if s == "&" {
+				return "and".to_string();
+			}
+
 			let chars = s
 				.chars()
 				.filter(|c| c.is_ascii_alphanumeric() || *c == '-')
@@ -30,7 +34,7 @@ fn split_normalized_words(input: &str) -> impl Iterator<Item = String> {
 				chars.collect()
 			}
 		})
-		.filter(|part: &String| !part.is_empty())
+		.filter(|part: &String| !part.is_empty() && part != "-")
 }
 
 fn split_leading_article<I: Iterator<Item = String>>(iter: I) -> (Option<String>, Peekable<I>) {
@@ -48,6 +52,7 @@ fn split_leading_article<I: Iterator<Item = String>>(iter: I) -> (Option<String>
 ///     assert_eq!(make_sortable_title("The Matrix"), "matrix, the");
 ///     assert_eq!(make_sortable_title("Marvel's Agents of S.H.I.E.L.D."), "marvels agents of shield");
 ///     assert_eq!(make_sortable_title("Avatar: The Last Airbender"), "avatar the last airbender");
+///     assert_eq!(make_sortable_title("Cloak & Dagger"), "cloak and dagger");
 ///
 /// # Panics
 ///
@@ -71,6 +76,7 @@ pub fn make_sortable_title(title: &str) -> String {
 ///     assert_eq!(make_fs_slug("The Matrix"), "matrix");
 ///     assert_eq!(make_fs_slug("Marvel's Agents of S.H.I.E.L.D."), "marvels agents of shield");
 ///     assert_eq!(make_fs_slug("Avatar: The Last Airbender"), "avatar the last airbender");
+///     assert_eq!(make_fs_slug("Cloak & Dagger"), "cloak and dagger");
 ///
 /// # Panics
 ///
@@ -89,6 +95,7 @@ pub fn make_fs_slug(title: &str) -> String {
 ///     assert_eq!(make_fs_slug_year("The Matrix", 1999), "matrix (1999)");
 ///     assert_eq!(make_fs_slug_year("Marvel's Agents of S.H.I.E.L.D.", 2013), "marvels agents of shield (2013)");
 ///     assert_eq!(make_fs_slug_year("Avatar: The Last Airbender", 2005), "avatar the last airbender (2005)");
+///     assert_eq!(make_fs_slug_year("Cloak & Dagger", 2018), "cloak and dagger (2018)");
 ///
 /// # Panics
 ///
@@ -109,8 +116,13 @@ pub fn make_fs_slug_year(title: &str, year: i32) -> String {
 ///     assert_eq!(normalize_fs_name("Matrix (1999)"), "matrix (1999)");
 ///     assert_eq!(normalize_fs_name("Marvel's Agents of SHIELD (2013)"), "marvels agents of shield (2013)");
 ///     assert_eq!(normalize_fs_name("Avatar The Last Airbender (2005)"), "avatar the last airbender (2005)");
+///     assert_eq!(normalize_fs_name("Cloak & Dagger (2018)"), "cloak and dagger (2018)");
 pub fn normalize_fs_name(input: &str) -> String {
 	let chars = input.split_ascii_whitespace().map(|s| {
+		if s == "&" {
+			return "and".to_string();
+		}
+
 		let chars = s
 			.chars()
 			.filter(|c| c.is_ascii_alphanumeric() || *c == '-' || *c == '(' || *c == ')')
@@ -136,6 +148,7 @@ pub fn normalize_fs_name(input: &str) -> String {
 ///     assert_eq!(make_web_slug("The Matrix"), "matrix");
 ///     assert_eq!(make_web_slug("Marvel's Agents of S.H.I.E.L.D."), "marvels-agents-of-shield");
 ///     assert_eq!(make_web_slug("Avatar: The Last Airbender"), "avatar-the-last-airbender");
+///     assert_eq!(make_web_slug("Cloak & Dagger"), "cloak-and-dagger");
 ///
 /// # Panics
 ///
@@ -154,6 +167,7 @@ pub fn make_web_slug(title: &str) -> String {
 ///     assert_eq!(make_web_slug_year("The Matrix", 1999), "matrix-1999");
 ///     assert_eq!(make_web_slug_year("Marvel's Agents of S.H.I.E.L.D.", 2013), "marvels-agents-of-shield-2013");
 ///     assert_eq!(make_web_slug_year("Avatar: The Last Airbender", 2005), "avatar-the-last-airbender-2005");
+///     assert_eq!(make_web_slug_year("Cloak & Dagger", 2018), "cloak-and-dagger-2018");
 ///
 /// # Panics
 ///

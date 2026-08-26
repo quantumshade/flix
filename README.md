@@ -17,4 +17,4 @@ Libraries and tools for dealing with media metadata
 
 ## Building flix.db
 
-`./flix.sh`
+`./catalog/flix.sh`

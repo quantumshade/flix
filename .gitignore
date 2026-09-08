@@ -20,4 +20,4 @@
 !/crates/**/Cargo.toml
 !/crates/**/README.md
 
-!/lints/*.toml
+!/catalog/**/*.sh

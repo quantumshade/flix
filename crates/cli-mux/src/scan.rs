@@ -1,3 +1,5 @@
+//! Helpers for filesystem scanning.
+
 use std::path::Path;
 
 use walkdir::WalkDir;
@@ -5,7 +7,8 @@ use walkdir::WalkDir;
 use crate::model::MediaFile;
 use crate::probe::probe_file;
 
-pub fn scan_directory<T>(
+/// Recursively scan a directory.
+pub(crate) fn scan_directory<T>(
 	path: &Path,
 	unknown_length_start: impl FnOnce() -> T,
 	unknown_length_end: impl FnOnce(T),
@@ -18,32 +21,26 @@ pub fn scan_directory<T>(
 	let files: Vec<_> = WalkDir::new(path)
 		.into_iter()
 		.filter_map(Result::ok)
-		.filter(|e| e.file_type().is_file())
 		.filter(|e| {
-			let is_mkv = e
-				.path()
-				.extension()
-				.unwrap_or_default()
-				.eq_ignore_ascii_case("mkv");
-			let is_mp4 = e
-				.path()
-				.extension()
-				.unwrap_or_default()
-				.eq_ignore_ascii_case("mp4");
-			is_mkv || is_mp4
+			#[expect(clippy::filetype_is_file, reason = "we only want regular files")]
+			e.file_type().is_file()
+		})
+		.filter(|e| {
+			let ext = e.path().extension().unwrap_or_default();
+			ext.eq_ignore_ascii_case("mkv") || ext.eq_ignore_ascii_case("mp4")
 		})
 		.collect();
 	unknown_length_end(spinner);
 
 	let mut progress = fixed_length_start(files.len());
-	let mut total_byte_size = 0u64;
+	let mut total_byte_size = 0_u64;
 	let files: Vec<_> = files
 		.iter()
 		.filter_map(|entry| {
 			let file = match probe_file(entry) {
 				Ok(file) => Some(file),
 				Err(err) => {
-					print_fn(&progress, &format!("{:?}", err));
+					print_fn(&progress, &format!("{err:?}"));
 					None
 				}
 			};

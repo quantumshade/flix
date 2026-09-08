@@ -1,7 +1,7 @@
 //! This module contains entities for storing media information such as
-//! titles and overviews
+//! titles and overviews.
 
-/// Collection entity
+/// Collection entity.
 pub mod collections {
 	use flix_model::id::CollectionId;
 
@@ -9,38 +9,39 @@ pub mod collections {
 
 	use crate::entity;
 
-	/// The database representation of a flix collection
+	/// The database representation of a flix collection.
 	#[sea_orm::model]
 	#[derive(Debug, Clone, DeriveEntityModel)]
 	#[sea_orm(table_name = "flix_info_collections")]
 	pub struct Model {
-		/// The collection's ID
+		/// The collection's ID.
 		#[sea_orm(primary_key, auto_increment = false)]
 		pub id: CollectionId,
-		/// The collection's title
+		/// The collection's title.
 		pub title: String,
-		/// The collection's overview
+		/// The collection's overview.
 		pub overview: String,
 
-		/// The sortable title
+		/// The sortable title.
 		#[sea_orm(indexed)]
 		pub sort_title: String,
-		/// The filesystem-safe slug
+		/// The filesystem-safe slug.
 		#[sea_orm(indexed, unique)]
 		pub fs_slug: String,
-		/// The url-safe slug
+		/// The url-safe slug.
 		#[sea_orm(indexed, unique)]
 		pub web_slug: String,
 
-		/// Potential content for this collection
+		/// Potential content for this collection.
 		#[sea_orm(has_one)]
 		pub content: HasOne<entity::content::collections::Entity>,
 	}
 
+	#[expect(clippy::missing_trait_methods, reason = "accept default methods")]
 	impl ActiveModelBehavior for ActiveModel {}
 }
 
-/// Movie entity
+/// Movie entity.
 pub mod movies {
 	use flix_model::id::MovieId;
 
@@ -49,43 +50,44 @@ pub mod movies {
 
 	use crate::entity;
 
-	/// The database representation of a flix movie
+	/// The database representation of a flix movie.
 	#[sea_orm::model]
 	#[derive(Debug, Clone, DeriveEntityModel)]
 	#[sea_orm(table_name = "flix_info_movies")]
 	pub struct Model {
-		/// The movie's ID
+		/// The movie's ID.
 		#[sea_orm(primary_key, auto_increment = false)]
 		pub id: MovieId,
-		/// The movie's title
+		/// The movie's title.
 		pub title: String,
-		/// The movie's tagline
+		/// The movie's tagline.
 		pub tagline: String,
-		/// The movie's overview
+		/// The movie's overview.
 		pub overview: String,
-		/// The movie's release date
+		/// The movie's release date.
 		#[sea_orm(indexed)]
 		pub date: NaiveDate,
 
-		/// The sortable title
+		/// The sortable title.
 		#[sea_orm(indexed)]
 		pub sort_title: String,
-		/// The filesystem-safe slug
+		/// The filesystem-safe slug.
 		#[sea_orm(indexed, unique)]
 		pub fs_slug: String,
-		/// The url-safe slug
+		/// The url-safe slug.
 		#[sea_orm(indexed, unique)]
 		pub web_slug: String,
 
-		/// Potential content for this movie
+		/// Potential content for this movie.
 		#[sea_orm(has_one)]
 		pub content: HasOne<entity::content::movies::Entity>,
 	}
 
+	#[expect(clippy::missing_trait_methods, reason = "accept default methods")]
 	impl ActiveModelBehavior for ActiveModel {}
 }
 
-/// Show entity
+/// Show entity.
 pub mod shows {
 	use flix_model::id::ShowId;
 
@@ -94,50 +96,51 @@ pub mod shows {
 
 	use crate::entity;
 
-	/// The database representation of a flix show
+	/// The database representation of a flix show.
 	#[sea_orm::model]
 	#[derive(Debug, Clone, DeriveEntityModel)]
 	#[sea_orm(table_name = "flix_info_shows")]
 	pub struct Model {
-		/// The show's ID
+		/// The show's ID.
 		#[sea_orm(primary_key, auto_increment = false)]
 		pub id: ShowId,
-		/// The show's title
+		/// The show's title.
 		pub title: String,
-		/// The show's tagline
+		/// The show's tagline.
 		pub tagline: String,
-		/// The show's overview
+		/// The show's overview.
 		pub overview: String,
-		/// The show's air date
+		/// The show's air date.
 		#[sea_orm(indexed)]
 		pub date: NaiveDate,
 
-		/// The sortable title
+		/// The sortable title.
 		#[sea_orm(indexed)]
 		pub sort_title: String,
-		/// The filesystem-safe slug
+		/// The filesystem-safe slug.
 		#[sea_orm(indexed, unique)]
 		pub fs_slug: String,
-		/// The url-safe slug
+		/// The url-safe slug.
 		#[sea_orm(indexed, unique)]
 		pub web_slug: String,
 
-		/// Seasons that are part of this show
+		/// Seasons that are part of this show.
 		#[sea_orm(has_many)]
 		pub seasons: HasMany<super::seasons::Entity>,
-		/// Episodes that are part of this show
+		/// Episodes that are part of this show.
 		#[sea_orm(has_many)]
 		pub episodes: HasMany<super::episodes::Entity>,
 
-		/// Potential content for this show
+		/// Potential content for this show.
 		#[sea_orm(has_one)]
 		pub content: HasOne<entity::content::shows::Entity>,
 	}
 
+	#[expect(clippy::missing_trait_methods, reason = "accept default methods")]
 	impl ActiveModelBehavior for ActiveModel {}
 }
 
-/// Season entity
+/// Season entity.
 pub mod seasons {
 	use flix_model::id::ShowId;
 	use flix_model::numbers::SeasonNumber;
@@ -147,26 +150,26 @@ pub mod seasons {
 
 	use crate::entity;
 
-	/// The database representation of a flix season
+	/// The database representation of a flix season.
 	#[sea_orm::model]
 	#[derive(Debug, Clone, DeriveEntityModel)]
 	#[sea_orm(table_name = "flix_info_seasons")]
 	pub struct Model {
-		/// The season's show's ID
+		/// The season's show's ID.
 		#[sea_orm(primary_key, auto_increment = false)]
 		pub show_id: ShowId,
-		/// The season's number
+		/// The season's number.
 		#[sea_orm(primary_key, auto_increment = false)]
 		pub season_number: SeasonNumber,
-		/// The season's title
+		/// The season's title.
 		pub title: String,
-		/// The season's overview
+		/// The season's overview.
 		pub overview: String,
-		/// The season's air date
+		/// The season's air date.
 		#[sea_orm(indexed)]
 		pub date: NaiveDate,
 
-		/// The show this season belongs to
+		/// The show this season belongs to.
 		#[sea_orm(
 			belongs_to,
 			from = "show_id",
@@ -175,19 +178,20 @@ pub mod seasons {
 			on_delete = "Cascade"
 		)]
 		pub show: HasOne<super::shows::Entity>,
-		/// Episodes that are part of this season
+		/// Episodes that are part of this season.
 		#[sea_orm(has_many)]
 		pub episodes: HasMany<super::episodes::Entity>,
 
-		/// Potential content for this season
+		/// Potential content for this season.
 		#[sea_orm(has_one)]
 		pub content: HasOne<entity::content::seasons::Entity>,
 	}
 
+	#[expect(clippy::missing_trait_methods, reason = "accept default methods")]
 	impl ActiveModelBehavior for ActiveModel {}
 }
 
-/// Episode entity
+/// Episode entity.
 pub mod episodes {
 	use flix_model::id::ShowId;
 	use flix_model::numbers::{EpisodeNumber, SeasonNumber};
@@ -197,29 +201,29 @@ pub mod episodes {
 
 	use crate::entity;
 
-	/// The database representation of a flix episode
+	/// The database representation of a flix episode.
 	#[sea_orm::model]
 	#[derive(Debug, Clone, DeriveEntityModel)]
 	#[sea_orm(table_name = "flix_info_episodes")]
 	pub struct Model {
-		/// The episode's show's ID
+		/// The episode's show's ID.
 		#[sea_orm(primary_key, auto_increment = false)]
 		pub show_id: ShowId,
-		/// The episode's season's number
+		/// The episode's season's number.
 		#[sea_orm(primary_key, auto_increment = false)]
 		pub season_number: SeasonNumber,
-		/// The episode's number
+		/// The episode's number.
 		#[sea_orm(primary_key, auto_increment = false)]
 		pub episode_number: EpisodeNumber,
-		/// The episode's title
+		/// The episode's title.
 		pub title: String,
-		/// The episode's overview
+		/// The episode's overview.
 		pub overview: String,
-		/// The episode's air date
+		/// The episode's air date.
 		#[sea_orm(indexed)]
 		pub date: NaiveDate,
 
-		/// The show this episode belongs to
+		/// The show this episode belongs to.
 		#[sea_orm(
 			belongs_to,
 			from = "show_id",
@@ -228,7 +232,7 @@ pub mod episodes {
 			on_delete = "Cascade"
 		)]
 		pub show: HasOne<super::shows::Entity>,
-		/// The season this episode belongs to
+		/// The season this episode belongs to.
 		#[sea_orm(
 			belongs_to,
 			from = "(show_id, season_number)",
@@ -238,101 +242,112 @@ pub mod episodes {
 		)]
 		pub season: HasOne<super::seasons::Entity>,
 
-		/// Potential content for this episode
+		/// Potential content for this episode.
 		#[sea_orm(has_one)]
 		pub content: HasOne<entity::content::episodes::Entity>,
 	}
 
+	#[expect(clippy::missing_trait_methods, reason = "accept default methods")]
 	impl ActiveModelBehavior for ActiveModel {}
 }
 
-/// Macros for creating info entities
+/// Macros for creating info entities.
 #[cfg(test)]
 pub mod test {
 	macro_rules! make_info_collection {
 		($db:expr, $id:expr) => {
-			$crate::entity::info::collections::ActiveModel {
-				id: Set(::flix_model::id::CollectionId::from_raw($id)),
-				title: Set(::std::string::String::new()),
-				overview: Set(::std::string::String::new()),
-				sort_title: Set(::std::string::String::new()),
-				fs_slug: Set(format!("C FS {}", $id)),
-				web_slug: Set(format!("C Web {}", $id)),
-			}
-			.insert($db)
-			.await
-			.expect("insert");
+			drop(
+				$crate::entity::info::collections::ActiveModel {
+					id: Set(::flix_model::id::CollectionId::from_raw($id)),
+					title: Set(::alloc::string::String::new()),
+					overview: Set(::alloc::string::String::new()),
+					sort_title: Set(::alloc::string::String::new()),
+					fs_slug: Set(format!("C FS {}", $id)),
+					web_slug: Set(format!("C Web {}", $id)),
+				}
+				.insert($db)
+				.await
+				.expect("insert"),
+			);
 		};
 	}
 	pub(crate) use make_info_collection;
 
 	macro_rules! make_info_movie {
 		($db:expr, $id:expr) => {
-			$crate::entity::info::movies::ActiveModel {
-				id: Set(::flix_model::id::MovieId::from_raw($id)),
-				title: Set(::std::string::String::new()),
-				tagline: Set(::std::string::String::new()),
-				overview: Set(::std::string::String::new()),
-				date: Set(::chrono::NaiveDate::from_yo_opt(1, 1).expect("from_yo_opt")),
-				sort_title: Set(::std::string::String::new()),
-				fs_slug: Set(format!("M FS {}", $id)),
-				web_slug: Set(format!("M Web {}", $id)),
-			}
-			.insert($db)
-			.await
-			.expect("insert");
+			drop(
+				$crate::entity::info::movies::ActiveModel {
+					id: Set(::flix_model::id::MovieId::from_raw($id)),
+					title: Set(::alloc::string::String::new()),
+					tagline: Set(::alloc::string::String::new()),
+					overview: Set(::alloc::string::String::new()),
+					date: Set(::chrono::NaiveDate::from_yo_opt(1, 1).expect("from_yo_opt")),
+					sort_title: Set(::alloc::string::String::new()),
+					fs_slug: Set(format!("M FS {}", $id)),
+					web_slug: Set(format!("M Web {}", $id)),
+				}
+				.insert($db)
+				.await
+				.expect("insert"),
+			);
 		};
 	}
 	pub(crate) use make_info_movie;
 
 	macro_rules! make_info_show {
 		($db:expr, $id:expr) => {
-			$crate::entity::info::shows::ActiveModel {
-				id: Set(::flix_model::id::ShowId::from_raw($id)),
-				title: Set(::std::string::String::new()),
-				tagline: Set(::std::string::String::new()),
-				overview: Set(::std::string::String::new()),
-				date: Set(::chrono::NaiveDate::from_yo_opt(1, 1).expect("from_yo_opt")),
-				sort_title: Set(::std::string::String::new()),
-				fs_slug: Set(format!("S FS {}", $id)),
-				web_slug: Set(format!("S Web {}", $id)),
-			}
-			.insert($db)
-			.await
-			.expect("insert");
+			drop(
+				$crate::entity::info::shows::ActiveModel {
+					id: Set(::flix_model::id::ShowId::from_raw($id)),
+					title: Set(::alloc::string::String::new()),
+					tagline: Set(::alloc::string::String::new()),
+					overview: Set(::alloc::string::String::new()),
+					date: Set(::chrono::NaiveDate::from_yo_opt(1, 1).expect("from_yo_opt")),
+					sort_title: Set(::alloc::string::String::new()),
+					fs_slug: Set(format!("S FS {}", $id)),
+					web_slug: Set(format!("S Web {}", $id)),
+				}
+				.insert($db)
+				.await
+				.expect("insert"),
+			);
 		};
 	}
 	pub(crate) use make_info_show;
 
 	macro_rules! make_info_season {
 		($db:expr, $show:expr, $season:expr) => {
-			$crate::entity::info::seasons::ActiveModel {
-				show_id: Set(::flix_model::id::ShowId::from_raw($show)),
-				season_number: Set(::flix_model::numbers::SeasonNumber::new($season)),
-				title: Set(::std::string::String::new()),
-				overview: Set(::std::string::String::new()),
-				date: Set(::chrono::NaiveDate::from_yo_opt(1, 1).expect("from_yo_opt")),
-			}
-			.insert($db)
-			.await
-			.expect("insert");
+			drop(
+				$crate::entity::info::seasons::ActiveModel {
+					show_id: Set(::flix_model::id::ShowId::from_raw($show)),
+					season_number: Set(::flix_model::numbers::SeasonNumber::new($season)),
+					title: Set(::alloc::string::String::new()),
+					overview: Set(::alloc::string::String::new()),
+					date: Set(::chrono::NaiveDate::from_yo_opt(1, 1).expect("from_yo_opt")),
+				}
+				.insert($db)
+				.await
+				.expect("insert"),
+			);
 		};
 	}
 	pub(crate) use make_info_season;
 
 	macro_rules! make_info_episode {
 		($db:expr, $show:expr, $season:expr, $episode:expr) => {
-			$crate::entity::info::episodes::ActiveModel {
-				show_id: Set(::flix_model::id::ShowId::from_raw($show)),
-				season_number: Set(::flix_model::numbers::SeasonNumber::new($season)),
-				episode_number: Set(::flix_model::numbers::EpisodeNumber::new($episode)),
-				title: Set(::std::string::String::new()),
-				overview: Set(::std::string::String::new()),
-				date: Set(::chrono::NaiveDate::from_yo_opt(1, 1).expect("from_yo_opt")),
-			}
-			.insert($db)
-			.await
-			.expect("insert");
+			drop(
+				$crate::entity::info::episodes::ActiveModel {
+					show_id: Set(::flix_model::id::ShowId::from_raw($show)),
+					season_number: Set(::flix_model::numbers::SeasonNumber::new($season)),
+					episode_number: Set(::flix_model::numbers::EpisodeNumber::new($episode)),
+					title: Set(::alloc::string::String::new()),
+					overview: Set(::alloc::string::String::new()),
+					date: Set(::chrono::NaiveDate::from_yo_opt(1, 1).expect("from_yo_opt")),
+				}
+				.insert($db)
+				.await
+				.expect("insert"),
+			);
 		};
 	}
 	pub(crate) use make_info_episode;
@@ -355,7 +370,10 @@ mod tests {
 		make_info_collection, make_info_episode, make_info_movie, make_info_season, make_info_show,
 	};
 
+	#[cfg(not(miri))]
 	#[tokio::test]
+	#[expect(clippy::missing_panics_doc, reason = "unit test")]
+	#[expect(clippy::default_numeric_fallback, reason = "unit test")]
 	async fn use_test_macros() {
 		let db = new_initialized_memory_db().await;
 
@@ -366,8 +384,10 @@ mod tests {
 		make_info_episode!(&db, 1, 1, 1);
 	}
 
+	#[cfg(not(miri))]
 	#[tokio::test]
-	async fn test_round_trip_collections() {
+	#[expect(clippy::missing_panics_doc, reason = "unit test")]
+	async fn round_trip_collections() {
 		let db = new_initialized_memory_db().await;
 
 		macro_rules! assert_collection {
@@ -409,8 +429,10 @@ mod tests {
 		assert_collection!(&db, 8, NotNullViolation; web_slug);
 	}
 
+	#[cfg(not(miri))]
 	#[tokio::test]
-	async fn test_round_trip_movies() {
+	#[expect(clippy::missing_panics_doc, reason = "unit test")]
+	async fn round_trip_movies() {
 		let db = new_initialized_memory_db().await;
 
 		macro_rules! assert_movie {
@@ -458,8 +480,10 @@ mod tests {
 		assert_movie!(&db, 10, NotNullViolation; web_slug);
 	}
 
+	#[cfg(not(miri))]
 	#[tokio::test]
-	async fn test_round_trip_shows() {
+	#[expect(clippy::missing_panics_doc, reason = "unit test")]
+	async fn round_trip_shows() {
 		let db = new_initialized_memory_db().await;
 
 		macro_rules! assert_show {
@@ -510,8 +534,11 @@ mod tests {
 		assert_show!(&db, 10, NotNullViolation; web_slug);
 	}
 
+	#[cfg(not(miri))]
 	#[tokio::test]
-	async fn test_round_trip_seasons() {
+	#[expect(clippy::missing_panics_doc, reason = "unit test")]
+	#[expect(clippy::default_numeric_fallback, reason = "unit test")]
+	async fn round_trip_seasons() {
 		let db = new_initialized_memory_db().await;
 
 		macro_rules! assert_season {
@@ -561,8 +588,11 @@ mod tests {
 		assert_season!(&db, 1, 7, NotNullViolation; date);
 	}
 
+	#[cfg(not(miri))]
 	#[tokio::test]
-	async fn test_round_trip_episodes() {
+	#[expect(clippy::missing_panics_doc, reason = "unit test")]
+	#[expect(clippy::default_numeric_fallback, reason = "unit test")]
+	async fn round_trip_episodes() {
 		let db = new_initialized_memory_db().await;
 
 		macro_rules! assert_episode {

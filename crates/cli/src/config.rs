@@ -1,21 +1,29 @@
+//! CLI configuration.
+
+/// Top level config struct.
 #[derive(serde::Deserialize)]
-pub struct Config {
+pub(crate) struct Config {
+	/// The TMDB config.
 	tmdb: TmdbConfig,
 }
 
+/// TMDB config struct.
 #[derive(serde::Deserialize)]
-pub struct TmdbConfig {
+pub(crate) struct TmdbConfig {
+	/// The bearer token to use for API requests.
 	bearer_token: String,
 }
 
 impl Config {
-	pub fn tmdb(&self) -> &TmdbConfig {
+	/// Get the TMDB config.
+	pub(crate) const fn tmdb(&self) -> &TmdbConfig {
 		&self.tmdb
 	}
 }
 
 impl TmdbConfig {
-	pub fn bearer_token(&self) -> &str {
+	/// Get the bearer token.
+	pub(crate) fn bearer_token(&self) -> &str {
 		&self.bearer_token
 	}
 }

@@ -1,4 +1,4 @@
-//! flix-fs provides filesystem scanners for flix media
+//! flix-fs provides filesystem scanners for flix media.
 
 #![cfg_attr(docsrs, feature(doc_cfg))]
 

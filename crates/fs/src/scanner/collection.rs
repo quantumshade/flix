@@ -1,4 +1,4 @@
-//! The collection scanner will scan a folder and its children
+//! The collection scanner will scan a folder and its children.
 
 use core::pin::Pin;
 use std::ffi::OsStr;
@@ -17,24 +17,27 @@ use crate::scanner::{
 	CollectionScan, EpisodeScan, MediaRef, MovieScan, SeasonScan, ShowScan, generic, movie, show,
 };
 
-/// A collection item
+/// A collection item.
 pub type Item = crate::Item<Scanner>;
 
-/// The scanner for collections
+/// The scanner for collections.
+#[derive(Debug)]
+#[expect(clippy::exhaustive_enums, reason = "unlikely to change")]
 pub enum Scanner {
-	/// A scanned collection
+	/// A scanned collection.
 	Collection(CollectionScan),
-	/// A scanned movie
+	/// A scanned movie.
 	Movie(MovieScan),
-	/// A scanned show
+	/// A scanned show.
 	Show(ShowScan),
-	/// A scanned episode
+	/// A scanned episode.
 	Season(SeasonScan),
-	/// A scanned episode
+	/// A scanned episode.
 	Episode(EpisodeScan),
 }
 
 impl From<movie::Scanner> for Scanner {
+	#[inline]
 	fn from(value: movie::Scanner) -> Self {
 		match value {
 			movie::Scanner::Movie(m) => Self::Movie(m),
@@ -43,6 +46,7 @@ impl From<movie::Scanner> for Scanner {
 }
 
 impl From<show::Scanner> for Scanner {
+	#[inline]
 	fn from(value: show::Scanner) -> Self {
 		match value {
 			show::Scanner::Show(s) => Self::Show(s),
@@ -53,6 +57,7 @@ impl From<show::Scanner> for Scanner {
 }
 
 impl From<generic::Scanner> for Scanner {
+	#[inline]
 	fn from(value: generic::Scanner) -> Self {
 		match value {
 			generic::Scanner::Collection(c) => Self::Collection(c),
@@ -65,7 +70,12 @@ impl From<generic::Scanner> for Scanner {
 }
 
 impl Scanner {
-	/// Scan a folder for a collection
+	/// Scan a folder for a collection.
+	#[inline]
+	#[must_use]
+	#[expect(clippy::allow_attributes, reason = "for tail_expr_drop_order")]
+	#[allow(tail_expr_drop_order, reason = "bug in stream! macro")]
+	#[expect(clippy::semicolon_if_nothing_returned, reason = "false positive")]
 	pub fn scan_collection(
 		path: &Path,
 		parent_ref: Option<MediaRef<CollectionId>>,
@@ -151,7 +161,7 @@ impl Scanner {
 				for await event in
 					generic::Scanner::scan_detect_folder(&subdir, Some(id_ref.clone()))
 				{
-					yield event.map(|e| e.into());
+					yield event.map(Into::into);
 				}
 			}
 		}))

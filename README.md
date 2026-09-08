@@ -2,18 +2,20 @@
 
 Libraries and tools for dealing with media metadata
 
-## Various builds
+## Development
 
-- build: `cargo hack --feature-powerset build`
-- clippy: `cargo hack --feature-powerset clippy -- -D warnings`
-- test: `cargo hack --feature-powerset test`
-- test old: `cargo +1.89 hack --feature-powerset test`
-- fmt: `cargo fmt --check`
-- docs: `RUSTDOCFLAGS="--cfg docsrs" cargo +nightly doc --all-features`
-- install: `cargo install --path crates/cli`
-- install: `cargo install --path crates/cli-mux`
-- semver: `cargo semver-checks --all-features`
-- publish: `cargo publish --dry-run --workspace`
+Run the full validation suite before committing:
+
+```sh
+just all
+just install
+```
+
+##### Publish
+
+- `cargo semver-checks --all-features`
+- `cargo publish --dry-run -p <crate>`
+- `cargo publish --dry-run --workspace`
 
 ## Building flix.db
 

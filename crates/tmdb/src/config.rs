@@ -1,3 +1,5 @@
+//! Client configuration.
+
 use governor::clock::MonotonicClock;
 use governor::state::{InMemoryState, NotKeyed};
 use governor::{Quota, RateLimiter};
@@ -5,27 +7,31 @@ use nonzero_ext::nonzero;
 use url::Url;
 use url_macro::url;
 
-/// The client configuration
+/// The client configuration.
+#[derive(Debug)]
+#[expect(clippy::exhaustive_structs, reason = "must be constructed in full")]
 pub struct Config {
-	/// The base URL of the API
+	/// The base URL of the API.
 	pub base_url: Url,
-	/// The reqwest client that is used for every request
+	/// The reqwest client that is used for every request.
 	pub client: reqwest::Client,
-	/// The rate limiter to use for the client
+	/// The rate limiter to use for the client.
 	pub limiter: RateLimiter<NotKeyed, InMemoryState, MonotonicClock>,
-	/// The bearer token for readonly access to the API
+	/// The bearer token for readonly access to the API.
 	pub bearer_token: String,
-	/// An optional user agent string to provide to the API
+	/// An optional user agent string to provide to the API.
 	pub user_agent: Option<String>,
 }
 
 impl Config {
-	/// Create a new configuration using the provided bearer token
+	/// Create a new configuration using the provided bearer token.
+	#[inline]
+	#[must_use]
 	pub fn new(bearer_token: String) -> Self {
 		Self {
 			base_url: url!("https://api.themoviedb.org"),
 			client: reqwest::Client::new(),
-			limiter: RateLimiter::direct(Quota::per_second(nonzero!(30u32))),
+			limiter: RateLimiter::direct(Quota::per_second(nonzero!(30_u32))),
 			bearer_token,
 			user_agent: None,
 		}

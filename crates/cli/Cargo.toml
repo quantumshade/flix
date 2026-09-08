@@ -1,14 +1,16 @@
 [package]
 name = "flix-cli"
-version = "0.0.20"
-license-file.workspace = true
-
+version = "0.1.0"
 description = "CLI for interacting with a flix database"
-repository = "https://github.com/QuantumShade/flix"
-categories = ["command-line-utilities"]
+repository = "https://git.skrundz.dev/quantumshade/flix"
+keywords = ["flix"]
+categories = ["command-line-utilities", "multimedia"]
+include = ["/src"]
+publish = true
 
 edition.workspace = true
 rust-version.workspace = true
+license-file.workspace = true
 
 [package.metadata.docs.rs]
 all-features = true
@@ -32,7 +34,6 @@ clap = { workspace = true, features = [
 	"usage",
 ] }
 flix = { workspace = true, features = ["tmdb"] }
-futures = { workspace = true }
 sea-orm = { workspace = true, features = ["debug-print", "runtime-tokio"] }
 serde = { workspace = true, features = ["derive"] }
 tokio = { workspace = true, features = ["fs", "macros", "rt"] }
@@ -40,21 +41,5 @@ toml = { workspace = true, features = ["parse", "serde"] }
 tracing = { workspace = true }
 tracing-subscriber = { workspace = true }
 
-[lints.clippy]
-arithmetic_side_effects = "deny"
-as_conversions = "deny"
-checked_conversions = "deny"
-default_union_representation = "deny"
-expect_used = "deny"
-indexing_slicing = "deny"
-integer_division = "deny"
-integer_division_remainder_used = "deny"
-transmute_undefined_repr = "deny"
-unchecked_time_subtraction = "deny"
-unwrap_used = "deny"
-
-[lints.rust]
-arithmetic_overflow = "forbid"
-missing_docs = "forbid"
-unsafe_code = "forbid"
-unused_doc_comments = "forbid"
+[lints]
+workspace = true

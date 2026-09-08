@@ -1,6 +1,6 @@
-//! This module contains entities for storing dynamic data from TMDB
+//! This module contains entities for storing dynamic data from TMDB.
 
-/// Collection entity
+/// Collection entity.
 pub mod collections {
 	use flix_model::id::CollectionId as FlixId;
 	use flix_tmdb::model::id::CollectionId;
@@ -10,23 +10,23 @@ pub mod collections {
 
 	use crate::entity;
 
-	/// The database representation of a tmdb collection
+	/// The database representation of a tmdb collection.
 	#[sea_orm::model]
 	#[derive(Debug, Clone, DeriveEntityModel)]
 	#[sea_orm(table_name = "flix_tmdb_collections")]
 	pub struct Model {
-		/// The collection's TMDB ID
+		/// The collection's TMDB ID.
 		#[sea_orm(primary_key, auto_increment = false)]
 		pub tmdb_id: CollectionId,
-		/// The collection's ID
+		/// The collection's ID.
 		#[sea_orm(unique)]
 		pub flix_id: FlixId,
-		/// The date of the last update
+		/// The date of the last update.
 		pub last_update: DateTime<Utc>,
-		/// The number of movies in the collection
+		/// The number of movies in the collection.
 		pub movie_count: u16,
 
-		/// The info for this collection
+		/// The info for this collection.
 		#[sea_orm(
 			belongs_to,
 			from = "flix_id",
@@ -36,15 +36,16 @@ pub mod collections {
 		)]
 		pub info: HasOne<entity::info::collections::Entity>,
 
-		/// Movies that are in this collection
+		/// Movies that are in this collection.
 		#[sea_orm(has_many)]
 		pub movies: HasMany<super::movies::Entity>,
 	}
 
+	#[expect(clippy::missing_trait_methods, reason = "accept default methods")]
 	impl ActiveModelBehavior for ActiveModel {}
 }
 
-/// Movie entity
+/// Movie entity.
 pub mod movies {
 	use flix_model::id::MovieId as FlixId;
 	use flix_tmdb::model::id::{CollectionId, MovieId};
@@ -56,26 +57,26 @@ pub mod movies {
 
 	use crate::entity;
 
-	/// The database representation of a tmdb movie
+	/// The database representation of a tmdb movie.
 	#[sea_orm::model]
 	#[derive(Debug, Clone, DeriveEntityModel)]
 	#[sea_orm(table_name = "flix_tmdb_movies")]
 	pub struct Model {
-		/// The movie's TMDB ID
+		/// The movie's TMDB ID.
 		#[sea_orm(primary_key, auto_increment = false)]
 		pub tmdb_id: MovieId,
-		/// The movie's ID
+		/// The movie's ID.
 		#[sea_orm(unique)]
 		pub flix_id: FlixId,
-		/// The date of the last update
+		/// The date of the last update.
 		pub last_update: DateTime<Utc>,
-		/// The movie's runtime in seconds
+		/// The movie's runtime in seconds.
 		pub runtime: Seconds,
-		/// The TMDB ID of the collection this movie belongs to
+		/// The TMDB ID of the collection this movie belongs to.
 		#[sea_orm(indexed)]
 		pub collection_id: Option<CollectionId>,
 
-		/// The collection this movie belongs to
+		/// The collection this movie belongs to.
 		#[sea_orm(
 			belongs_to,
 			from = "collection_id",
@@ -84,7 +85,7 @@ pub mod movies {
 			on_delete = "Cascade"
 		)]
 		pub collection: HasOne<super::collections::Entity>,
-		/// The info for this movie
+		/// The info for this movie.
 		#[sea_orm(
 			belongs_to,
 			from = "flix_id",
@@ -95,10 +96,11 @@ pub mod movies {
 		pub info: HasOne<entity::info::movies::Entity>,
 	}
 
+	#[expect(clippy::missing_trait_methods, reason = "accept default methods")]
 	impl ActiveModelBehavior for ActiveModel {}
 }
 
-/// Show entity
+/// Show entity.
 pub mod shows {
 	use flix_model::id::ShowId as FlixId;
 	use flix_tmdb::model::id::ShowId;
@@ -108,23 +110,23 @@ pub mod shows {
 
 	use crate::entity;
 
-	/// The database representation of a tmdb show
+	/// The database representation of a tmdb show.
 	#[sea_orm::model]
 	#[derive(Debug, Clone, DeriveEntityModel)]
 	#[sea_orm(table_name = "flix_tmdb_shows")]
 	pub struct Model {
-		/// The show's TMDB ID
+		/// The show's TMDB ID.
 		#[sea_orm(primary_key, auto_increment = false)]
 		pub tmdb_id: ShowId,
-		/// The show's ID
+		/// The show's ID.
 		#[sea_orm(unique)]
 		pub flix_id: FlixId,
-		/// The movie's runtime in seconds
+		/// The movie's runtime in seconds.
 		pub last_update: DateTime<Utc>,
-		/// The number of seasons the show has
+		/// The number of seasons the show has.
 		pub number_of_seasons: u32,
 
-		/// The info for this show
+		/// The info for this show.
 		#[sea_orm(
 			belongs_to,
 			from = "flix_id",
@@ -134,18 +136,19 @@ pub mod shows {
 		)]
 		pub info: HasOne<entity::info::shows::Entity>,
 
-		/// Seasons that are part of this show
+		/// Seasons that are part of this show.
 		#[sea_orm(has_many)]
 		pub seasons: HasMany<super::seasons::Entity>,
-		/// Episodes that are part of this show
+		/// Episodes that are part of this show.
 		#[sea_orm(has_many)]
 		pub episodes: HasMany<super::episodes::Entity>,
 	}
 
+	#[expect(clippy::missing_trait_methods, reason = "accept default methods")]
 	impl ActiveModelBehavior for ActiveModel {}
 }
 
-/// Season entity
+/// Season entity.
 pub mod seasons {
 	use flix_model::id::ShowId as FlixId;
 	use flix_model::numbers::SeasonNumber;
@@ -156,27 +159,27 @@ pub mod seasons {
 
 	use crate::entity;
 
-	/// The database representation of a tmdb season
+	/// The database representation of a tmdb season.
 	#[sea_orm::model]
 	#[derive(Debug, Clone, DeriveEntityModel)]
 	#[sea_orm(table_name = "flix_tmdb_seasons")]
 	pub struct Model {
-		/// The season's show's TMDB ID
+		/// The season's show's TMDB ID.
 		#[sea_orm(primary_key, auto_increment = false)]
 		pub tmdb_show: ShowId,
-		/// The season's TMDB season number
+		/// The season's TMDB season number.
 		#[sea_orm(primary_key, auto_increment = false)]
 		pub tmdb_season: SeasonNumber,
-		/// The season's show's ID
+		/// The season's show's ID.
 		#[sea_orm(unique_key = "flix")]
 		pub flix_show: FlixId,
-		/// The season's number
+		/// The season's number.
 		#[sea_orm(unique_key = "flix")]
 		pub flix_season: SeasonNumber,
-		/// The date of the last update
+		/// The date of the last update.
 		pub last_update: DateTime<Utc>,
 
-		/// The show this season belongs to
+		/// The show this season belongs to.
 		#[sea_orm(
 			belongs_to,
 			from = "tmdb_show",
@@ -185,7 +188,7 @@ pub mod seasons {
 			on_delete = "Cascade"
 		)]
 		pub show: HasOne<super::shows::Entity>,
-		/// The info for this season
+		/// The info for this season.
 		#[sea_orm(
 			belongs_to,
 			from = "(flix_show, flix_season)",
@@ -195,15 +198,16 @@ pub mod seasons {
 		)]
 		pub info: HasOne<entity::info::seasons::Entity>,
 
-		/// Episodes that are part of this season
+		/// Episodes that are part of this season.
 		#[sea_orm(has_many)]
 		pub episodes: HasMany<super::episodes::Entity>,
 	}
 
+	#[expect(clippy::missing_trait_methods, reason = "accept default methods")]
 	impl ActiveModelBehavior for ActiveModel {}
 }
 
-/// Season entity
+/// Season entity.
 pub mod episodes {
 	use flix_model::id::ShowId as FlixId;
 	use flix_model::numbers::{EpisodeNumber, SeasonNumber};
@@ -215,35 +219,35 @@ pub mod episodes {
 
 	use crate::entity;
 
-	/// The database representation of a tmdb episode
+	/// The database representation of a tmdb episode.
 	#[sea_orm::model]
 	#[derive(Debug, Clone, DeriveEntityModel)]
 	#[sea_orm(table_name = "flix_tmdb_episodes")]
 	pub struct Model {
-		/// The episode's show's TMDB ID
+		/// The episode's show's TMDB ID.
 		#[sea_orm(primary_key, auto_increment = false)]
 		pub tmdb_show: ShowId,
-		/// The episode's season's TMDB season number
+		/// The episode's season's TMDB season number.
 		#[sea_orm(primary_key, auto_increment = false)]
 		pub tmdb_season: SeasonNumber,
-		/// The episode's TMDB episode number
+		/// The episode's TMDB episode number.
 		#[sea_orm(primary_key, auto_increment = false)]
 		pub tmdb_episode: EpisodeNumber,
-		/// The episode's show's ID
+		/// The episode's show's ID.
 		#[sea_orm(unique_key = "flix")]
 		pub flix_show: FlixId,
-		/// The episode's season's number
+		/// The episode's season's number.
 		#[sea_orm(unique_key = "flix")]
 		pub flix_season: SeasonNumber,
-		/// The episode's number
+		/// The episode's number.
 		#[sea_orm(unique_key = "flix")]
 		pub flix_episode: EpisodeNumber,
-		/// The date of the last update
+		/// The date of the last update.
 		pub last_update: DateTime<Utc>,
-		/// The episode's runtime in seconds
+		/// The episode's runtime in seconds.
 		pub runtime: Seconds,
 
-		/// The show this episode belongs to
+		/// The show this episode belongs to.
 		#[sea_orm(
 			belongs_to,
 			from = "tmdb_show",
@@ -252,7 +256,7 @@ pub mod episodes {
 			on_delete = "Cascade"
 		)]
 		pub show: HasOne<super::shows::Entity>,
-		/// The season this episode belongs to
+		/// The season this episode belongs to.
 		#[sea_orm(
 			belongs_to,
 			from = "(tmdb_show, tmdb_season)",
@@ -261,7 +265,7 @@ pub mod episodes {
 			on_delete = "Cascade"
 		)]
 		pub season: HasOne<super::seasons::Entity>,
-		/// The info for this episode
+		/// The info for this episode.
 		#[sea_orm(
 			belongs_to,
 			from = "(flix_show, flix_season, flix_episode)",
@@ -272,15 +276,16 @@ pub mod episodes {
 		pub info: HasOne<entity::info::episodes::Entity>,
 	}
 
+	#[expect(clippy::missing_trait_methods, reason = "accept default methods")]
 	impl ActiveModelBehavior for ActiveModel {}
 }
 
-/// Macros for creating tmdb entities
+/// Macros for creating tmdb entities.
 #[cfg(test)]
 pub mod test {
 	macro_rules! make_tmdb_collection {
 		($db:expr, $id:expr, $flix_id:expr) => {
-			$crate::entity::tmdb::collections::ActiveModel {
+			_ = $crate::entity::tmdb::collections::ActiveModel {
 				tmdb_id: Set(::flix_tmdb::model::id::CollectionId::from_raw($id)),
 				flix_id: Set(::flix_model::id::CollectionId::from_raw($flix_id)),
 				last_update: Set(::chrono::Utc::now()),
@@ -295,7 +300,7 @@ pub mod test {
 
 	macro_rules! make_tmdb_movie {
 		($db:expr, $id:expr, $flix_id:expr) => {
-			$crate::entity::tmdb::movies::ActiveModel {
+			_ = $crate::entity::tmdb::movies::ActiveModel {
 				tmdb_id: Set(::flix_tmdb::model::id::MovieId::from_raw($id)),
 				flix_id: Set(::flix_model::id::MovieId::from_raw($flix_id)),
 				last_update: Set(::chrono::Utc::now()),
@@ -311,7 +316,7 @@ pub mod test {
 
 	macro_rules! make_tmdb_show {
 		($db:expr, $id:expr, $flix_id:expr) => {
-			$crate::entity::tmdb::shows::ActiveModel {
+			_ = $crate::entity::tmdb::shows::ActiveModel {
 				tmdb_id: Set(::flix_tmdb::model::id::ShowId::from_raw($id)),
 				flix_id: Set(::flix_model::id::ShowId::from_raw($flix_id)),
 				last_update: Set(::chrono::Utc::now()),
@@ -326,7 +331,7 @@ pub mod test {
 
 	macro_rules! make_tmdb_season {
 		($db:expr, $show:expr, $season:expr, $flix_show:expr, $flix_season:expr) => {
-			$crate::entity::tmdb::seasons::ActiveModel {
+			_ = $crate::entity::tmdb::seasons::ActiveModel {
 				tmdb_show: Set(::flix_tmdb::model::id::ShowId::from_raw($show)),
 				tmdb_season: Set(::flix_model::numbers::SeasonNumber::new($season)),
 				flix_show: Set(::flix_model::id::ShowId::from_raw($flix_show)),
@@ -342,7 +347,7 @@ pub mod test {
 
 	macro_rules! make_tmdb_episode {
 		($db:expr, $show:expr, $season:expr, $episode:expr, $flix_show:expr, $flix_season:expr, $flix_episode:expr) => {
-			$crate::entity::tmdb::episodes::ActiveModel {
+			_ = $crate::entity::tmdb::episodes::ActiveModel {
 				tmdb_show: Set(::flix_tmdb::model::id::ShowId::from_raw($show)),
 				tmdb_season: Set(::flix_model::numbers::SeasonNumber::new($season)),
 				tmdb_episode: Set(::flix_model::numbers::EpisodeNumber::new($episode)),
@@ -385,7 +390,10 @@ mod tests {
 		make_tmdb_collection, make_tmdb_episode, make_tmdb_movie, make_tmdb_season, make_tmdb_show,
 	};
 
+	#[cfg(not(miri))]
 	#[tokio::test]
+	#[expect(clippy::missing_panics_doc, reason = "unit test")]
+	#[expect(clippy::default_numeric_fallback, reason = "unit test")]
 	async fn use_test_macros() {
 		let db = new_initialized_memory_db().await;
 
@@ -402,8 +410,11 @@ mod tests {
 		make_tmdb_episode!(&db, 1, 1, 1, 1, 1, 1);
 	}
 
+	#[cfg(not(miri))]
 	#[tokio::test]
-	async fn test_round_trip_collections() {
+	#[expect(clippy::missing_panics_doc, reason = "unit test")]
+	#[expect(clippy::default_numeric_fallback, reason = "unit test")]
+	async fn round_trip_collections() {
 		let db = new_initialized_memory_db().await;
 
 		macro_rules! assert_collection {
@@ -449,8 +460,11 @@ mod tests {
 		assert_collection!(&db, 6, 6, NotNullViolation; movie_count);
 	}
 
+	#[cfg(not(miri))]
 	#[tokio::test]
-	async fn test_round_trip_movies() {
+	#[expect(clippy::missing_panics_doc, reason = "unit test")]
+	#[expect(clippy::default_numeric_fallback, reason = "unit test")]
+	async fn round_trip_movies() {
 		let db = new_initialized_memory_db().await;
 
 		macro_rules! assert_movie {
@@ -502,8 +516,11 @@ mod tests {
 		assert_movie!(&db, 7, 7, None, ForeignKeyViolation; collection_id);
 	}
 
+	#[cfg(not(miri))]
 	#[tokio::test]
-	async fn test_round_trip_shows() {
+	#[expect(clippy::missing_panics_doc, reason = "unit test")]
+	#[expect(clippy::default_numeric_fallback, reason = "unit test")]
+	async fn round_trip_shows() {
 		let db = new_initialized_memory_db().await;
 
 		macro_rules! assert_show {
@@ -552,8 +569,11 @@ mod tests {
 		assert_show!(&db, 6, 6, NotNullViolation; number_of_seasons);
 	}
 
+	#[cfg(not(miri))]
 	#[tokio::test]
-	async fn test_round_trip_seasons() {
+	#[expect(clippy::missing_panics_doc, reason = "unit test")]
+	#[expect(clippy::default_numeric_fallback, reason = "unit test")]
+	async fn round_trip_seasons() {
 		let db = new_initialized_memory_db().await;
 
 		macro_rules! assert_season {
@@ -607,8 +627,11 @@ mod tests {
 		assert_season!(&db, 1, 7, 1, 7, NotNullViolation; last_update);
 	}
 
+	#[cfg(not(miri))]
 	#[tokio::test]
-	async fn test_round_trip_episodes() {
+	#[expect(clippy::missing_panics_doc, reason = "unit test")]
+	#[expect(clippy::default_numeric_fallback, reason = "unit test")]
+	async fn round_trip_episodes() {
 		let db = new_initialized_memory_db().await;
 
 		macro_rules! assert_episode {

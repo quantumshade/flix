@@ -1,14 +1,16 @@
 [package]
 name = "flix-fs"
-version = "0.0.20"
-license-file.workspace = true
-
+version = "0.1.0"
 description = "Filesystem scanner for flix media"
-repository = "https://github.com/QuantumShade/flix"
-categories = []
+repository = "https://git.skrundz.dev/quantumshade/flix"
+keywords = ["flix"]
+categories = ["multimedia"]
+include = ["/src"]
+publish = true
 
 edition.workspace = true
 rust-version.workspace = true
+license-file.workspace = true
 
 [package.metadata.docs.rs]
 all-features = true
@@ -22,6 +24,9 @@ regex = { workspace = true, features = ["perf", "std"] }
 thiserror = { workspace = true }
 tokio = { workspace = true }
 tokio-stream = { workspace = true, features = ["fs"] }
+
+[dev-dependencies]
+tempfile = { workspace = true }
 
 [lints]
 workspace = true

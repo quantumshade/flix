@@ -1,11 +1,12 @@
 {
-	"languages": {
-		"TOML": {
-			"format_on_save": "on",
-			"formatter": { "language_server": { "name": "tombi" } },
-		},
-	},
 	"lsp": {
+		"just-lsp": {
+			"initialization_options": {
+				"formatting": {
+					"indentation": "\t",
+				},
+			},
+		},
 		"rust-analyzer": {
 			"initialization_options": {
 				"imports": {

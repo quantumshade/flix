@@ -1,8 +1,8 @@
-//! flix-mux
+//! flix-mux.
 
 use core::time::Duration;
 
-use clap::Parser;
+use clap::Parser as _;
 use console::style;
 use indicatif::{HumanBytes, ProgressBar, ProgressStyle};
 
@@ -16,14 +16,17 @@ mod parser;
 mod probe;
 mod scan;
 
+#[cfg_attr(test, expect(clippy::missing_panics_doc, reason = "main function"))]
+#[expect(clippy::print_stderr, reason = "we want to print in a binary")]
+#[expect(clippy::print_stdout, reason = "we want to print in a binary")]
 fn main() {
-	let cli = cli::Cli::parse();
+	let cli = cli::Args::parse();
 
 	let (files, size) = scan_directory(
 		&cli.scan_dir_path(),
 		|| {
 			let progress = ProgressBar::new_spinner();
-			progress.set_message(format!("Scanning {:?}", &cli.scan_dir_path()));
+			progress.set_message(format!("Scanning {}", cli.scan_dir_path().display()));
 			progress.enable_steady_tick(Duration::from_millis(50));
 			progress
 		},
@@ -31,7 +34,8 @@ fn main() {
 		|len| {
 			let progress = ProgressBar::new(u64::try_from(len).unwrap_or(0));
 			progress.set_style(
-				#[expect(clippy::expect_used)]
+				#[expect(clippy::expect_used, reason = "panic if the template is invalid")]
+				#[expect(clippy::literal_string_with_formatting_args, reason = "template")]
 				ProgressStyle::with_template("[{elapsed_precise}] {wide_bar} {pos}/{len} ({msg})")
 					.expect("static template"),
 			);
@@ -40,19 +44,20 @@ fn main() {
 		|progress| progress.inc(1),
 		|progress| progress.finish_and_clear(),
 		|progress, msg| {
-			progress.suspend(|| eprintln!("{} {}", style("[WARN]").bold().yellow(), msg))
+			progress.suspend(|| eprintln!("{} {msg}", style("[WARN]").bold().yellow()));
 		},
 	);
 	println!("Found {} files ({})", files.len(), HumanBytes(size));
 
 	mux_files(
-		cli.is_dry(),
+		cli.is_dry_run(),
 		&files,
 		cli.selectors(),
 		|len| {
 			let progress = ProgressBar::new(u64::try_from(len).unwrap_or(0));
 			progress.set_style(
-				#[expect(clippy::expect_used)]
+				#[expect(clippy::expect_used, reason = "panic if the template is invalid")]
+				#[expect(clippy::literal_string_with_formatting_args, reason = "template")]
 				ProgressStyle::with_template("[{elapsed_precise}] {wide_bar} {pos}/{len} ({msg})")
 					.expect("static template"),
 			);
@@ -61,6 +66,6 @@ fn main() {
 		},
 		|progress| progress.inc(1),
 		|progress| progress.finish_with_message("done"),
-		|progress, msg| progress.suspend(|| eprintln!("{} {}", style("[ERR]").bold().red(), msg)),
+		|progress, msg| progress.suspend(|| eprintln!("{} {msg}", style("[ERR]").bold().red())),
 	);
 }

@@ -1,18 +1,22 @@
+//! Custom views for seasons.
+
 use sea_orm::prelude::*;
 use sea_orm::sea_query::Table;
-use sea_orm::{ConnectionTrait, DbBackend, Statement};
+use sea_orm::{DbBackend, Statement};
 use sea_orm_migration::prelude::*;
 
-pub async fn up(manager: &SchemaManager<'_>) -> Result<(), DbErr> {
+/// # Errors
+/// Database operations can fail.
+pub(crate) async fn up(manager: &SchemaManager<'_>) -> Result<(), DbErr> {
 	manager
 		.drop_table(Table::drop().table("flix_watched_seasons").to_owned())
 		.await?;
 
-	manager
+	_ = manager
 		.get_connection()
 		.execute_raw(Statement::from_string(
 			DbBackend::Sqlite,
-			r#"
+			"
 				CREATE VIEW flix_watched_seasons AS
 				SELECT
 					w.show_id,
@@ -36,22 +40,24 @@ pub async fn up(manager: &SchemaManager<'_>) -> Result<(), DbErr> {
 				)
 				GROUP BY w.show_id, w.season_number, w.user_id
 				;
-			"#,
+			",
 		))
 		.await?;
 
 	Ok(())
 }
 
-pub async fn down(manager: &SchemaManager<'_>) -> Result<(), DbErr> {
-	manager
+/// # Errors
+/// Database operations can fail.
+pub(crate) async fn down(manager: &SchemaManager<'_>) -> Result<(), DbErr> {
+	_ = manager
 		.get_connection()
 		.execute_raw(Statement::from_string(
 			DbBackend::Sqlite,
-			r#"
+			"
 				DROP VIEW flix_watched_seasons
 				;
-			"#,
+			",
 		))
 		.await?;
 

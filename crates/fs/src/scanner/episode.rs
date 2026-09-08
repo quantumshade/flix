@@ -1,4 +1,4 @@
-//! The episode scanner will scan a folder and exit
+//! The episode scanner will scan a folder and exit.
 
 use std::ffi::OsStr;
 use std::path::Path;
@@ -15,17 +15,23 @@ use crate::Error;
 use crate::macros::{is_image_extension, is_media_extension};
 use crate::scanner::{EpisodeScan, MediaRef};
 
-/// An episode item
+/// An episode item.
 pub type Item = crate::Item<Scanner>;
 
-/// The scanner for epispdes
+/// The scanner for epispdes.
+#[derive(Debug)]
+#[expect(clippy::exhaustive_enums, reason = "unlikely to change")]
 pub enum Scanner {
-	/// A scanned episode
+	/// A scanned episode.
 	Episode(EpisodeScan),
 }
 
 impl Scanner {
-	/// Scan a folder for an episode
+	/// Scan a folder for an episode.
+	#[inline]
+	#[expect(clippy::allow_attributes, reason = "for tail_expr_drop_order")]
+	#[allow(tail_expr_drop_order, reason = "bug in stream! macro")]
+	#[expect(clippy::semicolon_if_nothing_returned, reason = "false positive")]
 	pub fn scan_episode(
 		path: &Path,
 		show_ref: MediaRef<ShowId>,
@@ -62,6 +68,7 @@ impl Scanner {
 								continue;
 							}
 						};
+						#[expect(clippy::filetype_is_file, reason = "we only want regular files")]
 						if !filetype.is_file() {
 							yield Item {
 								path,

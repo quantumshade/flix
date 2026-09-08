@@ -1,14 +1,16 @@
 [package]
 name = "flix-db"
-version = "0.0.20"
-license-file.workspace = true
-
+version = "0.1.0"
 description = "Types for storing persistent data about media"
-repository = "https://github.com/QuantumShade/flix"
-categories = []
+repository = "https://git.skrundz.dev/quantumshade/flix"
+keywords = ["flix"]
+categories = ["multimedia"]
+include = ["/src"]
+publish = true
 
 edition.workspace = true
 rust-version.workspace = true
+license-file.workspace = true
 
 [package.metadata.docs.rs]
 all-features = true
@@ -29,7 +31,7 @@ flix-tmdb = { workspace = true, features = ["sea-orm"], optional = true }
 
 [dev-dependencies]
 sea-orm-migration = { workspace = true, features = ["runtime-tokio-rustls"] }
-tokio = { version = "^1", default-features = false, features = [
+tokio = { workspace = true, features = [
 	"macros",
 	"rt",
 ] }

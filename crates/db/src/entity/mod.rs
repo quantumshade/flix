@@ -1,4 +1,10 @@
-//! Entity structs for interacting with the database
+//! Entity structs for interacting with the database.
+
+#![expect(clippy::exhaustive_enums, reason = "reflects the database schema")]
+#![expect(clippy::exhaustive_structs, reason = "reflects the database schema")]
+#![expect(clippy::derive_partial_eq_without_eq, reason = "#[sea_orm::model]")]
+#![expect(clippy::impl_trait_in_params, reason = "#[sea_orm::model]")]
+#![expect(clippy::same_name_method, reason = "#[sea_orm::model]")]
 
 pub mod content;
 pub mod info;
@@ -13,8 +19,6 @@ mod tests {
 	use flix_tmdb::model::id::TmdbRepr as TmdbReprId;
 
 	use sea_orm::ActiveValue::Set;
-	use sea_orm::DatabaseConnection;
-	use sea_orm::DbErr;
 	use sea_orm::entity::prelude::*;
 	use sea_orm::sqlx::error::ErrorKind;
 	use seamantic::model::id::SeaOrmRepr as SeaOrmReprId;
@@ -32,35 +36,36 @@ mod tests {
 	use crate::tests::new_initialized_memory_db;
 
 	#[derive(Debug)]
-	pub enum ErrorKindError {
-		NotRuntimeError,
-		NotSqlxError,
-		NotDatabaseError,
+	pub(crate) enum ErrorKindNot {
+		Runtime,
+		Sqlx,
+		Database,
 	}
 
-	pub fn get_error_kind(error: DbErr) -> Result<ErrorKind, ErrorKindError> {
-		let runtime_err = match error {
-			DbErr::Conn(runtime_err) => runtime_err,
-			DbErr::Exec(runtime_err) => runtime_err,
-			DbErr::Query(runtime_err) => runtime_err,
-			_ => return Err(ErrorKindError::NotRuntimeError),
+	/// Extract the error kind from a [`DbErr`].
+	///
+	/// # Errors
+	/// If the [`DbErr`] internals diverge from [`SqlxError::Database`].
+	pub(crate) fn get_error_kind(error: DbErr) -> Result<ErrorKind, ErrorKindNot> {
+		let (DbErr::Conn(runtime_err) | DbErr::Exec(runtime_err) | DbErr::Query(runtime_err)) =
+			error
+		else {
+			return Err(ErrorKindNot::Runtime);
 		};
 
-		let sqlx_err = match runtime_err {
-			sea_orm::RuntimeErr::SqlxError(sqlx_err) => sqlx_err,
-			_ => return Err(ErrorKindError::NotSqlxError),
+		let RuntimeErr::SqlxError(sqlx_err) = runtime_err else {
+			return Err(ErrorKindNot::Sqlx);
 		};
 
-		let database_err = match sqlx_err.as_ref() {
-			sea_orm::SqlxError::Database(database_err) => database_err,
-			_ => return Err(ErrorKindError::NotDatabaseError),
+		let SqlxError::Database(database_err) = sqlx_err.as_ref() else {
+			return Err(ErrorKindNot::Database);
 		};
 
 		Ok(database_err.kind())
 	}
 
 	/// Helper macro for writing tests for `ActiveModel` structs where
-	/// toggling [sea_orm::ActiveValue] is needed
+	/// toggling [`sea_orm::ActiveValue`] is needed.
 	macro_rules! notsettable {
 		($field:ident, $value:expr $(, $($skip:ident),+)?) => {
 			if notsettable!(@skip, $field $(, $($skip),+)?) {
@@ -76,7 +81,7 @@ mod tests {
 	pub(super) use notsettable;
 
 	/// Helper macro for writing tests for `ActiveModel` structs where
-	/// toggling [sea_orm::ActiveValue] is needed
+	/// toggling [`sea_orm::ActiveValue`] is needed.
 	macro_rules! noneable {
 			($field:ident, $value:expr $(, $($skip:ident),+)?) => {
 				if noneable!(@skip, $field $(, $($skip),+)?) {
@@ -148,6 +153,11 @@ mod tests {
 		}
 	}
 
+	/// Initialize a database with data to be deleted.
+	///
+	/// # Panics
+	/// If any database operation fails, since this is only for testing.
+	#[expect(clippy::default_numeric_fallback, reason = "unit test")]
 	async fn initialize_deletion_test_database(id: &DbId) -> DatabaseConnection {
 		let db = new_initialized_memory_db().await;
 
@@ -284,12 +294,14 @@ mod tests {
 		db
 	}
 
+	#[cfg(not(miri))]
 	#[tokio::test]
-	async fn test_delete_info_collection() {
+	#[expect(clippy::missing_panics_doc, reason = "unit test")]
+	async fn delete_info_collection() {
 		let id = DbId::default();
 		let db = initialize_deletion_test_database(&id).await;
 
-		entity::info::collections::Entity::delete_by_id(seamantic::model::id::Id::from_raw(
+		_ = entity::info::collections::Entity::delete_by_id(seamantic::model::id::Id::from_raw(
 			id.flix.collection,
 		))
 		.exec(&db)
@@ -368,12 +380,14 @@ mod tests {
 		);
 	}
 
+	#[cfg(not(miri))]
 	#[tokio::test]
-	async fn test_delete_info_movie() {
+	#[expect(clippy::missing_panics_doc, reason = "unit test")]
+	async fn delete_info_movie() {
 		let id = DbId::default();
 		let db = initialize_deletion_test_database(&id).await;
 
-		entity::info::movies::Entity::delete_by_id(seamantic::model::id::Id::from_raw(
+		_ = entity::info::movies::Entity::delete_by_id(seamantic::model::id::Id::from_raw(
 			id.flix.movie,
 		))
 		.exec(&db)
@@ -452,15 +466,19 @@ mod tests {
 		);
 	}
 
+	#[cfg(not(miri))]
 	#[tokio::test]
-	async fn test_delete_info_show() {
+	#[expect(clippy::missing_panics_doc, reason = "unit test")]
+	async fn delete_info_show() {
 		let id = DbId::default();
 		let db = initialize_deletion_test_database(&id).await;
 
-		entity::info::shows::Entity::delete_by_id(seamantic::model::id::Id::from_raw(id.flix.show))
-			.exec(&db)
-			.await
-			.expect("Entity::delete_by_id");
+		_ = entity::info::shows::Entity::delete_by_id(seamantic::model::id::Id::from_raw(
+			id.flix.show,
+		))
+		.exec(&db)
+		.await
+		.expect("Entity::delete_by_id");
 
 		assert_eq!(
 			Ok(1),
@@ -534,12 +552,14 @@ mod tests {
 		);
 	}
 
+	#[cfg(not(miri))]
 	#[tokio::test]
-	async fn test_delete_info_season() {
+	#[expect(clippy::missing_panics_doc, reason = "unit test")]
+	async fn delete_info_season() {
 		let id = DbId::default();
 		let db = initialize_deletion_test_database(&id).await;
 
-		entity::info::seasons::Entity::delete_by_id((
+		_ = entity::info::seasons::Entity::delete_by_id((
 			seamantic::model::id::Id::from_raw(id.flix.show),
 			SeasonNumber::new(id.flix.season),
 		))
@@ -619,12 +639,14 @@ mod tests {
 		);
 	}
 
+	#[cfg(not(miri))]
 	#[tokio::test]
-	async fn test_delete_info_episodes() {
+	#[expect(clippy::missing_panics_doc, reason = "unit test")]
+	async fn delete_info_episodes() {
 		let id = DbId::default();
 		let db = initialize_deletion_test_database(&id).await;
 
-		entity::info::episodes::Entity::delete_by_id((
+		_ = entity::info::episodes::Entity::delete_by_id((
 			seamantic::model::id::Id::from_raw(id.flix.show),
 			SeasonNumber::new(id.flix.season),
 			EpisodeNumber::new(id.flix.episode),
@@ -705,13 +727,15 @@ mod tests {
 		);
 	}
 
+	#[cfg(not(miri))]
 	#[cfg(feature = "tmdb")]
 	#[tokio::test]
-	async fn test_delete_tmdb_collection() {
+	#[expect(clippy::missing_panics_doc, reason = "unit test")]
+	async fn delete_tmdb_collection() {
 		let id = DbId::default();
 		let db = initialize_deletion_test_database(&id).await;
 
-		entity::tmdb::collections::Entity::delete_by_id(flix_tmdb::model::id::Id::from_raw(
+		_ = entity::tmdb::collections::Entity::delete_by_id(flix_tmdb::model::id::Id::from_raw(
 			id.tmdb.collection,
 		))
 		.exec(&db)
@@ -790,13 +814,15 @@ mod tests {
 		);
 	}
 
+	#[cfg(not(miri))]
 	#[cfg(feature = "tmdb")]
 	#[tokio::test]
-	async fn test_delete_tmdb_movie() {
+	#[expect(clippy::missing_panics_doc, reason = "unit test")]
+	async fn delete_tmdb_movie() {
 		let id = DbId::default();
 		let db = initialize_deletion_test_database(&id).await;
 
-		entity::tmdb::movies::Entity::delete_by_id(flix_tmdb::model::id::Id::from_raw(
+		_ = entity::tmdb::movies::Entity::delete_by_id(flix_tmdb::model::id::Id::from_raw(
 			id.tmdb.movie,
 		))
 		.exec(&db)
@@ -875,16 +901,20 @@ mod tests {
 		);
 	}
 
+	#[cfg(not(miri))]
 	#[cfg(feature = "tmdb")]
 	#[tokio::test]
-	async fn test_delete_tmdb_show() {
+	#[expect(clippy::missing_panics_doc, reason = "unit test")]
+	async fn delete_tmdb_show() {
 		let id = DbId::default();
 		let db = initialize_deletion_test_database(&id).await;
 
-		entity::tmdb::shows::Entity::delete_by_id(flix_tmdb::model::id::Id::from_raw(id.tmdb.show))
-			.exec(&db)
-			.await
-			.expect("Entity::delete_by_id");
+		_ = entity::tmdb::shows::Entity::delete_by_id(flix_tmdb::model::id::Id::from_raw(
+			id.tmdb.show,
+		))
+		.exec(&db)
+		.await
+		.expect("Entity::delete_by_id");
 
 		assert_eq!(
 			Ok(1),
@@ -958,13 +988,15 @@ mod tests {
 		);
 	}
 
+	#[cfg(not(miri))]
 	#[cfg(feature = "tmdb")]
 	#[tokio::test]
-	async fn test_delete_tmdb_season() {
+	#[expect(clippy::missing_panics_doc, reason = "unit test")]
+	async fn delete_tmdb_season() {
 		let id = DbId::default();
 		let db = initialize_deletion_test_database(&id).await;
 
-		entity::tmdb::seasons::Entity::delete_by_id((
+		_ = entity::tmdb::seasons::Entity::delete_by_id((
 			flix_tmdb::model::id::Id::from_raw(id.tmdb.show),
 			SeasonNumber::new(id.tmdb.season),
 		))
@@ -1044,13 +1076,15 @@ mod tests {
 		);
 	}
 
+	#[cfg(not(miri))]
 	#[cfg(feature = "tmdb")]
 	#[tokio::test]
-	async fn test_delete_tmdb_episode() {
+	#[expect(clippy::missing_panics_doc, reason = "unit test")]
+	async fn delete_tmdb_episode() {
 		let id = DbId::default();
 		let db = initialize_deletion_test_database(&id).await;
 
-		entity::tmdb::episodes::Entity::delete_by_id((
+		_ = entity::tmdb::episodes::Entity::delete_by_id((
 			flix_tmdb::model::id::Id::from_raw(id.tmdb.show),
 			SeasonNumber::new(id.tmdb.season),
 			EpisodeNumber::new(id.tmdb.episode),
@@ -1131,12 +1165,14 @@ mod tests {
 		);
 	}
 
+	#[cfg(not(miri))]
 	#[tokio::test]
-	async fn test_delete_content_library() {
+	#[expect(clippy::missing_panics_doc, reason = "unit test")]
+	async fn delete_content_library() {
 		let id = DbId::default();
 		let db = initialize_deletion_test_database(&id).await;
 
-		entity::content::libraries::Entity::delete_by_id(seamantic::model::id::Id::from_raw(
+		_ = entity::content::libraries::Entity::delete_by_id(seamantic::model::id::Id::from_raw(
 			id.content.library,
 		))
 		.exec(&db)
@@ -1215,12 +1251,14 @@ mod tests {
 		);
 	}
 
+	#[cfg(not(miri))]
 	#[tokio::test]
-	async fn test_delete_content_collection() {
+	#[expect(clippy::missing_panics_doc, reason = "unit test")]
+	async fn delete_content_collection() {
 		let id = DbId::default();
 		let db = initialize_deletion_test_database(&id).await;
 
-		entity::content::collections::Entity::delete_by_id(seamantic::model::id::Id::from_raw(
+		_ = entity::content::collections::Entity::delete_by_id(seamantic::model::id::Id::from_raw(
 			id.flix.collection,
 		))
 		.exec(&db)
@@ -1299,12 +1337,14 @@ mod tests {
 		);
 	}
 
+	#[cfg(not(miri))]
 	#[tokio::test]
-	async fn test_delete_content_movie() {
+	#[expect(clippy::missing_panics_doc, reason = "unit test")]
+	async fn delete_content_movie() {
 		let id = DbId::default();
 		let db = initialize_deletion_test_database(&id).await;
 
-		entity::content::movies::Entity::delete_by_id(seamantic::model::id::Id::from_raw(
+		_ = entity::content::movies::Entity::delete_by_id(seamantic::model::id::Id::from_raw(
 			id.flix.movie,
 		))
 		.exec(&db)
@@ -1383,12 +1423,14 @@ mod tests {
 		);
 	}
 
+	#[cfg(not(miri))]
 	#[tokio::test]
-	async fn test_delete_content_show() {
+	#[expect(clippy::missing_panics_doc, reason = "unit test")]
+	async fn delete_content_show() {
 		let id = DbId::default();
 		let db = initialize_deletion_test_database(&id).await;
 
-		entity::content::shows::Entity::delete_by_id(seamantic::model::id::Id::from_raw(
+		_ = entity::content::shows::Entity::delete_by_id(seamantic::model::id::Id::from_raw(
 			id.flix.show,
 		))
 		.exec(&db)
@@ -1467,12 +1509,14 @@ mod tests {
 		);
 	}
 
+	#[cfg(not(miri))]
 	#[tokio::test]
-	async fn test_delete_content_season() {
+	#[expect(clippy::missing_panics_doc, reason = "unit test")]
+	async fn delete_content_season() {
 		let id = DbId::default();
 		let db = initialize_deletion_test_database(&id).await;
 
-		entity::content::seasons::Entity::delete_by_id((
+		_ = entity::content::seasons::Entity::delete_by_id((
 			seamantic::model::id::Id::from_raw(id.flix.show),
 			SeasonNumber::new(id.flix.season),
 		))
@@ -1552,12 +1596,14 @@ mod tests {
 		);
 	}
 
+	#[cfg(not(miri))]
 	#[tokio::test]
-	async fn test_delete_content_episode() {
+	#[expect(clippy::missing_panics_doc, reason = "unit test")]
+	async fn delete_content_episode() {
 		let id = DbId::default();
 		let db = initialize_deletion_test_database(&id).await;
 
-		entity::content::episodes::Entity::delete_by_id((
+		_ = entity::content::episodes::Entity::delete_by_id((
 			seamantic::model::id::Id::from_raw(id.flix.show),
 			SeasonNumber::new(id.flix.season),
 			EpisodeNumber::new(id.flix.episode),
@@ -1638,12 +1684,14 @@ mod tests {
 		);
 	}
 
+	#[cfg(not(miri))]
 	#[tokio::test]
-	async fn test_delete_watched_movie() {
+	#[expect(clippy::missing_panics_doc, reason = "unit test")]
+	async fn delete_watched_movie() {
 		let id = DbId::default();
 		let db = initialize_deletion_test_database(&id).await;
 
-		entity::watched::movies::Entity::delete_by_id((
+		_ = entity::watched::movies::Entity::delete_by_id((
 			seamantic::model::id::Id::from_raw(id.flix.movie),
 			id.watch.user,
 		))
@@ -1723,12 +1771,14 @@ mod tests {
 		);
 	}
 
+	#[cfg(not(miri))]
 	#[tokio::test]
-	async fn test_delete_watched_episode() {
+	#[expect(clippy::missing_panics_doc, reason = "unit test")]
+	async fn delete_watched_episode() {
 		let id = DbId::default();
 		let db = initialize_deletion_test_database(&id).await;
 
-		entity::watched::episodes::Entity::delete_by_id((
+		_ = entity::watched::episodes::Entity::delete_by_id((
 			seamantic::model::id::Id::from_raw(id.flix.show),
 			SeasonNumber::new(id.flix.season),
 			EpisodeNumber::new(id.flix.episode),

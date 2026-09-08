@@ -1,14 +1,16 @@
 [package]
 name = "flix"
-version = "0.0.20"
-license-file.workspace = true
-
+version = "0.1.0"
 description = "Mechanisms for interacting with flix media"
-repository = "https://github.com/QuantumShade/flix"
-categories = []
+repository = "https://git.skrundz.dev/quantumshade/flix"
+keywords = ["flix"]
+categories = ["multimedia"]
+include = ["/src"]
+publish = true
 
 edition.workspace = true
 rust-version.workspace = true
+license-file.workspace = true
 
 [package.metadata.docs.rs]
 all-features = true

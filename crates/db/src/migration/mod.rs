@@ -1,4 +1,4 @@
-//! Migrations for maintaining the database schema
+//! Migrations for maintaining the database schema.
 
 seamantic::migrations! {
 	"seaql_migrations_flix";

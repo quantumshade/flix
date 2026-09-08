@@ -1,4 +1,4 @@
-//! The movie scanner will scan a folder and exit
+//! The movie scanner will scan a folder and exit.
 
 use std::ffi::OsStr;
 use std::path::Path;
@@ -14,17 +14,23 @@ use crate::Error;
 use crate::macros::{is_image_extension, is_media_extension};
 use crate::scanner::{MediaRef, MovieScan};
 
-/// An movie item
+/// An movie item.
 pub type Item = crate::Item<Scanner>;
 
-/// The scanner for movies
+/// The scanner for movies.
+#[derive(Debug)]
+#[expect(clippy::exhaustive_enums, reason = "unlikely to change")]
 pub enum Scanner {
-	/// A scanned movie
+	/// A scanned movie.
 	Movie(MovieScan),
 }
 
 impl Scanner {
-	/// Scan a folder for a movie
+	/// Scan a folder for a movie.
+	#[inline]
+	#[expect(clippy::allow_attributes, reason = "for tail_expr_drop_order")]
+	#[allow(tail_expr_drop_order, reason = "bug in stream! macro")]
+	#[expect(clippy::semicolon_if_nothing_returned, reason = "false positive")]
 	pub fn scan_movie(
 		path: &Path,
 		parent_ref: Option<MediaRef<CollectionId>>,
@@ -60,6 +66,7 @@ impl Scanner {
 								continue;
 							}
 						};
+						#[expect(clippy::filetype_is_file, reason = "we only want regular files")]
 						if !filetype.is_file() {
 							yield Item {
 								path,

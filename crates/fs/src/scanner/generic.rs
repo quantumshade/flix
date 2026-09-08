@@ -19,28 +19,32 @@ use crate::scanner::{
 	CollectionScan, EpisodeScan, MediaRef, MovieScan, SeasonScan, ShowScan, collection, movie, show,
 };
 
+/// Regex for detecting a media folder.
 static MEDIA_FOLDER_REGEX: OnceLock<Regex> = OnceLock::new();
+/// Regex for detecting a season folder.
 static SEASON_FOLDER_REGEX: OnceLock<Regex> = OnceLock::new();
 
-/// A collection item
+/// A collection item.
 pub type Item = crate::Item<Scanner>;
 
-/// The scanner for collections
+/// The scanner for collections.
 #[derive(Debug)]
+#[expect(clippy::exhaustive_enums, reason = "unlikely to change")]
 pub enum Scanner {
-	/// A scanned collection
+	/// A scanned collection.
 	Collection(CollectionScan),
-	/// A scanned movie
+	/// A scanned movie.
 	Movie(MovieScan),
-	/// A scanned show
+	/// A scanned show.
 	Show(ShowScan),
-	/// A scanned episode
+	/// A scanned episode.
 	Season(SeasonScan),
-	/// A scanned episode
+	/// A scanned episode.
 	Episode(EpisodeScan),
 }
 
 impl From<collection::Scanner> for Scanner {
+	#[inline]
 	fn from(value: collection::Scanner) -> Self {
 		match value {
 			collection::Scanner::Collection(c) => Self::Collection(c),
@@ -53,6 +57,7 @@ impl From<collection::Scanner> for Scanner {
 }
 
 impl From<movie::Scanner> for Scanner {
+	#[inline]
 	fn from(value: movie::Scanner) -> Self {
 		match value {
 			movie::Scanner::Movie(m) => Self::Movie(m),
@@ -61,6 +66,7 @@ impl From<movie::Scanner> for Scanner {
 }
 
 impl From<show::Scanner> for Scanner {
+	#[inline]
 	fn from(value: show::Scanner) -> Self {
 		match value {
 			show::Scanner::Show(s) => Self::Show(s),
@@ -71,13 +77,13 @@ impl From<show::Scanner> for Scanner {
 }
 
 impl Scanner {
-	/// Helper function for stripping allowed numerical prefixes for sorting ("01 - ")
-	fn strip_numeric_prefix(original: &str) -> &str {
-		let mut s = original;
-		while let Some('0'..='9') = s.chars().next() {
-			s = &s[1..]
-		}
-		s.strip_prefix(" - ").unwrap_or(original)
+	/// Helper function for stripping allowed numerical prefixes for sorting ("01 - ").
+	#[inline]
+	fn strip_numeric_prefix(string: &str) -> &str {
+		string
+			.trim_start_matches(['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'])
+			.strip_prefix(" - ")
+			.unwrap_or(string)
 	}
 
 	/// Detect the type of a folder and call the correct scanner. Use
@@ -85,6 +91,13 @@ impl Scanner {
 	///   - Collections
 	///   - Movies
 	///   - Shows
+	///
+	/// # Panics
+	/// If a static regex is invalid.
+	#[inline]
+	#[expect(clippy::allow_attributes, reason = "for tail_expr_drop_order")]
+	#[allow(tail_expr_drop_order, reason = "bug in stream! macro")]
+	#[expect(clippy::semicolon_if_nothing_returned, reason = "false positive")]
 	pub fn scan_detect_folder(
 		path: &Path,
 		parent: Option<MediaRef<CollectionId>>,
@@ -95,12 +108,14 @@ impl Scanner {
 			Show,
 		}
 
+		#[expect(clippy::panic, reason = "static regex string")]
 		let media_folder_re = MEDIA_FOLDER_REGEX.get_or_init(|| {
 			Regex::new(r"^[[[:alnum:]]' -]+ \([[:digit:]]+\)( \[[[:digit:]]+\])?$")
 				.unwrap_or_else(|err| panic!("regex is invalid: {err}"))
 		});
+		#[expect(clippy::panic, reason = "static regex string")]
 		let season_folder_re = SEASON_FOLDER_REGEX.get_or_init(|| {
-			Regex::new(r"^S[[:digit:]]+$").unwrap_or_else(|err| panic!("regex is invalid: {err}"))
+			Regex::new("^S[[:digit:]]+$").unwrap_or_else(|err| panic!("regex is invalid: {err}"))
 		});
 
 		stream!({
@@ -204,7 +219,7 @@ impl Scanner {
 					};
 
 					for await event in collection::Scanner::scan_collection(path, parent, id) {
-						yield event.map(|e| e.into());
+						yield event.map(Into::into);
 					}
 				}
 				MediaType::Movie => {
@@ -214,7 +229,7 @@ impl Scanner {
 					};
 
 					for await event in movie::Scanner::scan_movie(path, parent, id) {
-						yield event.map(|e| e.into());
+						yield event.map(Into::into);
 					}
 				}
 				MediaType::Show => {
@@ -224,7 +239,7 @@ impl Scanner {
 					};
 
 					for await event in show::Scanner::scan_show(path, parent, id) {
-						yield event.map(|e| e.into());
+						yield event.map(Into::into);
 					}
 				}
 			}

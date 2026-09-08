@@ -1,6 +1,6 @@
-//! This module contains entities for storing watched information
+//! This module contains entities for storing watched information.
 
-/// Collection entity
+/// Collection entity.
 pub mod collections {
 	use flix_model::id::{CollectionId, RawId};
 
@@ -9,21 +9,21 @@ pub mod collections {
 
 	use crate::entity;
 
-	/// The database representation of a watched movie
+	/// The database representation of a watched movie.
 	#[sea_orm::model]
 	#[derive(Debug, Clone, DeriveEntityModel)]
 	#[sea_orm(table_name = "flix_watched_collections")]
 	pub struct Model {
-		/// The collection's ID
+		/// The collection's ID.
 		#[sea_orm(primary_key, auto_increment = false)]
 		pub id: CollectionId,
-		/// The user's ID
+		/// The user's ID.
 		#[sea_orm(primary_key, auto_increment = false)]
 		pub user_id: RawId,
-		/// The date this collection was watched
+		/// The date this collection was watched.
 		pub watched_date: DateTime<Utc>,
 
-		/// The info for this collection
+		/// The info for this collection.
 		#[sea_orm(
 			belongs_to,
 			relation_enum = "Info",
@@ -33,15 +33,16 @@ pub mod collections {
 			on_delete = "Cascade"
 		)]
 		pub info: HasOne<entity::info::collections::Entity>,
-		/// The content for this collection
+		/// The content for this collection.
 		#[sea_orm(belongs_to, relation_enum = "Content", from = "id", to = "id", skip_fk)]
 		pub content: HasOne<entity::content::collections::Entity>,
 	}
 
+	#[expect(clippy::missing_trait_methods, reason = "accept default methods")]
 	impl ActiveModelBehavior for ActiveModel {}
 }
 
-/// Movie entity
+/// Movie entity.
 pub mod movies {
 	use flix_model::id::{MovieId, RawId};
 
@@ -50,21 +51,21 @@ pub mod movies {
 
 	use crate::entity;
 
-	/// The database representation of a watched movie
+	/// The database representation of a watched movie.
 	#[sea_orm::model]
 	#[derive(Debug, Clone, DeriveEntityModel)]
 	#[sea_orm(table_name = "flix_watched_movies")]
 	pub struct Model {
-		/// The movie's ID
+		/// The movie's ID.
 		#[sea_orm(primary_key, auto_increment = false)]
 		pub id: MovieId,
-		/// The user's ID
+		/// The user's ID.
 		#[sea_orm(primary_key, auto_increment = false)]
 		pub user_id: RawId,
-		/// The date this movie was watched
+		/// The date this movie was watched.
 		pub watched_date: DateTime<Utc>,
 
-		/// The info for this movie
+		/// The info for this movie.
 		#[sea_orm(
 			belongs_to,
 			from = "id",
@@ -73,15 +74,16 @@ pub mod movies {
 			on_delete = "Cascade"
 		)]
 		pub info: HasOne<entity::info::movies::Entity>,
-		/// The content for this movie
+		/// The content for this movie.
 		#[sea_orm(belongs_to, relation_enum = "Content", from = "id", to = "id", skip_fk)]
 		pub content: HasOne<entity::content::movies::Entity>,
 	}
 
+	#[expect(clippy::missing_trait_methods, reason = "accept default methods")]
 	impl ActiveModelBehavior for ActiveModel {}
 }
 
-/// Show entity
+/// Show entity.
 pub mod shows {
 	use flix_model::id::{RawId, ShowId};
 
@@ -90,21 +92,21 @@ pub mod shows {
 
 	use crate::entity;
 
-	/// The database representation of a watched movie
+	/// The database representation of a watched movie.
 	#[sea_orm::model]
 	#[derive(Debug, Clone, DeriveEntityModel)]
 	#[sea_orm(table_name = "flix_watched_shows")]
 	pub struct Model {
-		/// The show's ID
+		/// The show's ID.
 		#[sea_orm(primary_key, auto_increment = false)]
 		pub id: ShowId,
-		/// The user's ID
+		/// The user's ID.
 		#[sea_orm(primary_key, auto_increment = false)]
 		pub user_id: RawId,
-		/// The date this show was watched
+		/// The date this show was watched.
 		pub watched_date: DateTime<Utc>,
 
-		/// The info for this show
+		/// The info for this show.
 		#[sea_orm(
 			belongs_to,
 			relation_enum = "Info",
@@ -114,15 +116,16 @@ pub mod shows {
 			on_delete = "Cascade"
 		)]
 		pub info: HasOne<entity::info::shows::Entity>,
-		/// The content for this show
+		/// The content for this show.
 		#[sea_orm(belongs_to, relation_enum = "Content", from = "id", to = "id", skip_fk)]
 		pub content: HasOne<entity::content::shows::Entity>,
 	}
 
+	#[expect(clippy::missing_trait_methods, reason = "accept default methods")]
 	impl ActiveModelBehavior for ActiveModel {}
 }
 
-/// Season entity
+/// Season entity.
 pub mod seasons {
 	use flix_model::id::{RawId, ShowId};
 	use flix_model::numbers::SeasonNumber;
@@ -132,24 +135,24 @@ pub mod seasons {
 
 	use crate::entity;
 
-	/// The database representation of a watched movie
+	/// The database representation of a watched movie.
 	#[sea_orm::model]
 	#[derive(Debug, Clone, DeriveEntityModel)]
 	#[sea_orm(table_name = "flix_watched_seasons")]
 	pub struct Model {
-		/// The season's show's ID
+		/// The season's show's ID.
 		#[sea_orm(primary_key, auto_increment = false)]
 		pub show_id: ShowId,
-		/// The season's number
+		/// The season's number.
 		#[sea_orm(primary_key, auto_increment = false)]
 		pub season_number: SeasonNumber,
-		/// The user's ID
+		/// The user's ID.
 		#[sea_orm(primary_key, auto_increment = false)]
 		pub user_id: RawId,
-		/// The date this season was watched
+		/// The date this season was watched.
 		pub watched_date: DateTime<Utc>,
 
-		/// The info for this season
+		/// The info for this season.
 		#[sea_orm(
 			belongs_to,
 			relation_enum = "Info",
@@ -159,7 +162,7 @@ pub mod seasons {
 			on_delete = "Cascade"
 		)]
 		pub info: HasOne<entity::info::seasons::Entity>,
-		/// The content for this season
+		/// The content for this season.
 		#[sea_orm(
 			belongs_to,
 			relation_enum = "Content",
@@ -170,10 +173,11 @@ pub mod seasons {
 		pub content: HasOne<entity::content::seasons::Entity>,
 	}
 
+	#[expect(clippy::missing_trait_methods, reason = "accept default methods")]
 	impl ActiveModelBehavior for ActiveModel {}
 }
 
-/// Episode entity
+/// Episode entity.
 pub mod episodes {
 	use flix_model::id::{RawId, ShowId};
 	use flix_model::numbers::{EpisodeNumber, SeasonNumber};
@@ -183,27 +187,27 @@ pub mod episodes {
 
 	use crate::entity;
 
-	/// The database representation of a watched movie
+	/// The database representation of a watched movie.
 	#[sea_orm::model]
 	#[derive(Debug, Clone, DeriveEntityModel)]
 	#[sea_orm(table_name = "flix_watched_episodes")]
 	pub struct Model {
-		/// The episode's show's ID
+		/// The episode's show's ID.
 		#[sea_orm(primary_key, auto_increment = false)]
 		pub show_id: ShowId,
-		/// The episode's season's number
+		/// The episode's season's number.
 		#[sea_orm(primary_key, auto_increment = false)]
 		pub season_number: SeasonNumber,
-		/// The episode's number
+		/// The episode's number.
 		#[sea_orm(primary_key, auto_increment = false)]
 		pub episode_number: EpisodeNumber,
-		/// The user's ID
+		/// The user's ID.
 		#[sea_orm(primary_key, auto_increment = false)]
 		pub user_id: RawId,
-		/// The date this episode was watched
+		/// The date this episode was watched.
 		pub watched_date: DateTime<Utc>,
 
-		/// The info for this episode
+		/// The info for this episode.
 		#[sea_orm(
 			belongs_to,
 			relation_enum = "Info",
@@ -213,7 +217,7 @@ pub mod episodes {
 			on_delete = "Cascade"
 		)]
 		pub info: HasOne<entity::info::episodes::Entity>,
-		/// The content for this episode
+		/// The content for this episode.
 		#[sea_orm(
 			belongs_to,
 			relation_enum = "Content",
@@ -224,15 +228,16 @@ pub mod episodes {
 		pub content: HasOne<entity::content::episodes::Entity>,
 	}
 
+	#[expect(clippy::missing_trait_methods, reason = "accept default methods")]
 	impl ActiveModelBehavior for ActiveModel {}
 }
 
-/// Macros for creating watched entities
+/// Macros for creating watched entities.
 #[cfg(test)]
 pub mod test {
 	macro_rules! make_watched_movie {
 		($db:expr, $id:expr, $user:expr) => {
-			$crate::entity::watched::movies::ActiveModel {
+			_ = $crate::entity::watched::movies::ActiveModel {
 				id: Set(::flix_model::id::MovieId::from_raw($id)),
 				user_id: Set($user),
 				watched_date: Set(::chrono::Utc::now()),
@@ -246,7 +251,7 @@ pub mod test {
 
 	macro_rules! make_watched_episode {
 		($db:expr, $show:expr, $season:expr, $episode:expr, $user:expr) => {
-			$crate::entity::watched::episodes::ActiveModel {
+			_ = $crate::entity::watched::episodes::ActiveModel {
 				show_id: Set(::flix_model::id::ShowId::from_raw($show)),
 				season_number: Set(::flix_model::numbers::SeasonNumber::new($season)),
 				episode_number: Set(::flix_model::numbers::EpisodeNumber::new($episode)),
@@ -284,7 +289,10 @@ mod tests {
 	use super::super::tests::notsettable;
 	use super::test::{make_watched_episode, make_watched_movie};
 
+	#[cfg(not(miri))]
 	#[tokio::test]
+	#[expect(clippy::missing_panics_doc, reason = "unit test")]
+	#[expect(clippy::default_numeric_fallback, reason = "unit test")]
 	async fn use_test_macros() {
 		let db = new_initialized_memory_db().await;
 
@@ -297,8 +305,11 @@ mod tests {
 		make_watched_episode!(&db, 1, 1, 1, 1);
 	}
 
+	#[cfg(not(miri))]
 	#[tokio::test]
-	async fn test_round_trip_movies() {
+	#[expect(clippy::missing_panics_doc, reason = "unit test")]
+	#[expect(clippy::default_numeric_fallback, reason = "unit test")]
+	async fn round_trip_movies() {
 		let db = new_initialized_memory_db().await;
 
 		macro_rules! assert_movie {
@@ -340,8 +351,11 @@ mod tests {
 		assert_movie!(&db, 5, 1, NotNullViolation; watched_date);
 	}
 
+	#[cfg(not(miri))]
 	#[tokio::test]
-	async fn test_round_trip_episodes() {
+	#[expect(clippy::missing_panics_doc, reason = "unit test")]
+	#[expect(clippy::default_numeric_fallback, reason = "unit test")]
+	async fn round_trip_episodes() {
 		let db = new_initialized_memory_db().await;
 
 		macro_rules! assert_episode {
@@ -394,13 +408,16 @@ mod tests {
 		assert_episode!(&db, 7, 1, 1, 1, NotNullViolation; watched_date);
 	}
 
+	#[cfg(not(miri))]
 	#[tokio::test]
-	async fn test_query_seasons() {
+	#[expect(clippy::missing_panics_doc, reason = "unit test")]
+	#[expect(clippy::default_numeric_fallback, reason = "unit test")]
+	async fn query_seasons() {
 		let db = new_initialized_memory_db().await;
 
 		macro_rules! assert_season {
 			($db:expr, $show:literal, $season:literal, $uid:literal, Watched) => {
-				assert_season!(@find, $db, $show, $season, $uid)
+				_ = assert_season!(@find, $db, $show, $season, $uid)
 					.ok_or(())
 					.expect("is none");
 			};
@@ -462,13 +479,16 @@ mod tests {
 		assert_season!(&db, 1, 2, 3, Unwatched);
 	}
 
+	#[cfg(not(miri))]
 	#[tokio::test]
-	async fn test_query_shows() {
+	#[expect(clippy::missing_panics_doc, reason = "unit test")]
+	#[expect(clippy::default_numeric_fallback, reason = "unit test")]
+	async fn query_shows() {
 		let db = new_initialized_memory_db().await;
 
 		macro_rules! assert_show {
 			($db:expr, $show:literal, $uid:literal, Watched) => {
-				assert_show!(@find, $db, $show, $uid)
+				_ = assert_show!(@find, $db, $show, $uid)
 					.ok_or(())
 					.expect("is none");
 			};
@@ -517,13 +537,16 @@ mod tests {
 		assert_show!(&db, 1, 2, Unwatched);
 	}
 
+	#[cfg(not(miri))]
 	#[tokio::test]
-	async fn test_query_collections() {
+	#[expect(clippy::missing_panics_doc, reason = "unit test")]
+	#[expect(clippy::default_numeric_fallback, reason = "unit test")]
+	async fn query_collections() {
 		let db = new_initialized_memory_db().await;
 
 		macro_rules! assert_collection {
 			($db:expr, $id:literal, $uid:literal, Watched) => {
-				assert_collection!(@find, $db, $id, $uid)
+				_ = assert_collection!(@find, $db, $id, $uid)
 					.ok_or(())
 					.expect("is none");
 			};

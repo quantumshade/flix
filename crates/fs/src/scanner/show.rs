@@ -1,4 +1,4 @@
-//! The show scanner will scan a folder and its children
+//! The show scanner will scan a folder and its children.
 
 use std::ffi::OsStr;
 use std::path::Path;
@@ -15,20 +15,23 @@ use crate::Error;
 use crate::macros::is_image_extension;
 use crate::scanner::{EpisodeScan, MediaRef, SeasonScan, ShowScan, season};
 
-/// A show item
+/// A show item.
 pub type Item = crate::Item<Scanner>;
 
-/// The scanner for shows
+/// The scanner for shows.
+#[derive(Debug)]
+#[expect(clippy::exhaustive_enums, reason = "unlikely to change")]
 pub enum Scanner {
-	/// A scanned show
+	/// A scanned show.
 	Show(ShowScan),
-	/// A scanned season
+	/// A scanned season.
 	Season(SeasonScan),
-	/// A scanned episode
+	/// A scanned episode.
 	Episode(EpisodeScan),
 }
 
 impl From<season::Scanner> for Scanner {
+	#[inline]
 	fn from(value: season::Scanner) -> Self {
 		match value {
 			season::Scanner::Season(s) => Self::Season(s),
@@ -38,7 +41,11 @@ impl From<season::Scanner> for Scanner {
 }
 
 impl Scanner {
-	/// Scan a folder for a show and its seasons/episodes
+	/// Scan a folder for a show and its seasons/episodes.
+	#[inline]
+	#[expect(clippy::allow_attributes, reason = "for tail_expr_drop_order")]
+	#[allow(tail_expr_drop_order, reason = "bug in stream! macro")]
+	#[expect(clippy::semicolon_if_nothing_returned, reason = "false positive")]
 	pub fn scan_show(
 		path: &Path,
 		parent_ref: Option<MediaRef<CollectionId>>,
@@ -143,7 +150,7 @@ impl Scanner {
 				for await event in
 					season::Scanner::scan_season(&season_dir, id_ref.clone(), season_number)
 				{
-					yield event.map(|e| e.into());
+					yield event.map(Into::into);
 				}
 			}
 		})

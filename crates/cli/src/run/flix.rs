@@ -1,3 +1,5 @@
+//! The `flix` runtime backend.
+
 use flix::db::entity;
 use flix::model::id::{CollectionId, ShowId};
 use flix::model::numbers::{EpisodeNumber, SeasonNumber};
@@ -5,12 +7,19 @@ use flix::model::text;
 
 use anyhow::Result;
 use sea_orm::ActiveValue::{NotSet, Set};
-use sea_orm::{ActiveModelTrait, DatabaseConnection, DbErr, TransactionError, TransactionTrait};
+use sea_orm::{
+	ActiveModelTrait as _, DatabaseConnection, DbErr, TransactionError, TransactionTrait as _,
+};
 
 use crate::cli::AddOverrides;
 use crate::cli::flix::AddCommand;
 
-pub async fn add(
+/// Execute an `add` command.
+///
+/// # Errors
+/// Forwards any database transaction failures.
+#[expect(clippy::print_stdout, reason = "we want to print in a binary")]
+pub(crate) async fn add(
 	db: &DatabaseConnection,
 	command: AddCommand,
 	overrides: AddOverrides,
@@ -50,15 +59,16 @@ pub async fn add(
 
 			match result {
 				Ok(_) => {}
-				Err(TransactionError::Connection(err)) => Err(err)?,
-				Err(TransactionError::Transaction(err)) => Err(err)?,
-			};
-			println!("Created Collection: {}", title);
+				Err(TransactionError::Connection(err) | TransactionError::Transaction(err)) => {
+					return Err(err.into());
+				}
+			}
+			println!("Created Collection: {title}");
 
 			Ok(())
 		}
 		AddCommand::Episode {
-			show_slug,
+			show_web_slug,
 			season_number,
 			episode_number,
 			title,
@@ -70,11 +80,11 @@ pub async fn add(
 					let title = overrides.title.unwrap_or_else(|| title.clone());
 
 					Box::pin(async move {
-						let show = entity::info::shows::Entity::find_by_web_slug(&show_slug)
+						let show = entity::info::shows::Entity::find_by_web_slug(&show_web_slug)
 							.one(txn)
 							.await?
 							.ok_or_else(|| {
-								DbErr::Custom(format!("show '{}' does not exist", show_slug))
+								DbErr::Custom(format!("show '{show_web_slug}' does not exist"))
 							})?;
 
 						let flix = entity::info::episodes::ActiveModel {
@@ -95,10 +105,11 @@ pub async fn add(
 
 			match result {
 				Ok(_) => {}
-				Err(TransactionError::Connection(err)) => Err(err)?,
-				Err(TransactionError::Transaction(err)) => Err(err)?,
-			};
-			println!("Created Episode: {}", title);
+				Err(TransactionError::Connection(err) | TransactionError::Transaction(err)) => {
+					return Err(err.into());
+				}
+			}
+			println!("Created Episode: {title}");
 
 			Ok(())
 		}

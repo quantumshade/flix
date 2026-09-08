@@ -1,4 +1,4 @@
-//! flix provides mechanisms for interacting with flix media
+//! flix provides mechanisms for interacting with flix media.
 
 #![cfg_attr(docsrs, feature(doc_cfg))]
 

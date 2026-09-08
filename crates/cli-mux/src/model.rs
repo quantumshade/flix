@@ -1,42 +1,61 @@
+//! Model for handling media streams.
+
 use std::path::PathBuf;
 
 use serde::Deserialize;
 
+/// Represents a file that was scanned.
 #[derive(Debug, Clone)]
-pub struct MediaFile {
+pub(crate) struct MediaFile {
+	/// The path to the file.
 	pub path: PathBuf,
+	/// The size of the file.
 	pub byte_size: u64,
+	/// The streams in the file.
 	pub streams: Streams,
 }
 
+/// Represents the collection of streams found in a media file.
 #[derive(Debug, Clone)]
-pub struct Streams {
+pub(crate) struct Streams {
+	/// The video streams.
 	pub video: Vec<VideoStream>,
+	/// The audio streams.
 	pub audio: Vec<AudioStream>,
+	/// The subtitle streams.
 	pub subtitle: Vec<SubtitleStream>,
 }
 
-pub trait FFStream: serde::de::DeserializeOwned {
+/// This trait helps with deserializing `ffmpeg` output.
+pub(crate) trait FFStream: serde::de::DeserializeOwned {
+	/// The type name that `ffmpeg` uses.
 	const FF_TYPE_NAME: &str;
 }
 
+/// Represents an individual video stream in a media file.
 #[derive(Debug, Clone, Deserialize)]
-pub struct VideoStream {
+pub(crate) struct VideoStream {
+	/// The name of the video codec.
 	codec_name: String,
+	/// Additional tags on the stream.
 	tags: Option<VideoTags>,
 }
 
+/// Represents tags on a video stream.
 #[derive(Debug, Clone, Deserialize)]
-pub struct VideoTags {
+pub(crate) struct VideoTags {
+	/// The language of the stream.
 	language: Option<String>,
 }
 
 impl VideoStream {
-	pub fn codec(&self) -> &str {
+	/// Get the video codec name.
+	pub(crate) fn codec(&self) -> &str {
 		&self.codec_name
 	}
 
-	pub fn language(&self) -> Option<&str> {
+	/// Get the stream language.
+	pub(crate) fn language(&self) -> Option<&str> {
 		self.tags.as_ref()?.language.as_deref()
 	}
 }
@@ -45,23 +64,30 @@ impl FFStream for VideoStream {
 	const FF_TYPE_NAME: &str = "v";
 }
 
+/// Represents an individual audio stream in a media file.
 #[derive(Debug, Clone, Deserialize)]
-pub struct AudioStream {
+pub(crate) struct AudioStream {
+	/// The name of the audio codec.
 	codec_name: String,
+	/// Additional tags on the stream.
 	tags: Option<AudioTags>,
 }
 
+/// Represents tags on an audio stream.
 #[derive(Debug, Clone, Deserialize)]
-pub struct AudioTags {
+pub(crate) struct AudioTags {
+	/// The language of the stream.
 	language: Option<String>,
 }
 
 impl AudioStream {
-	pub fn codec(&self) -> &str {
+	/// Get the audio codec name.
+	pub(crate) fn codec(&self) -> &str {
 		&self.codec_name
 	}
 
-	pub fn language(&self) -> Option<&str> {
+	/// Get the stream language.
+	pub(crate) fn language(&self) -> Option<&str> {
 		self.tags.as_ref()?.language.as_deref()
 	}
 }
@@ -70,28 +96,37 @@ impl FFStream for AudioStream {
 	const FF_TYPE_NAME: &str = "a";
 }
 
+/// Represents an individual subtitle stream in a media file.
 #[derive(Debug, Clone, Deserialize)]
-pub struct SubtitleStream {
+pub(crate) struct SubtitleStream {
+	/// The name of the subtitle codec.
 	codec_name: String,
+	/// Additional tags on the stream.
 	tags: Option<SubtitleTags>,
 }
 
+/// Represents tags on a subtitle stream.
 #[derive(Debug, Clone, Deserialize)]
-pub struct SubtitleTags {
+pub(crate) struct SubtitleTags {
+	/// The language of the stream.
 	language: Option<String>,
+	/// The title of the stream.
 	title: Option<String>,
 }
 
 impl SubtitleStream {
-	pub fn codec(&self) -> &str {
+	/// Get the subtitle codec name.
+	pub(crate) fn codec(&self) -> &str {
 		&self.codec_name
 	}
 
-	pub fn language(&self) -> Option<&str> {
+	/// Get the stream language.
+	pub(crate) fn language(&self) -> Option<&str> {
 		self.tags.as_ref()?.language.as_deref()
 	}
 
-	pub fn title(&self) -> Option<&str> {
+	/// Get the stream title.
+	pub(crate) fn title(&self) -> Option<&str> {
 		self.tags.as_ref()?.title.as_deref()
 	}
 }

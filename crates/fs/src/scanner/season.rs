@@ -1,10 +1,10 @@
-//! The episode scanner will scan a folder and its children
+//! The episode scanner will scan a folder and its children.
 
 use std::ffi::OsStr;
 use std::path::Path;
 
 use flix_model::id::ShowId;
-use flix_model::numbers::{EpisodeNumber, EpisodeNumbers, SeasonNumber};
+use flix_model::numbers::{EpisodeNumbers, SeasonNumber};
 
 use async_stream::stream;
 use tokio::fs;
@@ -15,18 +15,21 @@ use crate::Error;
 use crate::macros::is_image_extension;
 use crate::scanner::{EpisodeScan, MediaRef, SeasonScan, episode};
 
-/// A season item
+/// A season item.
 pub type Item = crate::Item<Scanner>;
 
-/// The scanner for seasons
+/// The scanner for seasons.
+#[derive(Debug)]
+#[expect(clippy::exhaustive_enums, reason = "unlikely to change")]
 pub enum Scanner {
-	/// A scanned season
+	/// A scanned season.
 	Season(SeasonScan),
-	/// A scanned episode
+	/// A scanned episode.
 	Episode(EpisodeScan),
 }
 
 impl From<episode::Scanner> for Scanner {
+	#[inline]
 	fn from(value: episode::Scanner) -> Self {
 		match value {
 			episode::Scanner::Episode(e) => Self::Episode(e),
@@ -35,7 +38,11 @@ impl From<episode::Scanner> for Scanner {
 }
 
 impl Scanner {
-	/// Scan a folder for a season and its episodes
+	/// Scan a folder for a season and its episodes.
+	#[inline]
+	#[expect(clippy::allow_attributes, reason = "for tail_expr_drop_order")]
+	#[allow(tail_expr_drop_order, reason = "bug in stream! macro")]
+	#[expect(clippy::semicolon_if_nothing_returned, reason = "false positive")]
 	pub fn scan_season(
 		path: &Path,
 		show_ref: MediaRef<ShowId>,
@@ -158,7 +165,7 @@ impl Scanner {
 
 				let Ok(episode_numbers) = e_str
 					.split('E')
-					.map(|s| s.parse::<EpisodeNumber>())
+					.map(str::parse)
 					.collect::<Result<Vec<_>, _>>()
 				else {
 					yield Item {
@@ -181,7 +188,7 @@ impl Scanner {
 					season_number,
 					episode_numbers,
 				) {
-					yield event.map(|e| e.into());
+					yield event.map(Into::into);
 				}
 			}
 		})

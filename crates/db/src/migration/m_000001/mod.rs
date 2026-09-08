@@ -11,10 +11,16 @@ mod collections;
 mod seasons;
 mod shows;
 
+/// The migration entry point.
 #[derive(DeriveMigrationName)]
 pub(super) struct Migration;
 
 #[async_trait::async_trait]
+#[expect(
+	elided_lifetimes_in_paths,
+	reason = "async_trait causes lifetimes to be strange"
+)]
+#[expect(clippy::missing_trait_methods, reason = "accept default methods")]
 impl MigrationTrait for Migration {
 	async fn up(&self, manager: &SchemaManager) -> Result<(), DbErr> {
 		seasons::up(manager).await?;

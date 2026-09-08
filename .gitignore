@@ -1,11 +1,23 @@
-# OS Files
-*~
-._*
-.DS_Store
+*
+!**/
 
-# Rust
-/target
+!.zed/settings.json
+!.gitignore
 
-# Flix
-flix.db
-flix.redb
+!/CONTRIBUTING.md
+!/LICENSE.md
+!/README.md
+
+!/.clippy.toml
+!/.rustfmt.toml
+!/.tombi.toml
+!/Cargo.toml
+!/Cargo.lock
+!/justfile
+!/rust-toolchain.toml
+
+!/crates/**/*.rs
+!/crates/**/Cargo.toml
+!/crates/**/README.md
+
+!/lints/*.toml

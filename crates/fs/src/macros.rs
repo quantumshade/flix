@@ -1,3 +1,6 @@
+//! Helper macros.
+
+/// Defines media file extensions.
 macro_rules! is_media_extension {
 	() => {
 		Some("mp4" | "mkv")
@@ -5,6 +8,7 @@ macro_rules! is_media_extension {
 }
 pub(super) use is_media_extension;
 
+/// Defines image file expensions.
 macro_rules! is_image_extension {
 	() => {
 		Some("png" | "jpg")

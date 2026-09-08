@@ -1,6 +1,6 @@
-//! Episodes API
+//! Episodes API.
 
-use std::rc::Rc;
+use alloc::sync::Arc;
 use std::sync::RwLock;
 
 use flix_model::numbers::{EpisodeNumber, SeasonNumber};
@@ -12,26 +12,38 @@ use crate::{Cache, CachePolicy, Config};
 
 use super::{Error, make_request};
 
-/// TMDB Episodes API client
+/// TMDB Episodes API client.
+#[derive(Debug)]
 pub struct Client {
-	config: Rc<Config>,
-	cache: Rc<dyn Cache>,
-	policy: Rc<RwLock<CachePolicy>>,
+	/// The client configuration.
+	config: Arc<Config>,
+	/// The request cache.
+	cache: Arc<dyn Cache>,
+	/// The cache policy to use for requests.
+	policy: Arc<RwLock<CachePolicy>>,
 }
 
 impl Client {
-	/// Create a new client with the given configuration
-	pub fn new(config: Rc<Config>, cache: Rc<dyn Cache>, policy: Rc<RwLock<CachePolicy>>) -> Self {
+	/// Create a new client with the given configuration.
+	#[inline]
+	pub fn new(
+		config: Arc<Config>,
+		cache: Arc<dyn Cache>,
+		policy: Arc<RwLock<CachePolicy>>,
+	) -> Self {
 		Self {
 			config,
 			cache,
 			policy,
 		}
 	}
-}
 
-impl Client {
-	/// Fetch the details of the episode refered to by ID, season number and episode number
+	/// Fetch the details of the episode refered to by ID, season number and episode number.
+	///
+	/// # Errors
+	/// See [Error] for failure modes.
+	#[inline]
+	#[expect(clippy::impl_trait_in_params, reason = "turbofish is not expected")]
 	pub async fn get_details(
 		&self,
 		id: impl Into<ShowId>,

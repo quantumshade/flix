@@ -1,0 +1,10 @@
+[format.rules]
+indent-style = "tab"
+indent-width = 4
+line-width = 120
+
+# Disable TOML 1.1 features from tombi as long as we support rust <1.94
+[[schemas]]
+toml-version = "v1.0.0"
+path = "tombi://www.schemastore.org/cargo.json"
+include = ["Cargo.toml"]

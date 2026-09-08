@@ -1,4 +1,4 @@
-//! flix-model provides core types for flix data
+//! flix-model provides core types for flix data.
 
 #![cfg_attr(docsrs, feature(doc_cfg))]
 

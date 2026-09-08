@@ -1,20 +1,26 @@
+//! Parsing types for `ffmpeg` output.
+
 use core::error::Error;
 use core::fmt;
 use core::str::FromStr;
 
+/// The type of a stream.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub enum StreamType {
+pub(crate) enum StreamType {
+	/// A video stream.
 	Video,
+	/// An audio stream.
 	Audio,
+	/// A subtitle stream.
 	Subtitle,
 }
 
 impl AsRef<str> for StreamType {
 	fn as_ref(&self) -> &str {
 		match self {
-			StreamType::Video => "v",
-			StreamType::Audio => "a",
-			StreamType::Subtitle => "s",
+			Self::Video => "v",
+			Self::Audio => "a",
+			Self::Subtitle => "s",
 		}
 	}
 }
@@ -24,18 +30,22 @@ impl FromStr for StreamType {
 
 	fn from_str(s: &str) -> Result<Self, Self::Err> {
 		match s {
-			"v" => Ok(StreamType::Video),
-			"a" => Ok(StreamType::Audio),
-			"s" => Ok(StreamType::Subtitle),
-			other => Err(ParseSelectorError::InvalidStreamType(other.to_string())),
+			"v" => Ok(Self::Video),
+			"a" => Ok(Self::Audio),
+			"s" => Ok(Self::Subtitle),
+			other => Err(ParseSelectorError::InvalidStreamType(other.to_owned())),
 		}
 	}
 }
 
+/// A property of a stream to match on.
 #[derive(Debug, Clone, PartialEq, Eq)]
-pub enum Matcher {
+pub(crate) enum Matcher {
+	/// Match a specific stream index.
 	Index(usize),
+	/// Match the first stream of the given language.
 	Language(String),
+	/// Match the first stream of the given codec.
 	Codec(String),
 }
 
@@ -44,19 +54,22 @@ impl FromStr for Matcher {
 
 	fn from_str(s: &str) -> Result<Self, Self::Err> {
 		if let Ok(idx) = s.parse::<usize>() {
-			return Ok(Matcher::Index(idx));
+			return Ok(Self::Index(idx));
 		}
 
 		if s.len() == 3 {
-			return Ok(Matcher::Language(s.to_ascii_lowercase()));
+			return Ok(Self::Language(s.to_ascii_lowercase()));
 		}
-		Ok(Matcher::Codec(s.to_ascii_lowercase()))
+		Ok(Self::Codec(s.to_ascii_lowercase()))
 	}
 }
 
+/// Flags applied to streams.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub enum StreamFlag {
+pub(crate) enum StreamFlag {
+	/// Forced flag.
 	Forced,
+	/// SDH flag.
 	Sdh,
 }
 
@@ -65,24 +78,31 @@ impl FromStr for StreamFlag {
 
 	fn from_str(s: &str) -> Result<Self, Self::Err> {
 		match s.to_ascii_lowercase().as_str() {
-			"forced" => Ok(StreamFlag::Forced),
-			"sdh" => Ok(StreamFlag::Sdh),
-			other => Err(ParseSelectorError::InvalidFlag(other.to_string())),
+			"forced" => Ok(Self::Forced),
+			"sdh" => Ok(Self::Sdh),
+			other => Err(ParseSelectorError::InvalidFlag(other.to_owned())),
 		}
 	}
 }
 
+/// A complete selector which has everything it needs to find a specific stream.
 #[derive(Debug, Clone, PartialEq, Eq)]
-pub struct Selector {
+pub(crate) struct Selector {
+	/// The type of the stream to select.
 	pub stream_type: StreamType,
+	/// The matcher to use when selecting.
 	pub matcher: Matcher,
+	/// A desired flag.
 	pub flag: Option<StreamFlag>,
+	/// Whether or not to bail if the stream cannot be found.
 	pub optional: bool,
+	/// The output language of the stream.
 	pub out_lang: String,
 }
 
 impl Selector {
-	pub fn language(&self) -> &str {
+	/// Get the target language of the selector.
+	pub(crate) fn language(&self) -> &str {
 		&self.out_lang
 	}
 }
@@ -125,7 +145,7 @@ impl FromStr for Selector {
 			(true, _) => return Err(ParseSelectorError::UnspecifiedLanguage),
 		};
 
-		Ok(Selector {
+		Ok(Self {
 			stream_type,
 			matcher,
 			flag,
@@ -135,15 +155,22 @@ impl FromStr for Selector {
 	}
 }
 
+/// Errors that can arise when parsing a selector string.
 #[derive(Debug)]
-pub enum ParseSelectorError {
+pub(crate) enum ParseSelectorError {
+	/// The selector string is empty.
 	Empty,
+	/// The selector string has an invalid format.
 	InvalidFormat,
+	/// The requested stream type in invalid.
 	InvalidStreamType(String),
+	/// The requested flag is invalid.
 	InvalidFlag(String),
+	/// The target language is unspecified.
 	UnspecifiedLanguage,
 }
 
+#[expect(clippy::missing_trait_methods, reason = "accept default methods")]
 impl Error for ParseSelectorError {}
 
 impl fmt::Display for ParseSelectorError {
@@ -151,8 +178,8 @@ impl fmt::Display for ParseSelectorError {
 		match self {
 			Self::Empty => write!(f, "selector was empty"),
 			Self::InvalidFormat => write!(f, "invalid selector format"),
-			Self::InvalidStreamType(s) => write!(f, "invalid stream type '{}'", s),
-			Self::InvalidFlag(s) => write!(f, "invalid stream flag '{}'", s),
+			Self::InvalidStreamType(s) => write!(f, "invalid stream type '{s}'"),
+			Self::InvalidFlag(s) => write!(f, "invalid stream flag '{s}'"),
 			Self::UnspecifiedLanguage => write!(f, "unspecified output language"),
 		}
 	}

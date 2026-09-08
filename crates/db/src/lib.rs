@@ -1,6 +1,9 @@
-//! flix-db provides types for storing persistent data about media
+//! flix-db provides types for storing persistent data about media.
 
 #![cfg_attr(docsrs, feature(doc_cfg))]
+
+#[cfg(test)]
+extern crate alloc;
 
 pub mod connection;
 pub mod entity;
@@ -12,7 +15,8 @@ mod tests {
 
 	use crate::connection::Connection;
 
-	pub async fn new_initialized_memory_db() -> DatabaseConnection {
+	#[expect(clippy::missing_panics_doc, reason = "unit test")]
+	pub(crate) async fn new_initialized_memory_db() -> DatabaseConnection {
 		let options = ConnectOptions::new("sqlite::memory:");
 
 		let db = Database::connect(options)

@@ -1,22 +1,26 @@
-//! This module contains helper functions for normalizing media titles
+//! This module contains helper functions for normalizing media titles.
 
 use core::iter::Peekable;
 
 use itertools::Itertools;
 
+/// Return an iterator over the normalized words of a string.
+///  - Alphanumeric
+///  - Lowercase
+///  - Replace `&` with `and`
+///  - Collapse acronyms
+///
 /// # Panics
 ///
 /// Panics if `input` is not ASCII.
 fn split_normalized_words(input: &str) -> impl Iterator<Item = String> {
-	if !input.is_ascii() {
-		panic!("Input is not ASCII: {input}");
-	}
+	assert!(input.is_ascii(), "input is not ASCII: {input}");
 
 	input
 		.split_ascii_whitespace()
 		.map(|s| {
 			if s == "&" {
-				return "and".to_string();
+				return "and".to_owned();
 			}
 
 			let chars = s
@@ -37,6 +41,7 @@ fn split_normalized_words(input: &str) -> impl Iterator<Item = String> {
 		.filter(|part: &String| !part.is_empty() && part != "-")
 }
 
+/// Split out `a`, `an`, and `the` from the start of the string if it exists.
 fn split_leading_article<I: Iterator<Item = String>>(iter: I) -> (Option<String>, Peekable<I>) {
 	let mut iter = iter.peekable();
 	match iter.peek().map(String::as_str) {
@@ -57,13 +62,15 @@ fn split_leading_article<I: Iterator<Item = String>>(iter: I) -> (Option<String>
 /// # Panics
 ///
 /// Panics if `input` is not ASCII.
+#[inline]
+#[must_use]
 pub fn make_sortable_title(title: &str) -> String {
 	let words = split_normalized_words(title);
 	let (article, words) = split_leading_article(words);
 
-	let output = Itertools::intersperse(words, " ".to_string());
+	let output = Itertools::intersperse(words, " ".to_owned());
 	if let Some(article) = article {
-		output.chain([", ".to_string(), article]).collect()
+		output.chain([", ".to_owned(), article]).collect()
 	} else {
 		output.collect()
 	}
@@ -81,11 +88,13 @@ pub fn make_sortable_title(title: &str) -> String {
 /// # Panics
 ///
 /// Panics if `input` is not ASCII.
+#[inline]
+#[must_use]
 pub fn make_fs_slug(title: &str) -> String {
 	let words = split_normalized_words(title);
 	let (_, words) = split_leading_article(words);
 
-	Itertools::intersperse(words, " ".to_string()).collect()
+	Itertools::intersperse(words, " ".to_owned()).collect()
 }
 
 /// Convert a media title and year to a folder name representable on filesystems
@@ -100,11 +109,13 @@ pub fn make_fs_slug(title: &str) -> String {
 /// # Panics
 ///
 /// Panics if `input` is not ASCII.
+#[inline]
+#[must_use]
 pub fn make_fs_slug_year(title: &str, year: i32) -> String {
 	let words = split_normalized_words(title);
 	let (_, words) = split_leading_article(words);
 
-	Itertools::intersperse(words, " ".to_string())
+	Itertools::intersperse(words, " ".to_owned())
 		.chain([format!(" ({year})")])
 		.collect()
 }
@@ -117,10 +128,12 @@ pub fn make_fs_slug_year(title: &str, year: i32) -> String {
 ///     assert_eq!(normalize_fs_name("Marvel's Agents of SHIELD (2013)"), "marvels agents of shield (2013)");
 ///     assert_eq!(normalize_fs_name("Avatar The Last Airbender (2005)"), "avatar the last airbender (2005)");
 ///     assert_eq!(normalize_fs_name("Cloak & Dagger (2018)"), "cloak and dagger (2018)");
+#[inline]
+#[must_use]
 pub fn normalize_fs_name(input: &str) -> String {
 	let chars = input.split_ascii_whitespace().map(|s| {
 		if s == "&" {
-			return "and".to_string();
+			return "and".to_owned();
 		}
 
 		let chars = s
@@ -138,7 +151,7 @@ pub fn normalize_fs_name(input: &str) -> String {
 			chars.collect()
 		}
 	});
-	Itertools::intersperse(chars, " ".to_string()).collect()
+	Itertools::intersperse(chars, " ".to_owned()).collect()
 }
 
 /// Convert a media title to a url compatible string
@@ -153,11 +166,13 @@ pub fn normalize_fs_name(input: &str) -> String {
 /// # Panics
 ///
 /// Panics if `input` is not ASCII.
+#[inline]
+#[must_use]
 pub fn make_web_slug(title: &str) -> String {
 	let words = split_normalized_words(title);
 	let (_, words) = split_leading_article(words);
 
-	Itertools::intersperse(words, "-".to_string()).collect()
+	Itertools::intersperse(words, "-".to_owned()).collect()
 }
 
 /// Convert a media title and year to a url compatible string
@@ -172,11 +187,31 @@ pub fn make_web_slug(title: &str) -> String {
 /// # Panics
 ///
 /// Panics if `input` is not ASCII.
+#[inline]
+#[must_use]
 pub fn make_web_slug_year(title: &str, year: i32) -> String {
 	let words = split_normalized_words(title);
 	let (_, words) = split_leading_article(words);
 
-	Itertools::intersperse(words, "-".to_string())
+	Itertools::intersperse(words, "-".to_owned())
 		.chain([format!("-{year}")])
 		.collect()
+}
+
+#[cfg(test)]
+mod tests {
+	use super::{
+		make_fs_slug, make_fs_slug_year, make_sortable_title, make_web_slug, make_web_slug_year,
+		normalize_fs_name,
+	};
+
+	#[test]
+	fn use_fn() {
+		drop(make_sortable_title(""));
+		drop(make_fs_slug(""));
+		drop(make_fs_slug_year("", 0));
+		drop(normalize_fs_name(""));
+		drop(make_web_slug(""));
+		drop(make_web_slug_year("", 0));
+	}
 }

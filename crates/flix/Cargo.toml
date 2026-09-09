@@ -1,6 +1,6 @@
 [package]
 name = "flix"
-version = "0.1.0"
+version = "0.1.1"
 description = "Mechanisms for interacting with flix media"
 repository = "https://git.skrundz.dev/quantumshade/flix"
 keywords = ["flix"]

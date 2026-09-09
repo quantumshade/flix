@@ -46,16 +46,15 @@ run flix add tmdb movie 49538                    # X-Men: First Class (2011)
 run flix add tmdb movie 127585                   # X-Men: Days of Future Past (2014)
 run flix add tmdb movie 246655                   # X-Men: Apocalypse (2016)
 run flix add tmdb movie 320288                   # Dark Phoenix (2019)
-run flix add tmdb collection 1645434             # X-Anthology
-run flix add tmdb movie 26623                    # Generation X (1996)
-run flix add tmdb movie 340102                   # The New Mutants (2020)
 
 run flix add tmdb collection 558216              # Venom Collection
 run flix add tmdb movie 335983                   # Venom (2018)
 run flix add tmdb movie 580489                   # Venom: Let There Be Carnage (2021)
 run flix add tmdb movie 912649                   # Venom: The Last Dance (2024)
 
+run flix add tmdb movie 26623                    # Generation X (1996)
 run flix add tmdb movie 1927                     # Hulk (2003)
+run flix add tmdb movie 340102                   # The New Mutants (2020)
 run flix add tmdb movie 634492                   # Madame Web (2024)
 
 run flix add \

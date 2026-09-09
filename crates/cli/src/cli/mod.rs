@@ -93,6 +93,9 @@ pub(crate) struct AddOverrides {
 	/// Override the displayed title.
 	#[arg(long)]
 	pub title: Option<String>,
+	/// Override the displayed overview.
+	#[arg(long)]
+	pub overview: Option<String>,
 	/// Override the title used to sort.
 	#[arg(long)]
 	pub sort_title: Option<String>,
@@ -106,6 +109,7 @@ pub(crate) struct AddOverrides {
 
 /// Top level cli commands.
 #[derive(Subcommand)]
+#[expect(clippy::large_enum_variant, reason = "not performance critical")]
 pub(crate) enum Command {
 	/// Initialize a new database.
 	Init,

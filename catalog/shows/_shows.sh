@@ -46,6 +46,7 @@ run flix add tmdb show 63247                     # Westworld (2016)
 run flix add tmdb show 71912                     # The Witcher (2019)
 
 # Fixups
+run flix add tmdb season 15260 0                 # Adventure Time Specials
 run flix add flix episode \
 	"brooklyn-nine-nine-2013" 8 10 \
 	"The Last Day (Part 2)" \

@@ -52,6 +52,7 @@ pub(crate) async fn add(
 				.with_context(|| format!("collections().get_details({})", id.into_raw()))?;
 
 			let title = overrides.title.unwrap_or(collection.title);
+			let overview = overrides.overview.unwrap_or(collection.overview);
 
 			let sort_title = overrides
 				.sort_title
@@ -81,7 +82,7 @@ pub(crate) async fn add(
 						let flix = entity::info::collections::ActiveModel {
 							id: NotSet,
 							title: Set(title),
-							overview: Set(collection.overview),
+							overview: Set(overview),
 							sort_title: Set(sort_title),
 							fs_slug: Set(fs_slug),
 							web_slug: Set(web_slug),

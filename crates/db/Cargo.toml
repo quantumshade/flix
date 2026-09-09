@@ -1,6 +1,6 @@
 [package]
 name = "flix-db"
-version = "0.1.0"
+version = "0.1.1"
 description = "Types for storing persistent data about media"
 repository = "https://git.skrundz.dev/quantumshade/flix"
 keywords = ["flix"]

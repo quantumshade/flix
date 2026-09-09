@@ -110,7 +110,7 @@ impl Scanner {
 
 		#[expect(clippy::panic, reason = "static regex string")]
 		let media_folder_re = MEDIA_FOLDER_REGEX.get_or_init(|| {
-			Regex::new(r"^[[[:alnum:]]' -]+ \([[:digit:]]+\)( \[[[:digit:]]+\])?$")
+			Regex::new(r"^[[[:alnum:]]' &-]+ \([[:digit:]]+\)( \[[[:digit:]]+\])?$")
 				.unwrap_or_else(|err| panic!("regex is invalid: {err}"))
 		});
 		#[expect(clippy::panic, reason = "static regex string")]

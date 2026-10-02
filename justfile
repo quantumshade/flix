@@ -33,7 +33,7 @@ example:
 doc *args:
 	RUSTDOCFLAGS="--cfg docsrs -D warnings" cargo +nightly doc \
 		--workspace --all-features --document-private-items \
-		--lib --bins --no-deps --locked \
+		--lib --no-deps --locked \
 		{{ args }}
 
 format:

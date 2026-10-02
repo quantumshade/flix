@@ -72,7 +72,6 @@ impl From<generic::Scanner> for Scanner {
 impl Scanner {
 	/// Scan a folder for a collection.
 	#[inline]
-	#[must_use]
 	#[expect(clippy::allow_attributes, reason = "for tail_expr_drop_order")]
 	#[allow(tail_expr_drop_order, reason = "bug in stream! macro")]
 	#[expect(clippy::semicolon_if_nothing_returned, reason = "false positive")]

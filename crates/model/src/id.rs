@@ -10,6 +10,7 @@ pub use seamantic::model::id::SeaOrmRepr as RawId;
 #[doc(hidden)]
 #[non_exhaustive]
 #[derive(Debug, Clone, Copy)]
+#[expect(clippy::empty_enums, reason = "support rust <1.100")]
 pub enum Library {}
 /// Type alias for a library ID.
 pub type LibraryId = Id<Library>;
@@ -17,6 +18,7 @@ pub type LibraryId = Id<Library>;
 #[doc(hidden)]
 #[non_exhaustive]
 #[derive(Debug, Clone, Copy)]
+#[expect(clippy::empty_enums, reason = "support rust <1.100")]
 pub enum Collection {}
 /// Type alias for a collection ID.
 pub type CollectionId = Id<Collection>;
@@ -24,6 +26,7 @@ pub type CollectionId = Id<Collection>;
 #[doc(hidden)]
 #[non_exhaustive]
 #[derive(Debug, Clone, Copy)]
+#[expect(clippy::empty_enums, reason = "support rust <1.100")]
 pub enum Movie {}
 /// Type alias for a movie ID.
 pub type MovieId = Id<Movie>;
@@ -31,6 +34,7 @@ pub type MovieId = Id<Movie>;
 #[doc(hidden)]
 #[non_exhaustive]
 #[derive(Debug, Clone, Copy)]
+#[expect(clippy::empty_enums, reason = "support rust <1.100")]
 pub enum Show {}
 /// Type alias for a show ID.
 pub type ShowId = Id<Show>;

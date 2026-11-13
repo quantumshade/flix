@@ -17,6 +17,7 @@ pub type Item = crate::Item<generic::Scanner>;
 
 /// The scanner for collections.
 #[derive(Debug, Clone, Copy)]
+#[expect(clippy::empty_enums, reason = "support rust <1.100")]
 #[expect(clippy::exhaustive_enums, reason = "unlikely to change")]
 pub enum Scanner {}
 

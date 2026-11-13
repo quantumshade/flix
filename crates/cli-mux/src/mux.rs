@@ -228,27 +228,28 @@ fn find_stream_index(file: &MediaFile, selector: &Selector) -> Option<usize> {
 		},
 		StreamType::Subtitle => match &selector.matcher {
 			Matcher::Index(index) => (file.streams.subtitle.len() > *index).then_some(*index),
-			Matcher::Language(language) => {
-				file.streams
-					.subtitle
-					.iter()
-					.enumerate()
-					.filter(|(_, c)| c.language() == Some(language.as_str()))
-					.filter(|(_, c)| {
-						c.title()
-							.unwrap_or_default()
-							.to_ascii_lowercase()
-							.contains("forced") == needs_forced
-					})
-					.filter(|(_, c)| {
-						c.title()
-							.unwrap_or_default()
-							.to_ascii_lowercase()
-							.contains("sdh") == needs_sdh
-					})
-					.map(|(i, _)| i)
-					.next()
-			}
+			Matcher::Language(language) => file
+				.streams
+				.subtitle
+				.iter()
+				.enumerate()
+				.filter(|(_, c)| c.language() == Some(language.as_str()))
+				.filter(|(_, c)| {
+					c.title()
+						.unwrap_or_default()
+						.to_ascii_lowercase()
+						.contains("forced")
+						== needs_forced
+				})
+				.filter(|(_, c)| {
+					c.title()
+						.unwrap_or_default()
+						.to_ascii_lowercase()
+						.contains("sdh")
+						== needs_sdh
+				})
+				.map(|(i, _)| i)
+				.next(),
 			Matcher::Codec(codec) => file
 				.streams
 				.subtitle

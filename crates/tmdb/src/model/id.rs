@@ -199,6 +199,7 @@ mod tests {
 		impl ActiveModelBehavior for ActiveModel {}
 
 		#[derive(Debug, EnumIter, DeriveRelation)]
+		#[expect(clippy::empty_enums, reason = "no relations at the moment")]
 		enum Relation {}
 	}
 
@@ -212,8 +213,9 @@ mod tests {
 }
 
 #[doc(hidden)]
-#[derive(Debug, Clone, Copy)]
 #[non_exhaustive]
+#[derive(Debug, Clone, Copy)]
+#[expect(clippy::empty_enums, reason = "support rust <1.100")]
 pub enum Collection {}
 /// Type alias for a collection ID.
 pub type CollectionId = Id<Collection>;
@@ -235,8 +237,9 @@ impl TryFrom<flix_model::id::CollectionId> for CollectionId {
 }
 
 #[doc(hidden)]
-#[derive(Debug, Clone, Copy)]
 #[non_exhaustive]
+#[derive(Debug, Clone, Copy)]
+#[expect(clippy::empty_enums, reason = "support rust <1.100")]
 pub enum Movie {}
 /// Type alias for a movie ID.
 pub type MovieId = Id<Movie>;
@@ -258,8 +261,9 @@ impl TryFrom<flix_model::id::MovieId> for MovieId {
 }
 
 #[doc(hidden)]
-#[derive(Debug, Clone, Copy)]
 #[non_exhaustive]
+#[derive(Debug, Clone, Copy)]
+#[expect(clippy::empty_enums, reason = "support rust <1.100")]
 pub enum Show {}
 /// Type alias for a show ID.
 pub type ShowId = Id<Show>;

@@ -6,15 +6,12 @@ members = ["crates/*"]
 edition = "2024"
 rust-version = "1.94"
 license-file = "LICENSE.md"
-publish = false
 
 [workspace.dependencies]
 flix = { path = "crates/flix", version = "=0.1.1", default-features = false }
-flix-cli = { path = "crates/cli", version = "=0.1.1", default-features = false }
 flix-db = { path = "crates/db", version = "=0.1.1", default-features = false }
 flix-fs = { path = "crates/fs", version = "=0.1.1", default-features = false }
 flix-model = { path = "crates/model", version = "=0.1.1", default-features = false }
-flix-mux = { path = "crates/cli-mux", version = "=0.1.1", default-features = false }
 flix-tmdb = { path = "crates/tmdb", version = "=0.1.1", default-features = false }
 
 anyhow = { version = "^1.0.87", default-features = false }
@@ -404,6 +401,7 @@ rust_2024_compatibility = { level = "deny", priority = -2 }
 unknown_or_malformed_diagnostic_attributes = { level = "deny", priority = -2 }
 unused = { level = "warn", priority = -3 }
 
+aligned_fields_in_packed = "deny"
 ambiguous_glob_reexports = "warn"
 ambiguous_negative_literals = "deny"
 ambiguous_wide_pointer_comparisons = "warn"
@@ -482,6 +480,7 @@ mixed_script_confusables = "warn"
 mutable_transmutes = "deny"
 named_arguments_used_positionally = "warn"
 named_asm_labels = "deny"
+never_type_fallback_flowing_into_unsafe = "deny"
 no_mangle_const_items = "deny"
 non_ascii_idents = "deny"
 non_contiguous_range_endpoints = "warn"
@@ -546,6 +545,7 @@ while_true = "warn"
 # deprecated_llvm_intrinsic = "warn"
 # duplicate_tools = "deny"
 # implicit_provenance_casts = "deny"
+# ineffective_unstable_reexports = "deny"
 # malformed_diagnostic_filters = "warn"
 # multiple_supertrait_upcastable = "warn"
 # must_not_suspend = "warn"
@@ -562,6 +562,7 @@ broken_footnote = "warn"
 broken_intra_doc_links = "warn"
 invalid_codeblock_attributes = "warn"
 invalid_html_tags = "warn"
+invalid_markdown_table = "warn"
 invalid_rust_codeblocks = "warn"
 missing_crate_level_docs = "warn"
 private_doc_tests = "warn"
